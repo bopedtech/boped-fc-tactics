@@ -47,10 +47,10 @@ export default function AIAdvisor({ onClose, squadData }: AIAdvisorProps) {
   const [analyzing, setAnalyzing] = useState(false);
 
   const playstyles = [
-    { value: "control", label: "Kiểm soát bóng", icon: TrendingUp },
-    { value: "counter", label: "Phản công nhanh", icon: Zap },
-    { value: "gegenpressing", label: "Gegenpressing", icon: Shield },
-    { value: "defensive", label: "Phòng ngự chặt", icon: Shield },
+    { value: "control", label: "Kiểm soát bóng (Possession)", icon: TrendingUp },
+    { value: "counter", label: "Phản công nhanh (Counter)", icon: Zap },
+    { value: "gegenpressing", label: "Ép sân cao (High Press)", icon: Shield },
+    { value: "defensive", label: "Phòng thủ chặt chẽ (Defensive)", icon: Shield },
   ];
 
   const handleAnalyze = async () => {
@@ -67,20 +67,20 @@ export default function AIAdvisor({ onClose, squadData }: AIAdvisorProps) {
     // Mock AI analysis based on selected playstyle
     const mockAnalysis: AIAnalysis = {
       playstyle: selectedPlaystyle === "counter" 
-        ? "Fast Counter-Attack" 
+        ? "Phản công nhanh (Fast Counter)" 
         : selectedPlaystyle === "control"
-        ? "Possession Control"
+        ? "Kiểm soát bóng (Possession Control)"
         : selectedPlaystyle === "gegenpressing"
-        ? "High Press & Recovery"
-        : "Defensive Stability",
+        ? "Ép sân cao (High Press)"
+        : "Phòng thủ vững chắc (Defensive)",
       explanation:
         selectedPlaystyle === "counter"
-          ? "Dựa trên tốc độ cao của hàng công và khả năng chuyển đổi trạng thái nhanh, đội hình này tối ưu cho việc phản công. Hàng thủ lùi sâu và tận dụng khoảng trống phía sau hàng thủ đối phương. Các cầu thủ có pace cao như Mbappé và Vinicius sẽ phát huy tối đa trong lối chơi này."
+          ? "Dựa trên tốc độ cao của hàng công (Mbappé, Vinicius có Pace 115+) và khả năng chuyển đổi trạng thái nhanh, đội hình này tối ưu cho phản công trong FC Mobile. Hàng thủ lùi sâu (~40 Defensive Line) và tận dụng khoảng trống phía sau hàng thủ đối phương với Build-up Speed cao (75-85). Thiết lập Manager Mode: Fast Counter-Attack, High Build-up Speed, Long Pass."
           : selectedPlaystyle === "control"
-          ? "Với khả năng passing xuất sắc của De Bruyne và Bellingham, đội hình có thể kiểm soát bóng hiệu quả. Tập trung vào việc xây dựng bóng ngắn từ hàng thủ, di chuyển bóng nhanh qua các khu vực và tạo ra cơ hội ghi bàn thông qua sự lưu thông."
+          ? "Với khả năng passing xuất sắc (De Bruyne 120 Passing, Bellingham 112 Passing), đội hình có thể kiểm soát bóng hiệu quả trong FC Mobile. Tập trung xây dựng bóng ngắn (Short Pass 30-40), di chuyển bóng nhanh qua các khu vực. Manager Mode: Possession, Low Build-up Speed (40), Short Pass, Free Form positioning."
           : selectedPlaystyle === "gegenpressing"
-          ? "Lối chơi ép sân cao với việc tranh bóng ngay khi mất bóng. Cần các cầu thủ có thể lực tốt và work rate cao như Bellingham, Rodri để duy trì cường độ. Hàng thủ đẩy cao và sử dụng bẫy việt vị thường xuyên."
-          : "Tập trung vào việc giữ vững hàng thủ với các trung vệ mạnh mẽ như Van Dijk và Dias. Hạn chế khoảng trống, chơi compact và phản công khi có cơ hội. Thích hợp khi đối đầu với đối thủ mạnh.",
+          ? "Lối chơi ép sân cao với tranh bóng ngay khi mất bóng - phù hợp FC Mobile. Cần cầu thủ có work rate cao (Bellingham High/High, Rodri Med/High). Thiết lập Manager Mode: High Defensive Line (65+), High Pressure (75-85), Offside Trap ON. Hàng thủ đẩy cao để thu hẹp khoảng cách."
+          : "Tập trung giữ vững hàng thủ với trung vệ mạnh (Van Dijk 118 Defense, Dias 115 Defense) trong FC Mobile. Hạn chế khoảng trống, chơi compact với Low Defensive Line (35-40), Low Pressure (30-40). Manager Mode: Defensive, Organized positioning. Phản công khi có cơ hội.",
       buildUp: {
         speed: selectedPlaystyle === "counter" ? 85 : selectedPlaystyle === "control" ? 40 : 65,
         passingDistance: selectedPlaystyle === "counter" ? 70 : selectedPlaystyle === "control" ? 35 : 50,
@@ -113,9 +113,9 @@ export default function AIAdvisor({ onClose, squadData }: AIAdvisorProps) {
               <Sparkles className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold">AI Tactics Advisor</h1>
+              <h1 className="text-3xl font-bold">Trợ lý AI Chiến thuật</h1>
               <p className="text-muted-foreground">
-                Gợi ý chiến thuật thông minh cho đội hình của bạn
+                Gợi ý thiết lập Manager Mode FC Mobile thông minh cho đội hình của bạn
               </p>
             </div>
           </div>
@@ -133,7 +133,7 @@ export default function AIAdvisor({ onClose, squadData }: AIAdvisorProps) {
                 </div>
                 <h2 className="text-2xl font-bold mb-2">Chọn lối chơi mong muốn</h2>
                 <p className="text-muted-foreground">
-                  AI sẽ phân tích và đề xuất thiết lập tối ưu dựa trên đội hình của bạn
+                  AI sẽ phân tích và đề xuất thiết lập Manager Mode tối ưu cho FC Mobile
                 </p>
               </div>
 
@@ -202,7 +202,7 @@ export default function AIAdvisor({ onClose, squadData }: AIAdvisorProps) {
                 </div>
                 <div>
                   <h3 className="text-xl font-bold mb-2 text-accent-foreground">
-                    Boped AI Insight
+                    Phân tích Boped AI
                   </h3>
                   <p className="text-accent-foreground/90 leading-relaxed">
                     {analysis.explanation}
@@ -217,7 +217,7 @@ export default function AIAdvisor({ onClose, squadData }: AIAdvisorProps) {
             {/* Detailed Settings */}
             <Tabs defaultValue="buildup" className="w-full">
               <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="buildup">Build-up</TabsTrigger>
+                <TabsTrigger value="buildup">Xây dựng</TabsTrigger>
                 <TabsTrigger value="offense">Tấn công</TabsTrigger>
                 <TabsTrigger value="defense">Phòng thủ</TabsTrigger>
                 <TabsTrigger value="summary">Tổng quan</TabsTrigger>
@@ -225,12 +225,12 @@ export default function AIAdvisor({ onClose, squadData }: AIAdvisorProps) {
 
               <TabsContent value="buildup" className="space-y-6 mt-6">
                 <Card className="p-6">
-                  <h3 className="text-lg font-bold mb-6">Thiết lập xây dựng lối chơi</h3>
+                  <h3 className="text-lg font-bold mb-6">Thiết lập xây dựng lối chơi (Build-up Play)</h3>
                   
                   <div className="space-y-6">
                     <div>
                       <Label className="mb-3 block">
-                        Tốc độ: {analysis.buildUp.speed}/100
+                        Tốc độ xây dựng (Build-up Speed): {analysis.buildUp.speed}/100
                       </Label>
                       <Slider
                         value={[analysis.buildUp.speed]}
@@ -242,7 +242,7 @@ export default function AIAdvisor({ onClose, squadData }: AIAdvisorProps) {
 
                     <div>
                       <Label className="mb-3 block">
-                        Khoảng cách chuyền: {analysis.buildUp.passingDistance}/100
+                        Khoảng cách chuyền (Pass Distance): {analysis.buildUp.passingDistance}/100
                       </Label>
                       <Slider
                         value={[analysis.buildUp.passingDistance]}
@@ -253,7 +253,7 @@ export default function AIAdvisor({ onClose, squadData }: AIAdvisorProps) {
                     </div>
 
                     <div>
-                      <Label className="mb-3 block">Vị trí cầu thủ</Label>
+                      <Label className="mb-3 block">Vị trí cầu thủ (Player Positioning)</Label>
                       <Select value={analysis.buildUp.positioning} disabled>
                         <SelectTrigger>
                           <SelectValue />
@@ -270,12 +270,12 @@ export default function AIAdvisor({ onClose, squadData }: AIAdvisorProps) {
 
               <TabsContent value="offense" className="space-y-6 mt-6">
                 <Card className="p-6">
-                  <h3 className="text-lg font-bold mb-6">Thiết lập tấn công</h3>
+                  <h3 className="text-lg font-bold mb-6">Thiết lập tấn công (Offensive Play)</h3>
                   
                   <div className="space-y-6">
                     <div>
                       <Label className="mb-3 block">
-                        Sút xa: {analysis.offense.shooting}/100
+                        Sút xa (Long Shots): {analysis.offense.shooting}/100
                       </Label>
                       <Slider
                         value={[analysis.offense.shooting]}
@@ -287,7 +287,7 @@ export default function AIAdvisor({ onClose, squadData }: AIAdvisorProps) {
 
                     <div>
                       <Label className="mb-3 block">
-                        Tạt cánh: {analysis.offense.crossing}/100
+                        Tạt cánh (Crossing): {analysis.offense.crossing}/100
                       </Label>
                       <Slider
                         value={[analysis.offense.crossing]}
@@ -299,7 +299,7 @@ export default function AIAdvisor({ onClose, squadData }: AIAdvisorProps) {
 
                     <div>
                       <Label className="mb-3 block">
-                        Chuyền bóng trong vòng cấm: {analysis.offense.passing}/100
+                        Chuyền trong vòng cấm (Pass in Box): {analysis.offense.passing}/100
                       </Label>
                       <Slider
                         value={[analysis.offense.passing]}
@@ -314,12 +314,12 @@ export default function AIAdvisor({ onClose, squadData }: AIAdvisorProps) {
 
               <TabsContent value="defense" className="space-y-6 mt-6">
                 <Card className="p-6">
-                  <h3 className="text-lg font-bold mb-6">Thiết lập phòng thủ</h3>
+                  <h3 className="text-lg font-bold mb-6">Thiết lập phòng thủ (Defensive Play)</h3>
                   
                   <div className="space-y-6">
                     <div>
                       <Label className="mb-3 block">
-                        Áp lực: {analysis.defense.pressure}/100
+                        Áp lực (Defensive Pressure): {analysis.defense.pressure}/100
                       </Label>
                       <Slider
                         value={[analysis.defense.pressure]}
@@ -331,7 +331,7 @@ export default function AIAdvisor({ onClose, squadData }: AIAdvisorProps) {
 
                     <div>
                       <Label className="mb-3 block">
-                        Quyết liệt: {analysis.defense.aggression}/100
+                        Quyết liệt (Defensive Aggression): {analysis.defense.aggression}/100
                       </Label>
                       <Slider
                         value={[analysis.defense.aggression]}
@@ -343,7 +343,7 @@ export default function AIAdvisor({ onClose, squadData }: AIAdvisorProps) {
 
                     <div>
                       <Label className="mb-3 block">
-                        Độ rộng hàng thủ: {analysis.defense.width}/100
+                        Độ rộng hàng thủ (Defensive Width): {analysis.defense.width}/100
                       </Label>
                       <Slider
                         value={[analysis.defense.width]}
@@ -354,7 +354,7 @@ export default function AIAdvisor({ onClose, squadData }: AIAdvisorProps) {
                     </div>
 
                     <div>
-                      <Label className="mb-3 block">Bẫy việt vị</Label>
+                      <Label className="mb-3 block">Bẫy việt vị (Offside Trap)</Label>
                       <Select
                         value={analysis.defense.offsideTrap ? "on" : "off"}
                         disabled
@@ -378,29 +378,29 @@ export default function AIAdvisor({ onClose, squadData }: AIAdvisorProps) {
                   
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-4">
-                      <h4 className="font-semibold text-primary">Điểm mạnh</h4>
+                      <h4 className="font-semibold text-primary">✅ Điểm mạnh</h4>
                       <ul className="space-y-2 text-sm text-muted-foreground">
                         <li className="flex items-start gap-2">
                           <span className="text-primary mt-1">•</span>
-                          <span>Chuyển đổi trạng thái nhanh với pace cao</span>
+                          <span>Chuyển trạng thái nhanh với pace cao (120+ Pace)</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="text-primary mt-1">•</span>
-                          <span>Khả năng ghi bàn xuất sắc từ hàng công</span>
+                          <span>Sức mạnh ghi bàn từ hàng công (115+ Shooting)</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="text-primary mt-1">•</span>
-                          <span>Hàng thủ vững chắc với các trung vệ đẳng cấp</span>
+                          <span>Hàng thủ vững chắc với CB đẳng cấp (115+ Defense)</span>
                         </li>
                       </ul>
                     </div>
 
                     <div className="space-y-4">
-                      <h4 className="font-semibold text-destructive">Lưu ý</h4>
+                      <h4 className="font-semibold text-destructive">⚠️ Lưu ý quan trọng</h4>
                       <ul className="space-y-2 text-sm text-muted-foreground">
                         <li className="flex items-start gap-2">
                           <span className="text-destructive mt-1">•</span>
-                          <span>Cần kiểm soát tốc độ để tránh mệt mỏi</span>
+                          <span>Kiểm soát stamina trong FC Mobile để tránh mệt</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="text-destructive mt-1">•</span>
@@ -408,7 +408,7 @@ export default function AIAdvisor({ onClose, squadData }: AIAdvisorProps) {
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="text-destructive mt-1">•</span>
-                          <span>Cần thể lực tốt cho pressing liên tục</span>
+                          <span>Cần work rate cao cho pressing liên tục (High/High)</span>
                         </li>
                       </ul>
                     </div>

@@ -104,10 +104,10 @@ export default function Database() {
       <div className="container mx-auto py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold gradient-primary bg-clip-text text-transparent mb-2">
-            Player Database
+            Cơ sở dữ liệu cầu thủ FC Mobile
           </h1>
           <p className="text-muted-foreground">
-            Khám phá và tìm kiếm cầu thủ cho đội hình của bạn
+            Khám phá và tìm kiếm cầu thủ cho đội hình FC Mobile của bạn
           </p>
         </div>
 

@@ -19,11 +19,11 @@ const Index = () => {
               </span>
             </h1>
             <p className="text-xl md:text-2xl text-muted-foreground mb-8">
-              Xây dựng đội hình tối ưu với sức mạnh của AI
+              Xây dựng đội hình FC Mobile tối ưu với AI
             </p>
             <p className="text-lg text-foreground/80 mb-12 max-w-2xl mx-auto">
               Công cụ phân tích chiến thuật thông minh giúp bạn tạo ra đội hình hoàn hảo 
-              cho FC Mobile và EA FC, với gợi ý từ AI về lối chơi và thiết lập tùy chỉnh.
+              cho FC Mobile, với gợi ý từ AI về lối chơi và thiết lập Manager Mode tùy chỉnh.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" className="gradient-primary text-lg px-8" asChild>
@@ -64,9 +64,9 @@ const Index = () => {
               <div className="w-12 h-12 rounded-lg gradient-primary flex items-center justify-center mb-4">
                 <Users className="h-6 w-6 text-white" />
               </div>
-              <h3 className="text-xl font-bold mb-2">Squad Builder</h3>
+              <h3 className="text-xl font-bold mb-2">Xây dựng đội hình</h3>
               <p className="text-muted-foreground">
-                Xây dựng đội hình với giao diện kéo thả trực quan, hỗ trợ nhiều sơ đồ chiến thuật.
+                Xây dựng đội hình FC Mobile với giao diện kéo thả trực quan, hỗ trợ nhiều sơ đồ chiến thuật phổ biến.
               </p>
             </div>
 
@@ -74,9 +74,9 @@ const Index = () => {
               <div className="w-12 h-12 rounded-lg gradient-primary flex items-center justify-center mb-4">
                 <Zap className="h-6 w-6 text-white" />
               </div>
-              <h3 className="text-xl font-bold mb-2">AI Tactics Advisor</h3>
+              <h3 className="text-xl font-bold mb-2">Trợ lý AI chiến thuật</h3>
               <p className="text-muted-foreground">
-                Nhận gợi ý chiến thuật thông minh dựa trên đội hình và lối chơi bạn chọn.
+                Nhận gợi ý Manager Mode thông minh dựa trên đội hình và lối chơi bạn chọn, tối ưu cho FC Mobile.
               </p>
             </div>
 

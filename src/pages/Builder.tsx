@@ -191,10 +191,10 @@ export default function Builder() {
       <div className="container mx-auto py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold gradient-primary bg-clip-text text-transparent mb-2">
-            Squad Builder
+            Xây dựng đội hình FC Mobile
           </h1>
           <p className="text-muted-foreground">
-            Xây dựng đội hình tối ưu của bạn ({filledCount}/11)
+            Tạo đội hình tối ưu cho FC Mobile ({filledCount}/11 cầu thủ)
           </p>
         </div>
 

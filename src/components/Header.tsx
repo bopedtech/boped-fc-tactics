@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
@@ -12,10 +12,12 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { LogOut, Settings, User as UserIcon } from "lucide-react";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 export default function Header() {
   const [user, setUser] = useState<User | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -35,6 +37,10 @@ export default function Header() {
     await supabase.auth.signOut();
     toast.success("Đăng xuất thành công");
     navigate("/");
+  };
+
+  const isActive = (path: string) => {
+    return location.pathname === path;
   };
 
   return (
@@ -64,22 +70,40 @@ export default function Header() {
 
           <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
             <Link
-              to="/database"
-              className="transition-colors hover:text-primary"
+              to="/"
+              className={cn(
+                "transition-colors hover:text-primary",
+                isActive("/") ? "text-primary font-semibold" : "text-foreground/80"
+              )}
             >
-              Database
+              Trang chủ
+            </Link>
+            <Link
+              to="/database"
+              className={cn(
+                "transition-colors hover:text-primary",
+                isActive("/database") ? "text-primary font-semibold" : "text-foreground/80"
+              )}
+            >
+              Cơ sở dữ liệu
             </Link>
             <Link
               to="/builder"
-              className="transition-colors hover:text-primary"
+              className={cn(
+                "transition-colors hover:text-primary",
+                isActive("/builder") ? "text-primary font-semibold" : "text-foreground/80"
+              )}
             >
-              Squad Builder
+              Xây dựng đội hình
             </Link>
             <Link
               to="/my-squads"
-              className="transition-colors hover:text-primary"
+              className={cn(
+                "transition-colors hover:text-primary",
+                isActive("/my-squads") ? "text-primary font-semibold" : "text-foreground/80"
+              )}
             >
-              My Squads
+              Đội hình của tôi
             </Link>
           </nav>
         </div>
