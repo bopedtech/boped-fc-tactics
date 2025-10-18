@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { getCountryFlag, getCountryNameVi, getClubInfo } from "@/lib/countryUtils";
+import { getCountryFlag, getCountryNameVi, getClubInfo, getNationCode } from "@/lib/countryUtils";
 
 interface PlayerStats {
   pace?: number;
@@ -42,12 +42,13 @@ export default function PlayerCard({ player, onClick, clubsData, countriesData }
   
   // Lấy thông tin club
   const clubInfo = player.club?.id ? getClubInfo(player.club.id, clubsData) : null;
-  const clubLogoUrl = clubInfo?.logoUrl || player.club?.image;
+  const clubLogoUrl = clubInfo?.logoUrl;
   const clubName = clubInfo?.nameVi || player.club?.name;
   
-  // Lấy tên quốc gia tiếng Việt
-  const countryNameVi = player.nation?.abbreviation 
-    ? getCountryNameVi(player.nation.abbreviation, countriesData) || player.nation.name
+  // Lấy mã quốc gia và tên tiếng Việt
+  const nationCode = player.nation?.name ? getNationCode(player.nation.name) : '';
+  const countryNameVi = nationCode 
+    ? getCountryNameVi(nationCode, countriesData) || player.nation?.name
     : player.nation?.name;
 
   const statColors: Record<string, string> = {
@@ -144,7 +145,7 @@ export default function PlayerCard({ player, onClick, clubsData, countriesData }
           {/* Nation */}
           {countryNameVi && (
             <div className="flex items-center gap-1.5">
-              <span className="text-base leading-none">{getCountryFlag(player.nation?.abbreviation || '')}</span>
+              <span className="text-base leading-none">{getCountryFlag(nationCode)}</span>
               <span className="text-muted-foreground">{countryNameVi}</span>
             </div>
           )}

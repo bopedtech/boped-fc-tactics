@@ -1,9 +1,35 @@
 import { getCountryFlagEmoji } from 'country-flag-emoji';
 
+// Mapping tên quốc gia (tiếng Anh) sang mã quốc gia
+const NATION_NAME_TO_CODE: Record<string, string> = {
+  'England': 'ENG',
+  'France': 'FRA', 
+  'Germany': 'GER',
+  'Spain': 'ESP',
+  'Italy': 'ITA',
+  'Brazil': 'BRA',
+  'Argentina': 'ARG',
+  'Portugal': 'POR',
+  'Netherlands': 'NED',
+  'Belgium': 'BEL',
+  'Uruguay': 'URU',
+  'Croatia': 'CRO',
+  'Poland': 'POL',
+  'South Korea': 'KOR',
+  'Korea Republic': 'KOR',
+  'Japan': 'JPN',
+  'Mexico': 'MEX',
+  'United States': 'USA',
+  'Canada': 'CAN',
+  'Chile': 'CHI',
+  'Colombia': 'COL',
+  'Vietnam': 'VNM',
+  'Norway': 'NOR',
+  'Egypt': 'EGY',
+};
+
 /**
  * Lấy emoji cờ từ mã quốc gia (ISO Alpha-2 hoặc Alpha-3)
- * @param countryCode - Mã quốc gia (VD: "ENG", "GB", "VNM", "VN")
- * @returns Emoji cờ hoặc mã quốc gia nếu không tìm thấy
  */
 export function getCountryFlag(countryCode: string): string {
   if (!countryCode) return '';
@@ -15,6 +41,8 @@ export function getCountryFlag(countryCode: string): string {
     'WAL': 'GB',
     'NIR': 'GB',
     'VNM': 'VN',
+    'NOR': 'NO',
+    'EGY': 'EG',
   };
   
   const code = codeMap[countryCode.toUpperCase()] || countryCode;
@@ -28,8 +56,15 @@ export function getCountryFlag(countryCode: string): string {
 }
 
 /**
+ * Chuyển đổi tên quốc gia sang mã quốc gia
+ */
+export function getNationCode(nationName: string): string {
+  if (!nationName) return '';
+  return NATION_NAME_TO_CODE[nationName] || '';
+}
+
+/**
  * Lấy tên quốc gia bằng tiếng Việt từ database
- * Cần gọi với dữ liệu từ countries_vi table
  */
 export function getCountryNameVi(
   countryCode: string, 
@@ -46,7 +81,6 @@ export function getCountryNameVi(
 
 /**
  * Lấy thông tin club từ database
- * Cần gọi với dữ liệu từ clubs table
  */
 export function getClubInfo(
   clubId: number,
