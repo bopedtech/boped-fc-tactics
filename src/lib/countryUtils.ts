@@ -27,17 +27,16 @@ const NATION_NAME_TO_CODE: Record<string, string> = {
 };
 
 /**
- * Chuyển mã quốc gia sang emoji cờ
+ * Chuyển mã quốc gia ISO 3166-1 alpha-2 sang emoji cờ
  */
 function codeToFlag(code: string): string {
-  if (!code || code.length !== 2) return '';
+  if (!code || code.length !== 2) return '🏴';
   
-  const codePoints = code
+  return code
     .toUpperCase()
     .split('')
-    .map(char => 127397 + char.charCodeAt(0));
-  
-  return String.fromCodePoint(...codePoints);
+    .map(char => String.fromCodePoint(127397 + char.charCodeAt(0)))
+    .join('');
 }
 
 /**
