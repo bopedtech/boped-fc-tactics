@@ -45,69 +45,133 @@ interface Formation {
 const calculateFormationLayout = (positions: string[]): Array<{ top: string; left: string; position: string }> => {
   const layout: Array<{ top: string; left: string; position: string }> = [];
   
-  // Find GK index (always last in the array)
-  const gkIndex = positions.findIndex(p => p === "GK");
-  if (gkIndex !== -1) {
-    layout.push({ top: "90%", left: "50%", position: positions[gkIndex] });
-  }
-
-  // Get positions without GK
-  const fieldPositions = positions.filter(p => p !== "GK");
+  // Định nghĩa thứ tự Y cho từng loại vị trí (từ cao xuống thấp = từ tấn công về phòng thủ)
+  const positionHierarchy: Record<string, number> = {
+    // Attackers (cao nhất)
+    'ST': 8,
+    'CF': 10,
+    'LW': 12,
+    'RW': 12,
+    'LF': 12,
+    'RF': 12,
+    
+    // Wing attackers/midfielders
+    'LM': 30,
+    'RM': 30,
+    
+    // Attacking midfielders
+    'CAM': 35,
+    
+    // Central midfielders
+    'CM': 45,
+    
+    // Defensive midfielders
+    'CDM': 55,
+    
+    // Wing backs
+    'LWB': 62,
+    'RWB': 62,
+    
+    // Full backs
+    'LB': 70,
+    'RB': 70,
+    
+    // Center backs
+    'CB': 75,
+    
+    // Goalkeeper
+    'GK': 90
+  };
   
-  // Group positions by rows (approximate based on position type)
-  const defenders: string[] = [];
-  const midfielders: string[] = [];
-  const attackers: string[] = [];
+  // Định nghĩa vị trí X cho từng loại vị trí
+  const positionLateralType: Record<string, 'left' | 'center' | 'right'> = {
+    'LW': 'left',
+    'LF': 'left',
+    'LM': 'left',
+    'LWB': 'left',
+    'LB': 'left',
+    
+    'RW': 'right',
+    'RF': 'right',
+    'RM': 'right',
+    'RWB': 'right',
+    'RB': 'right',
+    
+    'ST': 'center',
+    'CF': 'center',
+    'CAM': 'center',
+    'CM': 'center',
+    'CDM': 'center',
+    'CB': 'center',
+    'GK': 'center'
+  };
   
-  fieldPositions.forEach(pos => {
-    if (pos.includes("B") || pos === "CB") {
-      defenders.push(pos);
-    } else if (pos.includes("M") || pos.includes("DM") || pos.includes("CM") || pos.includes("CAM")) {
-      midfielders.push(pos);
-    } else {
-      attackers.push(pos);
+  // Nhóm các vị trí theo thứ bậc Y
+  const positionsByLevel: Record<number, { pos: string; lateral: 'left' | 'center' | 'right' }[]> = {};
+  
+  positions.forEach(pos => {
+    const yLevel = positionHierarchy[pos] || 50;
+    const lateral = positionLateralType[pos] || 'center';
+    
+    if (!positionsByLevel[yLevel]) {
+      positionsByLevel[yLevel] = [];
+    }
+    positionsByLevel[yLevel].push({ pos, lateral });
+  });
+  
+  // Tính toán vị trí cho từng level
+  Object.entries(positionsByLevel).forEach(([yLevel, posArray]) => {
+    const y = `${yLevel}%`;
+    
+    // Nhóm theo lateral (left, center, right)
+    const leftPositions = posArray.filter(p => p.lateral === 'left');
+    const centerPositions = posArray.filter(p => p.lateral === 'center');
+    const rightPositions = posArray.filter(p => p.lateral === 'right');
+    
+    // Xử lý vị trí bên trái
+    if (leftPositions.length === 1) {
+      layout.push({ top: y, left: '15%', position: leftPositions[0].pos });
+    } else if (leftPositions.length > 1) {
+      leftPositions.forEach((p, idx) => {
+        const leftX = 10 + (idx * 8);
+        layout.push({ top: y, left: `${leftX}%`, position: p.pos });
+      });
+    }
+    
+    // Xử lý vị trí trung tâm
+    if (centerPositions.length === 1) {
+      layout.push({ top: y, left: '50%', position: centerPositions[0].pos });
+    } else if (centerPositions.length === 2) {
+      layout.push({ top: y, left: '40%', position: centerPositions[0].pos });
+      layout.push({ top: y, left: '60%', position: centerPositions[1].pos });
+    } else if (centerPositions.length === 3) {
+      layout.push({ top: y, left: '30%', position: centerPositions[0].pos });
+      layout.push({ top: y, left: '50%', position: centerPositions[1].pos });
+      layout.push({ top: y, left: '70%', position: centerPositions[2].pos });
+    } else if (centerPositions.length === 4) {
+      layout.push({ top: y, left: '25%', position: centerPositions[0].pos });
+      layout.push({ top: y, left: '42%', position: centerPositions[1].pos });
+      layout.push({ top: y, left: '58%', position: centerPositions[2].pos });
+      layout.push({ top: y, left: '75%', position: centerPositions[3].pos });
+    } else if (centerPositions.length === 5) {
+      layout.push({ top: y, left: '20%', position: centerPositions[0].pos });
+      layout.push({ top: y, left: '35%', position: centerPositions[1].pos });
+      layout.push({ top: y, left: '50%', position: centerPositions[2].pos });
+      layout.push({ top: y, left: '65%', position: centerPositions[3].pos });
+      layout.push({ top: y, left: '80%', position: centerPositions[4].pos });
+    }
+    
+    // Xử lý vị trí bên phải
+    if (rightPositions.length === 1) {
+      layout.push({ top: y, left: '85%', position: rightPositions[0].pos });
+    } else if (rightPositions.length > 1) {
+      rightPositions.forEach((p, idx) => {
+        const rightX = 82 + (idx * 8);
+        layout.push({ top: y, left: `${rightX}%`, position: p.pos });
+      });
     }
   });
-
-  // Calculate positions for defenders
-  const defenderY = "70%";
-  defenders.forEach((pos, idx) => {
-    const spacing = 100 / (defenders.length + 1);
-    layout.push({ 
-      top: defenderY, 
-      left: `${spacing * (idx + 1)}%`, 
-      position: pos 
-    });
-  });
-
-  // Calculate positions for midfielders (may have multiple rows)
-  let midY = midfielders.length > 4 ? ["55%", "40%"] : ["48%"];
-  const midsPerRow = Math.ceil(midfielders.length / midY.length);
   
-  midfielders.forEach((pos, idx) => {
-    const row = Math.floor(idx / midsPerRow);
-    const posInRow = idx % midsPerRow;
-    const rowSize = Math.min(midsPerRow, midfielders.length - row * midsPerRow);
-    const spacing = 100 / (rowSize + 1);
-    
-    layout.push({ 
-      top: midY[row] || "48%", 
-      left: `${spacing * (posInRow + 1)}%`, 
-      position: pos 
-    });
-  });
-
-  // Calculate positions for attackers
-  const attackY = attackers.length === 1 ? "15%" : attackers.length === 2 ? "18%" : "20%";
-  attackers.forEach((pos, idx) => {
-    const spacing = 100 / (attackers.length + 1);
-    layout.push({ 
-      top: attackY, 
-      left: `${spacing * (idx + 1)}%`, 
-      position: pos 
-    });
-  });
-
   return layout;
 };
 
