@@ -1,5 +1,3 @@
-import { getCountryFlagEmoji } from 'country-flag-emoji';
-
 // Mapping tên quốc gia (tiếng Anh) sang mã quốc gia
 const NATION_NAME_TO_CODE: Record<string, string> = {
   'England': 'ENG',
@@ -29,12 +27,26 @@ const NATION_NAME_TO_CODE: Record<string, string> = {
 };
 
 /**
- * Lấy emoji cờ từ mã quốc gia (ISO Alpha-2 hoặc Alpha-3)
+ * Chuyển mã quốc gia sang emoji cờ
+ */
+function codeToFlag(code: string): string {
+  if (!code || code.length !== 2) return '';
+  
+  const codePoints = code
+    .toUpperCase()
+    .split('')
+    .map(char => 127397 + char.charCodeAt(0));
+  
+  return String.fromCodePoint(...codePoints);
+}
+
+/**
+ * Lấy emoji cờ từ mã quốc gia
  */
 export function getCountryFlag(countryCode: string): string {
   if (!countryCode) return '';
   
-  // Chuyển đổi một số mã đặc biệt
+  // Chuyển đổi một số mã đặc biệt sang ISO 3166-1 alpha-2
   const codeMap: Record<string, string> = {
     'ENG': 'GB',
     'SCO': 'GB',
@@ -43,16 +55,29 @@ export function getCountryFlag(countryCode: string): string {
     'VNM': 'VN',
     'NOR': 'NO',
     'EGY': 'EG',
+    'GER': 'DE',
+    'NED': 'NL',
+    'POR': 'PT',
+    'ESP': 'ES',
+    'FRA': 'FR',
+    'ITA': 'IT',
+    'BRA': 'BR',
+    'ARG': 'AR',
+    'BEL': 'BE',
+    'URU': 'UY',
+    'CRO': 'HR',
+    'POL': 'PL',
+    'KOR': 'KR',
+    'JPN': 'JP',
+    'MEX': 'MX',
+    'USA': 'US',
+    'CAN': 'CA',
+    'CHI': 'CL',
+    'COL': 'CO',
   };
   
   const code = codeMap[countryCode.toUpperCase()] || countryCode;
-  
-  try {
-    const flag = getCountryFlagEmoji(code);
-    return flag?.emoji || countryCode;
-  } catch {
-    return countryCode;
-  }
+  return codeToFlag(code);
 }
 
 /**
