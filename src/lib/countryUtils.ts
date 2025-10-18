@@ -8,10 +8,10 @@ export function getCountryFlag(countryCode: string): string {
   
   // Chuyển đổi một số mã đặc biệt sang ISO 3166-1 alpha-2
   const codeMap: Record<string, string> = {
-    'ENG': 'GB-ENG',
-    'SCO': 'GB-SCT',
-    'WAL': 'GB-WLS',
-    'NIR': 'GB-NIR',
+    'ENG': 'GB',
+    'SCO': 'GB',
+    'WAL': 'GB',
+    'NIR': 'GB',
     'VNM': 'VN',
     'NOR': 'NO',
     'EGY': 'EG',
