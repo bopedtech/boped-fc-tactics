@@ -1,1 +1,4 @@
 project_id = "nhdmgiyoienkixokcoue"
+
+[functions.sync-players]
+verify_jwt = false
