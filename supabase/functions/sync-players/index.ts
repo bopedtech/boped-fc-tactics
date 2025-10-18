@@ -152,8 +152,8 @@ Deno.serve(async (req) => {
     const isTestMode = mode === 'test';
     
     // Outer loop: Iterate through OVR ratings from high to low
-    const startOvr = isTestMode ? MAX_OVR : MAX_OVR;
-    const endOvr = isTestMode ? MAX_OVR - 2 : MIN_OVR; // Test mode: only 3 OVR levels
+    const startOvr = isTestMode ? 100 : MAX_OVR;
+    const endOvr = isTestMode ? 100 : MIN_OVR; // Test mode: only OVR 100
     
     for (let currentOvr = startOvr; currentOvr >= endOvr; currentOvr--) {
       console.log(`\n=== Starting sync for OVR ${currentOvr} ===`);
