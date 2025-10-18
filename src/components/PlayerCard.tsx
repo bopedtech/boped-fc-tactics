@@ -47,9 +47,22 @@ export default function PlayerCard({ player, onClick, clubsData, countriesData }
   
   // Lấy mã quốc gia và tên tiếng Việt
   const nationCode = player.nation?.name ? getNationCode(player.nation.name) : '';
+  
+  // Debug: log để kiểm tra
+  if (player.nation?.name && !nationCode) {
+    console.log('Missing nation mapping:', player.nation.name);
+  }
+  
   const countryNameVi = nationCode 
     ? getCountryNameVi(nationCode, countriesData) || player.nation?.name
     : player.nation?.name;
+  
+  const flagEmoji = nationCode ? getCountryFlag(nationCode) : '';
+  
+  // Debug: log để kiểm tra flag
+  if (nationCode && !flagEmoji) {
+    console.log('Flag not found for code:', nationCode);
+  }
 
   const statColors: Record<string, string> = {
     pace: "text-stat-pace",
@@ -145,7 +158,7 @@ export default function PlayerCard({ player, onClick, clubsData, countriesData }
           {/* Nation */}
           {countryNameVi && (
             <div className="flex items-center gap-1.5">
-              <span className="text-base leading-none">{getCountryFlag(nationCode)}</span>
+              {flagEmoji && <span className="text-base leading-none">{flagEmoji}</span>}
               <span className="text-muted-foreground">{countryNameVi}</span>
             </div>
           )}
