@@ -136,9 +136,16 @@ Deno.serve(async (req) => {
       // Build the Elasticsearch query payload
       const payload: any = {
         size: BATCH_SIZE,
-        sort: [{ "id.keyword": { order: "asc" } }], // Sort by ID keyword field
-        _source: true, // Include source
+        query: {
+          match_all: {} // Get all players
+        },
+        sort: [{ "_id": "asc" }], // Sort by internal _id for consistency
       };
+
+      // Track total hits on first request
+      if (pageCount === 0) {
+        payload.track_total_hits = true;
+      }
 
       // Add search_after cursor if not first request
       if (cursor) {
@@ -170,8 +177,22 @@ Deno.serve(async (req) => {
       }
 
       const data = await response.json();
+      
+      // Log response structure for debugging
+      console.log('Response keys:', Object.keys(data));
       console.log('Response data structure:', JSON.stringify(data).substring(0, 500));
       
+      // Check total hits on first request
+      if (pageCount === 0) {
+        const totalHits = data?.hits?.total?.value || 0;
+        console.log(`Total players found on server: ${totalHits}`);
+        if (totalHits === 0) {
+          console.log('Warning: Total hits is 0. Check endpoint or query.');
+          console.log('Full response:', JSON.stringify(data));
+        }
+      }
+      
+      // Extract players from hits.hits
       const rawPlayers = data?.hits?.hits || [];
 
       console.log(`Received ${rawPlayers.length} players`);
