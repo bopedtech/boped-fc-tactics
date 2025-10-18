@@ -52,8 +52,32 @@ interface ProcessedPlayer {
 }
 
 const RENDERZ_API_URL = 'https://renderz.app/api/search/elasticsearch';
-const BATCH_SIZE = 500;
-const DELAY_MS = 1500; // 1.5 seconds delay between requests
+const BATCH_SIZE = 200;
+const DELAY_MS = 1000; // 1 second delay between requests
+const MAX_OFFSET = 9800; // Safety limit for pagination
+const MIN_OVR = 40;
+const MAX_OVR = 130;
+
+// Extract players from Object response (not standard Elasticsearch format)
+function extractPlayersFromObject(responseData: any): RawPlayerData[] {
+  const players: RawPlayerData[] = [];
+  
+  // Check for error or invalid format
+  if (typeof responseData !== 'object' || responseData === null || responseData === 'error') {
+    console.log('Invalid response format or error received');
+    return players;
+  }
+  
+  // Loop through all keys in the object
+  for (const [key, value] of Object.entries(responseData)) {
+    // Skip the _pagination key
+    if (key !== '_pagination') {
+      players.push(value as RawPlayerData);
+    }
+  }
+  
+  return players;
+}
 
 function processPlayerData(rawPlayers: RawPlayerData[]): ProcessedPlayer[] {
   return rawPlayers.map((item) => {
@@ -116,152 +140,124 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { mode = 'test', maxPages = 2 } = await req.json();
+    const { mode = 'test' } = await req.json();
     
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    console.log(`Starting sync in ${mode} mode...`);
+    console.log(`Starting OVR slice pagination sync in ${mode} mode...`);
     
-    let cursor: any[] | null = null;
     let totalSynced = 0;
-    let pageCount = 0;
     const isTestMode = mode === 'test';
-    const maxPagesToFetch = isTestMode ? maxPages : Infinity;
+    
+    // Outer loop: Iterate through OVR ratings from high to low
+    const startOvr = isTestMode ? MAX_OVR : MAX_OVR;
+    const endOvr = isTestMode ? MAX_OVR - 2 : MIN_OVR; // Test mode: only 3 OVR levels
+    
+    for (let currentOvr = startOvr; currentOvr >= endOvr; currentOvr--) {
+      console.log(`\n=== Starting sync for OVR ${currentOvr} ===`);
+      let offset = 0;
+      let ovrPlayerCount = 0;
 
-    while (pageCount < maxPagesToFetch) {
-      console.log(`Fetching page ${pageCount + 1}...`);
-      
-      // Build the Elasticsearch query payload
-      const payload: any = {
-        size: BATCH_SIZE,
-        query: {
-          bool: {
-            filter: [
-              {
-                bool: {
-                  must: [
-                    { term: { platform: "mobile" } },
-                    { term: { is_card: true } },
-                    { term: { is_sold: false } }
-                  ]
-                }
-              }
-            ]
-          }
-        },
-        sort: [
-          { "stats.rating": "desc" },
-          { "id": "asc" }
-        ]
-      };
+      // Inner loop: Paginate through players at current OVR
+      while (offset <= MAX_OFFSET) {
+        console.log(`Fetching OVR ${currentOvr}, offset ${offset}...`);
+        
+        // Build the payload with OVR filter
+        const payload = {
+          size: BATCH_SIZE,
+          from: offset,
+          query: {
+            bool: {
+              filter: [
+                { term: { platform: "mobile" } },
+                { term: { is_card: true } },
+                { term: { is_sold: false } },
+                { term: { "stats.rating": currentOvr } } // OVR filter
+              ]
+            }
+          },
+          sort: [{ "id": "asc" }] // Consistent sorting within OVR
+        };
 
-      // Add search_after cursor if not first request
-      if (cursor) {
-        payload.search_after = cursor;
-      }
-
-      console.log('Request payload:', JSON.stringify(payload));
-
-      // Make request to Renderz API
-      const response = await fetch(RENDERZ_API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
-          'Origin': 'https://renderz.app',
-          'Referer': 'https://renderz.app/',
-        },
-        body: JSON.stringify(payload),
-      });
-
-      console.log('Response status:', response.status);
-
-      if (!response.ok) {
-        if (response.status === 429) {
-          console.log('Rate limited (429). Waiting 60 seconds...');
-          await delay(60000);
-          continue; // Retry the same request
-        }
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      // Log response structure for debugging
-      console.log('Response keys:', Object.keys(data));
-      console.log('Response data structure:', JSON.stringify(data).substring(0, 500));
-      
-      // Check total hits on first request
-      if (pageCount === 0) {
-        const totalHits = data?.hits?.total?.value || 0;
-        console.log(`Total players found on server: ${totalHits}`);
-        if (totalHits === 0) {
-          console.log('Warning: Total hits is 0. Check endpoint or query.');
-          console.log('Full response:', JSON.stringify(data));
-        }
-      }
-      
-      // Extract players from hits.hits
-      const rawPlayers = data?.hits?.hits || [];
-
-      console.log(`Received ${rawPlayers.length} players`);
-
-      // If no more data, we're done
-      if (rawPlayers.length === 0) {
-        console.log('No more players to fetch. Sync complete!');
-        break;
-      }
-
-      // Process and save players
-      const processedPlayers = processPlayerData(rawPlayers);
-      
-      // Upsert to Supabase
-      const { error } = await supabase
-        .from('players')
-        .upsert(processedPlayers, { 
-          onConflict: 'external_id',
-          ignoreDuplicates: false 
+        // Make request to Renderz API
+        const response = await fetch(RENDERZ_API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
+            'Origin': 'https://renderz.app',
+            'Referer': 'https://renderz.app/',
+          },
+          body: JSON.stringify(payload),
         });
 
-      if (error) {
-        console.error('Error upserting to Supabase:', error);
-        throw error;
-      }
+        console.log('Response status:', response.status);
 
-      totalSynced += processedPlayers.length;
-      console.log(`Synced batch. Total: ${totalSynced}`);
+        if (!response.ok) {
+          if (response.status === 429) {
+            console.log('Rate limited (429). Waiting 60 seconds...');
+            await delay(60000);
+            continue; // Retry the same request
+          }
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-      // Update cursor from the last player's sort value
-      const lastPlayer = rawPlayers[rawPlayers.length - 1];
-      if (lastPlayer?.sort) {
-        cursor = lastPlayer.sort;
-      } else {
-        console.log('No sort value found. Cannot continue.');
-        break;
-      }
+        const data = await response.json();
+        
+        // Extract players using the new Object-based logic
+        const rawPlayers = extractPlayersFromObject(data);
 
-      pageCount++;
+        console.log(`Received ${rawPlayers.length} players for OVR ${currentOvr}`);
 
-      // Delay before next request to avoid rate limiting
-      if (pageCount < maxPagesToFetch) {
+        // If no more players at this OVR, move to next OVR
+        if (rawPlayers.length === 0) {
+          console.log(`No more players at OVR ${currentOvr}. Moving to next OVR.`);
+          break;
+        }
+
+        // Process and save players
+        const processedPlayers = processPlayerData(rawPlayers);
+        
+        // Upsert to Supabase
+        const { error } = await supabase
+          .from('players')
+          .upsert(processedPlayers, { 
+            onConflict: 'external_id',
+            ignoreDuplicates: false 
+          });
+
+        if (error) {
+          console.error('Error upserting to Supabase:', error);
+          throw error;
+        }
+
+        ovrPlayerCount += processedPlayers.length;
+        totalSynced += processedPlayers.length;
+        console.log(`Synced ${processedPlayers.length} players. OVR ${currentOvr} total: ${ovrPlayerCount}, Grand total: ${totalSynced}`);
+
+        // Move to next page
+        offset += BATCH_SIZE;
+
+        // Delay before next request to avoid rate limiting
         console.log(`Waiting ${DELAY_MS}ms before next request...`);
         await delay(DELAY_MS);
       }
+      
+      console.log(`Completed OVR ${currentOvr}. Total players: ${ovrPlayerCount}`);
     }
 
     const message = isTestMode 
-      ? `Test sync completed: ${totalSynced} players synced across ${pageCount} pages`
-      : `Full sync completed: ${totalSynced} players synced across ${pageCount} pages`;
+      ? `Test sync completed: ${totalSynced} players synced (OVR ${startOvr}-${endOvr})`
+      : `Full sync completed: ${totalSynced} players synced (OVR ${MAX_OVR}-${MIN_OVR})`;
 
     return new Response(
       JSON.stringify({
         success: true,
         message,
         totalPlayers: totalSynced,
-        pagesProcessed: pageCount,
         mode,
       }),
       {
