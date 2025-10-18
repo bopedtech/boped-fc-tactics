@@ -34,7 +34,7 @@ interface PlayerCardProps {
   player: Player;
   onClick?: () => void;
   clubsData?: Array<{ club_id: number; name_vi: string; logo_url: string }>;
-  countriesData?: Array<{ country_code: string; name_vi: string }>;
+  countriesData?: Array<{ country_code: string; name_vi: string; name_en: string }>;
 }
 
 export default function PlayerCard({ player, onClick, clubsData, countriesData }: PlayerCardProps) {
@@ -45,24 +45,14 @@ export default function PlayerCard({ player, onClick, clubsData, countriesData }
   const clubLogoUrl = clubInfo?.logoUrl;
   const clubName = clubInfo?.nameVi || player.club?.name;
   
-  // Lấy mã quốc gia và tên tiếng Việt
-  const nationCode = player.nation?.name ? getNationCode(player.nation.name) : '';
-  
-  // Debug: log để kiểm tra
-  if (player.nation?.name && !nationCode) {
-    console.log('Missing nation mapping:', player.nation.name);
-  }
+  // Lấy mã quốc gia từ database và tên tiếng Việt
+  const nationCode = player.nation?.name ? getNationCode(player.nation.name, countriesData) : '';
   
   const countryNameVi = nationCode 
     ? getCountryNameVi(nationCode, countriesData) || player.nation?.name
     : player.nation?.name;
   
   const flagEmoji = nationCode ? getCountryFlag(nationCode) : '';
-  
-  // Debug: log để kiểm tra flag
-  if (nationCode && !flagEmoji) {
-    console.log('Flag not found for code:', nationCode);
-  }
 
   const statColors: Record<string, string> = {
     pace: "text-stat-pace",

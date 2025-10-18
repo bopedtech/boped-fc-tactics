@@ -1,36 +1,5 @@
 import flag from 'country-code-emoji';
 
-// Mapping tên quốc gia (tiếng Anh) sang mã quốc gia
-const NATION_NAME_TO_CODE: Record<string, string> = {
-  'England': 'ENG',
-  'France': 'FRA', 
-  'Germany': 'GER',
-  'Spain': 'ESP',
-  'Italy': 'ITA',
-  'Brazil': 'BRA',
-  'Argentina': 'ARG',
-  'Portugal': 'POR',
-  'Netherlands': 'NED',
-  'Belgium': 'BEL',
-  'Uruguay': 'URU',
-  'Croatia': 'CRO',
-  'Poland': 'POL',
-  'South Korea': 'KOR',
-  'Korea Republic': 'KOR',
-  'Japan': 'JPN',
-  'Mexico': 'MEX',
-  'United States': 'USA',
-  'Canada': 'CAN',
-  'Chile': 'CHI',
-  'Colombia': 'COL',
-  'Vietnam': 'VNM',
-  'Norway': 'NOR',
-  'Egypt': 'EGY',
-  'Nigeria': 'NGA',
-  'Morocco': 'MAR',
-  'Scotland': 'SCO',
-};
-
 /**
  * Lấy emoji cờ từ mã quốc gia
  */
@@ -39,10 +8,10 @@ export function getCountryFlag(countryCode: string): string {
   
   // Chuyển đổi một số mã đặc biệt sang ISO 3166-1 alpha-2
   const codeMap: Record<string, string> = {
-    'ENG': 'GB',
-    'SCO': 'GB',
-    'WAL': 'GB',
-    'NIR': 'GB',
+    'ENG': 'GB-ENG',
+    'SCO': 'GB-SCT',
+    'WAL': 'GB-WLS',
+    'NIR': 'GB-NIR',
     'VNM': 'VN',
     'NOR': 'NO',
     'EGY': 'EG',
@@ -74,11 +43,19 @@ export function getCountryFlag(countryCode: string): string {
 }
 
 /**
- * Chuyển đổi tên quốc gia sang mã quốc gia
+ * Chuyển đổi tên quốc gia sang mã quốc gia từ database
  */
-export function getNationCode(nationName: string): string {
-  if (!nationName) return '';
-  return NATION_NAME_TO_CODE[nationName] || '';
+export function getNationCode(
+  nationName: string,
+  countriesData?: Array<{ country_code: string; name_en: string }>
+): string {
+  if (!nationName || !countriesData) return '';
+  
+  const country = countriesData.find(
+    c => c.name_en.toLowerCase() === nationName.toLowerCase()
+  );
+  
+  return country?.country_code || '';
 }
 
 /**
