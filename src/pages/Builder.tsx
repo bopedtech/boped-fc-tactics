@@ -48,36 +48,36 @@ const calculateFormationLayout = (positions: string[]): Array<{ top: string; lef
   // Định nghĩa thứ tự Y cho từng loại vị trí (từ cao xuống thấp = từ tấn công về phòng thủ)
   const positionHierarchy: Record<string, number> = {
     // Attackers (cao nhất)
-    'ST': 6,
-    'CF': 10,
-    'LW': 14,
-    'RW': 14,
-    'LF': 14,
-    'RF': 14,
+    'ST': 10,
+    'CF': 14,
+    'LW': 18,
+    'RW': 18,
+    'LF': 18,
+    'RF': 18,
     
     // Attacking midfielders (CAM cao hơn LM/RM)
-    'CAM': 28,
+    'CAM': 32,
     
     // Wing attackers/midfielders
-    'LM': 40,
-    'RM': 40,
+    'LM': 44,
+    'RM': 44,
     
     // Central midfielders
-    'CM': 50,
+    'CM': 54,
     
     // Defensive midfielders
-    'CDM': 60,
+    'CDM': 64,
     
     // Wing backs
-    'LWB': 68,
-    'RWB': 68,
+    'LWB': 71,
+    'RWB': 71,
     
     // Full backs
-    'LB': 75,
-    'RB': 75,
+    'LB': 77,
+    'RB': 77,
     
     // Center backs
-    'CB': 82,
+    'CB': 83,
     
     // Goalkeeper
     'GK': 92
