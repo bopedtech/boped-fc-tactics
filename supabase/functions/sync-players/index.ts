@@ -52,11 +52,8 @@ interface ProcessedPlayer {
 }
 
 const RENDERZ_API_URL = 'https://renderz.app/api/search/elasticsearch';
-const BATCH_SIZE = 200;
-const DELAY_MS = 1000; // 1 second delay between requests
-const MAX_OFFSET = 9800; // Safety limit for pagination
-const MIN_OVR = 40;
-const MAX_OVR = 130;
+const BATCH_SIZE = 500; // Increased batch size for better performance
+const DELAY_MS = 1500; // 1.5 second delay between requests
 
 // Extract players from Object response (not standard Elasticsearch format)
 function extractPlayersFromObject(responseData: any): RawPlayerData[] | null {
@@ -146,190 +143,166 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { mode = 'test' } = await req.json();
+    const { mode = 'test', maxPages = 5 } = await req.json();
     
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    console.log(`Starting OVR slice pagination sync in ${mode} mode...`);
+    console.log(`Starting search_after pagination sync in ${mode} mode...`);
+    console.log(`Max pages to fetch: ${mode === 'test' ? maxPages : 'unlimited'}`);
     
     let totalSynced = 0;
+    let pageCount = 0;
+    let cursor: any[] | null = null; // search_after cursor
     const isTestMode = mode === 'test';
     
-    // Outer loop: Iterate through OVR ratings from high to low
-    const startOvr = isTestMode ? 100 : MAX_OVR;
-    const endOvr = isTestMode ? 100 : MIN_OVR; // Test mode: only OVR 100
-    
-    for (let currentOvr = startOvr; currentOvr >= endOvr; currentOvr--) {
-      console.log(`\n=== Starting sync for OVR ${currentOvr} ===`);
-      let offset = 0;
-      let ovrPlayerCount = 0;
-
-      // Inner loop: Paginate through players at current OVR
-      while (offset <= MAX_OFFSET) {
-        console.log(`Fetching OVR ${currentOvr}, offset ${offset}...`);
-        
-        // Build the payload with OVR filter using "Kitchen Sink" structure
-        const payload = {
-          size: BATCH_SIZE,
-          from: offset,
-          query: {
-            bool: {
-              filter: [
-                {
-                  // NESTED BOOL QUERY: Wrap all conditions in bool -> must
-                  bool: {
-                    must: [
-                      // Basic filters (required)
-                      { term: { platform: "mobile" } },
-                      { term: { is_card: true } },
-                      { term: { is_sold: false } },
-                      
-                      // OVR filter (changes per outer loop)
-                      { term: { "stats.rating": currentOvr } },
-                      
-                      // Additional "Kitchen Sink" filters (must be present, even if empty)
-                      { terms: { program: [] } },
-                      { terms: { league: [] } },
-                      { terms: { nation: [] } },
-                      { terms: { club: [] } },
-                      { terms: { "skills.id": [] } },
-                      { terms: { "traits.id": [] } },
-                      { terms: { foot: [] } },
-                      { terms: { "workRates.attack": [] } },
-                      { terms: { "workRates.defense": [] } }
-                    ]
-                  }
-                },
-                // Search filter (must be present, even if empty)
-                {
-                  query_string: {
-                    query: "",
-                    fields: ["firstName", "lastName", "commonName"],
-                    default_operator: "AND"
-                  }
-                }
-              ]
-            }
-          },
-          sort: [{ "id": "asc" }] // Consistent sorting within OVR
-        };
-
-        // Make request to Renderz API with full browser simulation headers
-        const response = await fetch(RENDERZ_API_URL, {
-          method: 'POST',
-          headers: {
-            // Content type and accept
-            'Accept': 'application/json, text/plain, */*',
-            'Content-Type': 'application/json',
-            
-            // Origin information
-            'Origin': 'https://renderz.app',
-            'Referer': 'https://renderz.app/',
-            
-            // Modern Chrome browser simulation
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
-            'Sec-Ch-Ua': '"Chromium";v="125", "Google Chrome";v="125", "Not-A-Brand";v="99"',
-            'Sec-Ch-Ua-Mobile': '?0',
-            'Sec-Ch-Ua-Platform': '"Windows"',
-            
-            // Encoding and language
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Accept-Language': 'en-US,en;q=0.9,vi;q=0.8',
-            
-            // Security headers (CORS/Fetch Metadata)
-            'Sec-Fetch-Dest': 'empty',
-            'Sec-Fetch-Mode': 'cors',
-            'Sec-Fetch-Site': 'same-origin',
-          },
-          body: JSON.stringify(payload),
-        });
-
-        console.log('Response status:', response.status);
-
-        if (!response.ok) {
-          if (response.status === 429) {
-            console.log('Rate limited (429). Waiting 60 seconds...');
-            await delay(60000);
-            continue; // Retry the same request
+    // Pagination loop using search_after
+    while (true) {
+      pageCount++;
+      console.log(`\n=== Fetching page ${pageCount} ===`);
+      
+      // Build the simplified payload structure
+      const payload: any = {
+        query: {
+          bool: {
+            must: [],
+            should: [],
+            must_not: []
           }
-          const errorText = await response.text();
-          console.error(`HTTP error! status: ${response.status}`);
-          console.error(`RAW ERROR RESPONSE (first 1000 chars): ${errorText.substring(0, 1000)}`);
-          throw new Error(`HTTP error! status: ${response.status}`);
+        },
+        sort: [
+          { "rating": { "order": "desc" } },
+          { "assetId": { "order": "desc" } }
+        ],
+        _source: [],
+        size: BATCH_SIZE
+      };
+
+      // Add search_after cursor if not first page
+      if (cursor !== null) {
+        payload.search_after = cursor;
+        console.log(`Using cursor: ${JSON.stringify(cursor)}`);
+      }
+
+      // Make request to Renderz API with Android mobile browser headers
+      const response = await fetch(RENDERZ_API_URL, {
+        method: 'POST',
+        headers: {
+          'Accept': '*/*',
+          'Content-Type': 'application/json',
+          'Accept-Language': 'en-US,en;q=0.9',
+          'Origin': 'https://renderz.app',
+          'Referer': 'https://renderz.app/24/players',
+          
+          // Android mobile browser simulation
+          'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36',
+          'Sec-Ch-Ua': '"Chromium";v="141", "Google Chrome";v="141", "Not?A_Brand";v="8"',
+          'Sec-Ch-Ua-Mobile': '?1',
+          'Sec-Ch-Ua-Platform': '"Android"',
+          
+          'Sec-Fetch-Dest': 'empty',
+          'Sec-Fetch-Mode': 'cors',
+          'Sec-Fetch-Site': 'same-origin',
+          'Accept-Encoding': 'gzip, deflate, br',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      console.log('Response status:', response.status);
+
+      if (!response.ok) {
+        if (response.status === 429) {
+          console.log('Rate limited (429). Waiting 60 seconds...');
+          await delay(60000);
+          continue; // Retry the same request
         }
+        const errorText = await response.text();
+        console.error(`HTTP error! status: ${response.status}`);
+        console.error(`RAW ERROR RESPONSE (first 1000 chars): ${errorText.substring(0, 1000)}`);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-        // Get raw response text first for error logging
-        const rawResponseText = await response.text();
-        
-        let data;
-        try {
-          data = JSON.parse(rawResponseText);
-        } catch (parseError) {
-          console.error('JSON PARSE ERROR: Unable to parse response (might be HTML)');
-          console.error(`RAW RESPONSE BODY (first 1000 chars): ${rawResponseText.substring(0, 1000)}`);
-          throw new Error('Invalid JSON response from API');
-        }
-        
-        // Extract players using the new Object-based logic
-        const rawPlayers = extractPlayersFromObject(data);
-
-        // Check if extraction failed (null return)
-        if (rawPlayers === null) {
-          console.error('FORMAT ERROR: Invalid response format or error received');
-          console.error(`RAW RESPONSE BODY (first 1000 chars): ${rawResponseText.substring(0, 1000)}`);
-          throw new Error('Invalid response format from API');
-        }
-
-        console.log(`Received ${rawPlayers.length} players for OVR ${currentOvr}`);
-
-        // If no more players at this OVR, move to next OVR
-        if (rawPlayers.length === 0) {
-          console.log(`No more players at OVR ${currentOvr}. Moving to next OVR.`);
-          break;
-        }
-
-        // Process and save players
-        const processedPlayers = processPlayerData(rawPlayers);
-        
-        // Upsert to Supabase
-        const { error } = await supabase
-          .from('players')
-          .upsert(processedPlayers, { 
-            onConflict: 'external_id',
-            ignoreDuplicates: false 
-          });
-
-        if (error) {
-          console.error('Error upserting to Supabase:', error);
-          throw error;
-        }
-
-        ovrPlayerCount += processedPlayers.length;
-        totalSynced += processedPlayers.length;
-        console.log(`Synced ${processedPlayers.length} players. OVR ${currentOvr} total: ${ovrPlayerCount}, Grand total: ${totalSynced}`);
-
-        // Move to next page
-        offset += BATCH_SIZE;
-
-        // Delay before next request to avoid rate limiting
-        console.log(`Waiting ${DELAY_MS}ms before next request...`);
-        await delay(DELAY_MS);
+      // Get raw response text first for error logging
+      const rawResponseText = await response.text();
+      
+      let data;
+      try {
+        data = JSON.parse(rawResponseText);
+      } catch (parseError) {
+        console.error('JSON PARSE ERROR: Unable to parse response (might be HTML)');
+        console.error(`RAW RESPONSE BODY (first 1000 chars): ${rawResponseText.substring(0, 1000)}`);
+        throw new Error('Invalid JSON response from API');
       }
       
-      console.log(`Completed OVR ${currentOvr}. Total players: ${ovrPlayerCount}`);
+      // Extract players using the Object-based logic
+      const rawPlayers = extractPlayersFromObject(data);
+
+      // Check if extraction failed (null return)
+      if (rawPlayers === null) {
+        console.error('FORMAT ERROR: Invalid response format or error received');
+        console.error(`RAW RESPONSE BODY (first 1000 chars): ${rawResponseText.substring(0, 1000)}`);
+        throw new Error('Invalid response format from API');
+      }
+
+      console.log(`Received ${rawPlayers.length} players on page ${pageCount}`);
+
+      // If no more players, pagination complete
+      if (rawPlayers.length === 0) {
+        console.log('No more players. Pagination complete.');
+        break;
+      }
+
+      // Process and save players
+      const processedPlayers = processPlayerData(rawPlayers);
+      
+      // Upsert to Supabase
+      const { error } = await supabase
+        .from('players')
+        .upsert(processedPlayers, { 
+          onConflict: 'external_id',
+          ignoreDuplicates: false 
+        });
+
+      if (error) {
+        console.error('Error upserting to Supabase:', error);
+        throw error;
+      }
+
+      totalSynced += processedPlayers.length;
+      console.log(`Synced ${processedPlayers.length} players. Total: ${totalSynced}`);
+
+      // Extract cursor from last player's sort field
+      const lastPlayer = rawPlayers[rawPlayers.length - 1];
+      if (lastPlayer && lastPlayer.sort) {
+        cursor = lastPlayer.sort;
+        console.log(`Extracted cursor from last player: ${JSON.stringify(cursor)}`);
+      } else {
+        console.log('No sort field found on last player. Pagination complete.');
+        break;
+      }
+
+      // Test mode: stop after maxPages
+      if (isTestMode && pageCount >= maxPages) {
+        console.log(`Test mode: Reached max pages (${maxPages}). Stopping.`);
+        break;
+      }
+
+      // Delay before next request to avoid rate limiting
+      console.log(`Waiting ${DELAY_MS}ms before next request...`);
+      await delay(DELAY_MS);
     }
 
     const message = isTestMode 
-      ? `Test sync completed: ${totalSynced} players synced (OVR ${startOvr}-${endOvr})`
-      : `Full sync completed: ${totalSynced} players synced (OVR ${MAX_OVR}-${MIN_OVR})`;
+      ? `Test sync completed: ${totalSynced} players synced (${pageCount} pages)`
+      : `Full sync completed: ${totalSynced} players synced (${pageCount} pages)`;
 
     return new Response(
       JSON.stringify({
         success: true,
         message,
         totalPlayers: totalSynced,
+        totalPages: pageCount,
         mode,
       }),
       {
