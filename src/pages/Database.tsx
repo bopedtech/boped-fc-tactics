@@ -3,19 +3,12 @@ import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import PlayerCard from "@/components/PlayerCard";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Search, Filter, X, RefreshCw, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
+import PlayerFilters from "@/components/PlayerFilters";
+import { usePlayerFilters } from "@/hooks/usePlayerFilters";
 
 interface Player {
   id: number;
@@ -24,25 +17,31 @@ interface Player {
   position: string;
   nation?: any;
   club?: any;
+  league?: any;
   images?: any;
   stats: any;
   traits?: any;
   work_rate_att?: number;
   work_rate_def?: number;
+  potential_positions?: any;
+  height?: number;
+  weight?: number;
+  weak_foot?: number;
+  skill_moves_level?: number;
+  foot?: number;
   created_at?: string;
 }
 
-const positions = ["GK", "LB", "CB", "RB", "LWB", "RWB", "CDM", "CM", "CAM", "LM", "RM", "LW", "RW", "CF", "ST"];
-
 export default function Database() {
-  const [players, setPlayers] = useState<Player[]>([]);
+  const [allPlayers, setAllPlayers] = useState<Player[]>([]);
+  const [displayedPlayers, setDisplayedPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchName, setSearchName] = useState("");
-  const [selectedPosition, setSelectedPosition] = useState<string>("all");
-  const [ovrRange, setOvrRange] = useState([100, 120]);
   const [showFilters, setShowFilters] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [syncStatus, setSyncStatus] = useState<string>("");
+  
+  const { filters, setFilters, resetFilters: resetFilterState, applyFiltersToQuery } = usePlayerFilters();
 
   useEffect(() => {
     fetchPlayers();
@@ -54,10 +53,12 @@ export default function Database() {
       const { data, error } = await supabase
         .from("players")
         .select("*")
-        .order("rating", { ascending: false });
+        .order("rating", { ascending: false })
+        .limit(500);
 
       if (error) throw error;
-      setPlayers(data || []);
+      setAllPlayers(data || []);
+      applyFilters(data || []);
     } catch (error: any) {
       toast.error("Không thể tải dữ liệu cầu thủ");
       console.error(error);
@@ -66,39 +67,31 @@ export default function Database() {
     }
   };
 
-  const applyFilters = async () => {
-    try {
-      setLoading(true);
-      let query = supabase.from("players").select("*");
+  const applyFilters = (playerList: Player[] = allPlayers) => {
+    let filtered = [...playerList];
 
-      if (searchName) {
-        query = query.ilike("common_name", `%${searchName}%`);
-      }
-
-      if (selectedPosition !== "all") {
-        query = query.eq("position", selectedPosition);
-      }
-
-      query = query.gte("rating", ovrRange[0]).lte("rating", ovrRange[1]);
-
-      const { data, error } = await query.order("rating", { ascending: false });
-
-      if (error) throw error;
-      setPlayers(data || []);
-    } catch (error: any) {
-      toast.error("Có lỗi khi lọc dữ liệu");
-      console.error(error);
-    } finally {
-      setLoading(false);
+    // Apply search filter
+    if (searchName) {
+      filtered = filtered.filter(p =>
+        p.common_name?.toLowerCase().includes(searchName.toLowerCase())
+      );
     }
+
+    // Apply filter component filters
+    filtered = applyFiltersToQuery(filtered);
+
+    setDisplayedPlayers(filtered);
   };
 
   const resetFilters = () => {
     setSearchName("");
-    setSelectedPosition("all");
-    setOvrRange([100, 120]);
-    fetchPlayers();
+    resetFilterState();
+    setDisplayedPlayers(allPlayers);
   };
+
+  useEffect(() => {
+    applyFilters();
+  }, [filters, searchName, allPlayers]);
 
   const handleSync = async (mode: 'test' | 'full', maxPages: number = 2) => {
     try {
@@ -185,8 +178,8 @@ export default function Database() {
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Sidebar Filters */}
           <div className={`lg:w-80 ${showFilters ? "block" : "hidden lg:block"}`}>
-            <div className="bg-card rounded-lg border p-6 space-y-6 sticky top-20">
-              <div className="flex items-center justify-between">
+            <div className="bg-card rounded-lg border sticky top-20 overflow-hidden">
+              <div className="p-4 border-b flex items-center justify-between">
                 <h2 className="text-xl font-bold flex items-center gap-2">
                   <Filter className="h-5 w-5" />
                   Bộ lọc
@@ -202,13 +195,11 @@ export default function Database() {
               </div>
 
               {/* Search by Name */}
-              <div className="space-y-2">
-                <Label htmlFor="search-name">Tìm theo tên</Label>
+              <div className="p-4 border-b">
                 <div className="relative">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
-                    id="search-name"
-                    placeholder="Tên cầu thủ..."
+                    placeholder="Tìm theo tên..."
                     value={searchName}
                     onChange={(e) => setSearchName(e.target.value)}
                     className="pl-10"
@@ -216,45 +207,12 @@ export default function Database() {
                 </div>
               </div>
 
-              {/* Filter by Position */}
-              <div className="space-y-2">
-                <Label>Vị trí</Label>
-                <Select value={selectedPosition} onValueChange={setSelectedPosition}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Chọn vị trí" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover">
-                    <SelectItem value="all">Tất cả vị trí</SelectItem>
-                    {positions.map((pos) => (
-                      <SelectItem key={pos} value={pos}>
-                        {pos}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Filter by OVR Range */}
-              <div className="space-y-2">
-                <Label>Chỉ số OVR: {ovrRange[0]} - {ovrRange[1]}</Label>
-                <Slider
-                  min={80}
-                  max={120}
-                  step={1}
-                  value={ovrRange}
-                  onValueChange={setOvrRange}
-                  className="mt-4"
+              <div className="max-h-[calc(100vh-300px)]">
+                <PlayerFilters
+                  filters={filters}
+                  onFilterChange={setFilters}
+                  onReset={resetFilters}
                 />
-              </div>
-
-              {/* Action Buttons */}
-              <div className="space-y-2 pt-4">
-                <Button onClick={applyFilters} className="w-full gradient-primary">
-                  Áp dụng
-                </Button>
-                <Button onClick={resetFilters} variant="outline" className="w-full">
-                  Đặt lại
-                </Button>
               </div>
             </div>
           </div>
@@ -262,7 +220,7 @@ export default function Database() {
           {/* Player Grid */}
           <div className="flex-1">
             <div className="mb-4 flex justify-between items-center lg:hidden">
-              <Button
+                <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setShowFilters(true)}
@@ -271,7 +229,7 @@ export default function Database() {
                 Bộ lọc
               </Button>
               <p className="text-sm text-muted-foreground">
-                {players.length} cầu thủ
+                {displayedPlayers.length} cầu thủ
               </p>
             </div>
 
@@ -281,7 +239,7 @@ export default function Database() {
                   <div key={i} className="h-96 bg-card animate-pulse rounded-lg" />
                 ))}
               </div>
-            ) : players.length === 0 ? (
+            ) : displayedPlayers.length === 0 ? (
               <div className="text-center py-16">
                 <p className="text-xl text-muted-foreground">
                   Không tìm thấy cầu thủ nào
@@ -289,7 +247,7 @@ export default function Database() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {players.map((player) => (
+                {displayedPlayers.map((player) => (
                   <PlayerCard key={player.id} player={player} />
                 ))}
               </div>

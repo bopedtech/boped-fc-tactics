@@ -4,12 +4,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, ChevronDown, ChevronUp, X } from "lucide-react";
+import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Slider } from "@/components/ui/slider";
+import PlayerFilters from "@/components/PlayerFilters";
+import { usePlayerFilters } from "@/hooks/usePlayerFilters";
 
 interface Player {
   id: number;
@@ -68,119 +68,68 @@ export default function PlayerSelectionDialog({
   requiredPosition,
   selectedPlayerIds = []
 }: PlayerSelectionDialogProps) {
-  const [players, setPlayers] = useState<Player[]>([]);
+  const [allPlayers, setAllPlayers] = useState<Player[]>([]);
+  const [displayedPlayers, setDisplayedPlayers] = useState<Player[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [positionFilter, setPositionFilter] = useState(requiredPosition || "all");
   const [loading, setLoading] = useState(false);
   const [selectedRank, setSelectedRank] = useState<number>(1);
   const [selectedTraining, setSelectedTraining] = useState<number>(0);
   
-  // Advanced filters
-  const [ratingRange, setRatingRange] = useState<[number, number]>([0, 125]);
-  const [weakFootFilter, setWeakFootFilter] = useState<number>(0);
-  const [skillMovesFilter, setSkillMovesFilter] = useState<number>(0);
-  const [heightRange, setHeightRange] = useState<[number, number]>([150, 210]);
-  
-  // Collapsible states
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
-    rating: true,
-    position: true,
-    skills: false,
-    physical: false
-  });
-
-  useEffect(() => {
-    if (requiredPosition) {
-      setPositionFilter(requiredPosition);
-    }
-  }, [requiredPosition]);
+  const { filters, setFilters, resetFilters: resetFilterState, applyFiltersToQuery } = usePlayerFilters(requiredPosition);
 
   useEffect(() => {
     if (open) {
       fetchPlayers();
     }
-  }, [open, positionFilter, selectedRank, ratingRange, weakFootFilter, skillMovesFilter, heightRange]);
+  }, [open]);
 
   const fetchPlayers = async () => {
     try {
       setLoading(true);
-      let query = supabase
+      const { data, error } = await supabase
         .from("players")
         .select("*")
         .order("rating", { ascending: false })
-        .limit(200);
+        .limit(500);
 
-      if (searchQuery) {
-        query = query.ilike("common_name", `%${searchQuery}%`);
-      }
-
-      const { data, error } = await query;
       if (error) throw error;
-      
-      // Apply all filters
-      let filteredPlayers = data || [];
-      
-      // Position filter
-      if (positionFilter !== "all") {
-        filteredPlayers = filteredPlayers.filter(player => {
-          if (player.position === positionFilter) return true;
-          if (player.potential_positions) {
-            const altPositions = Array.isArray(player.potential_positions) 
-              ? player.potential_positions 
-              : [];
-            return altPositions.includes(positionFilter);
-          }
-          return false;
-        });
-      }
-      
-      // Rating filter
-      filteredPlayers = filteredPlayers.filter(p => 
-        p.rating >= ratingRange[0] && p.rating <= ratingRange[1]
-      );
-      
-      // Weak foot filter
-      if (weakFootFilter > 0) {
-        filteredPlayers = filteredPlayers.filter(p => 
-          (p.weak_foot || 0) >= weakFootFilter
-        );
-      }
-      
-      // Skill moves filter
-      if (skillMovesFilter > 0) {
-        filteredPlayers = filteredPlayers.filter(p => 
-          (p.skill_moves_level || 0) >= skillMovesFilter
-        );
-      }
-      
-      // Height filter
-      filteredPlayers = filteredPlayers.filter(p => 
-        (p.height || 175) >= heightRange[0] && (p.height || 175) <= heightRange[1]
-      );
-      
-      setPlayers(filteredPlayers as Player[]);
+      setAllPlayers((data || []) as Player[]);
+      applyFilters((data || []) as Player[]);
     } catch (error: any) {
       console.error(error);
     } finally {
       setLoading(false);
     }
   };
-  
-  const resetFilters = () => {
-    setRatingRange([0, 125]);
-    setWeakFootFilter(0);
-    setSkillMovesFilter(0);
-    setHeightRange([150, 210]);
-    setPositionFilter(requiredPosition || "all");
-    setSearchQuery("");
-  };
-  
-  const toggleSection = (section: string) => {
-    setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
+
+  const applyFilters = (playerList: Player[] = allPlayers) => {
+    let filtered = [...playerList];
+
+    // Apply search filter
+    if (searchQuery) {
+      filtered = filtered.filter(p =>
+        p.common_name?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Apply filter component filters
+    filtered = applyFiltersToQuery(filtered);
+
+    setDisplayedPlayers(filtered as Player[]);
   };
 
+  const resetFilters = () => {
+    setSearchQuery("");
+    resetFilterState();
+    setDisplayedPlayers(allPlayers);
+  };
+
+  useEffect(() => {
+    applyFilters();
+  }, [filters, searchQuery, allPlayers]);
+
   const handleSearch = () => {
-    fetchPlayers();
+    applyFilters();
   };
 
   const handleSelectPlayer = (player: Player) => {
@@ -246,121 +195,8 @@ export default function PlayerSelectionDialog({
                 </div>
               </div>
 
-              {/* Rating Filter */}
-              <Collapsible open={openSections.rating} onOpenChange={() => toggleSection('rating')}>
-                <CollapsibleTrigger className="flex items-center justify-between w-full py-2 px-3 hover:bg-muted rounded-md">
-                  <span className="font-medium text-sm">Chỉ số (OVR)</span>
-                  {openSections.rating ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                </CollapsibleTrigger>
-                <CollapsibleContent className="px-3 py-3 space-y-3">
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>{ratingRange[0]}</span>
-                    <span>{ratingRange[1]}</span>
-                  </div>
-                  <Slider
-                    min={0}
-                    max={125}
-                    step={1}
-                    value={ratingRange}
-                    onValueChange={(val) => setRatingRange(val as [number, number])}
-                    className="w-full"
-                  />
-                </CollapsibleContent>
-              </Collapsible>
-
-              {/* Position Filter */}
-              <Collapsible open={openSections.position} onOpenChange={() => toggleSection('position')}>
-                <CollapsibleTrigger className="flex items-center justify-between w-full py-2 px-3 hover:bg-muted rounded-md">
-                  <span className="font-medium text-sm">Vị trí</span>
-                  {openSections.position ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                </CollapsibleTrigger>
-                <CollapsibleContent className="px-3 py-2">
-                  <Select value={positionFilter} onValueChange={setPositionFilter}>
-                    <SelectTrigger className="h-9 text-sm">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Tất cả</SelectItem>
-                      {positions.map((pos) => (
-                        <SelectItem key={pos} value={pos}>
-                          {positionNames[pos]} ({pos})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </CollapsibleContent>
-              </Collapsible>
-
-              {/* Skills Filter */}
-              <Collapsible open={openSections.skills} onOpenChange={() => toggleSection('skills')}>
-                <CollapsibleTrigger className="flex items-center justify-between w-full py-2 px-3 hover:bg-muted rounded-md">
-                  <span className="font-medium text-sm">Kỹ năng</span>
-                  {openSections.skills ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                </CollapsibleTrigger>
-                <CollapsibleContent className="px-3 py-2 space-y-3">
-                  <div className="space-y-2">
-                    <Label className="text-xs">Chân thuận tối thiểu</Label>
-                    <Select value={weakFootFilter.toString()} onValueChange={(v) => setWeakFootFilter(parseInt(v))}>
-                      <SelectTrigger className="h-9 text-sm">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="0">Tất cả</SelectItem>
-                        {[1, 2, 3, 4, 5].map((stars) => (
-                          <SelectItem key={stars} value={stars.toString()}>
-                            {stars} sao trở lên
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="text-xs">Kỹ năng rê bóng tối thiểu</Label>
-                    <Select value={skillMovesFilter.toString()} onValueChange={(v) => setSkillMovesFilter(parseInt(v))}>
-                      <SelectTrigger className="h-9 text-sm">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="0">Tất cả</SelectItem>
-                        {[1, 2, 3, 4, 5].map((stars) => (
-                          <SelectItem key={stars} value={stars.toString()}>
-                            {stars} sao trở lên
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-
-              {/* Physical Filter */}
-              <Collapsible open={openSections.physical} onOpenChange={() => toggleSection('physical')}>
-                <CollapsibleTrigger className="flex items-center justify-between w-full py-2 px-3 hover:bg-muted rounded-md">
-                  <span className="font-medium text-sm">Thể chất</span>
-                  {openSections.physical ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                </CollapsibleTrigger>
-                <CollapsibleContent className="px-3 py-3 space-y-3">
-                  <div className="space-y-2">
-                    <Label className="text-xs">Chiều cao (cm)</Label>
-                    <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                      <span>{heightRange[0]} cm</span>
-                      <span>{heightRange[1]} cm</span>
-                    </div>
-                    <Slider
-                      min={150}
-                      max={210}
-                      step={1}
-                      value={heightRange}
-                      onValueChange={(val) => setHeightRange(val as [number, number])}
-                      className="w-full"
-                    />
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-
               {/* Rank & Training */}
-              <div className="space-y-3 pt-4 border-t">
+              <div className="space-y-3 pt-4 border-t bg-background p-4">
                 <div className="space-y-2">
                   <Label className="text-xs font-semibold">Chọn Rank</Label>
                   <div className="grid grid-cols-5 gap-1.5">
@@ -411,7 +247,7 @@ export default function PlayerSelectionDialog({
             <div className="px-6 py-3 border-b bg-muted/10">
               <div className="flex items-center justify-between">
                 <p className="text-sm text-muted-foreground">
-                  Tìm thấy <span className="font-semibold text-foreground">{players.length}</span> cầu thủ
+                  Tìm thấy <span className="font-semibold text-foreground">{displayedPlayers.length}</span> cầu thủ
                 </p>
               </div>
             </div>
@@ -421,15 +257,15 @@ export default function PlayerSelectionDialog({
                 <div className="text-center py-12 text-muted-foreground">
                   Đang tải...
                 </div>
-              ) : players.length === 0 ? (
+              ) : displayedPlayers.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
                   Không tìm thấy cầu thủ
                 </div>
               ) : (
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
-                  {players.map((player) => {
+                  {displayedPlayers.map((player) => {
                     const isSelected = selectedPlayerIds.includes(player.id);
-                    const isAlternativePosition = positionFilter !== "all" && player.position !== positionFilter;
+                    const isAlternativePosition = requiredPosition && player.position !== requiredPosition;
                     const ovrPenalty = isAlternativePosition && selectedRank < 2 ? 2 : isAlternativePosition ? 1 : 0;
                     const displayOvr = player.rating - ovrPenalty;
                     
