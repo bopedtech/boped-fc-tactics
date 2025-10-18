@@ -14,7 +14,84 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      players: {
+        Row: {
+          club: string | null
+          created_at: string | null
+          id: number
+          image_url: string | null
+          name: string
+          nation: string | null
+          ovr: number
+          position: string
+          stats: Json | null
+          traits: Json | null
+          work_rate_att: string | null
+          work_rate_def: string | null
+        }
+        Insert: {
+          club?: string | null
+          created_at?: string | null
+          id?: number
+          image_url?: string | null
+          name: string
+          nation?: string | null
+          ovr: number
+          position: string
+          stats?: Json | null
+          traits?: Json | null
+          work_rate_att?: string | null
+          work_rate_def?: string | null
+        }
+        Update: {
+          club?: string | null
+          created_at?: string | null
+          id?: number
+          image_url?: string | null
+          name?: string
+          nation?: string | null
+          ovr?: number
+          position?: string
+          stats?: Json | null
+          traits?: Json | null
+          work_rate_att?: string | null
+          work_rate_def?: string | null
+        }
+        Relationships: []
+      }
+      squads: {
+        Row: {
+          created_at: string | null
+          formation: string
+          id: string
+          lineup: Json
+          playstyle: string | null
+          squad_name: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          formation: string
+          id?: string
+          lineup: Json
+          playstyle?: string | null
+          squad_name: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          formation?: string
+          id?: string
+          lineup?: Json
+          playstyle?: string | null
+          squad_name?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
