@@ -78,8 +78,8 @@ export default function PlayerSelectionDialog({
         filteredPlayers = filteredPlayers.filter(player => {
           if (player.position === positionFilter) return true;
           
-          // Check alternative positions (only if rank 2+)
-          if (selectedRank >= 2 && player.alternative_positions) {
+          // Check alternative positions for any rank (not just 2+)
+          if (player.alternative_positions) {
             const altPositions = Array.isArray(player.alternative_positions) 
               ? player.alternative_positions 
               : [];
@@ -209,6 +209,10 @@ export default function PlayerSelectionDialog({
             ) : (
               players.map((player) => {
                 const isSelected = selectedPlayerIds.includes(player.id);
+                const isAlternativePosition = positionFilter !== "all" && player.position !== positionFilter;
+                const ovrPenalty = isAlternativePosition && selectedRank < 2 ? 2 : isAlternativePosition ? 1 : 0;
+                const displayOvr = player.ovr - ovrPenalty;
+                
                 return (
                 <div
                   key={player.id}
@@ -222,11 +226,17 @@ export default function PlayerSelectionDialog({
                   <div className="flex items-center gap-4">
                     <div className="text-center shrink-0">
                       <div className="text-2xl font-bold gradient-primary bg-clip-text text-transparent">
-                        {player.ovr}
+                        {displayOvr}
+                        {ovrPenalty > 0 && (
+                          <span className="text-xs text-destructive ml-1">-{ovrPenalty}</span>
+                        )}
                       </div>
-                      <Badge variant="secondary" className="text-xs mt-1">
+                      <Badge variant={isAlternativePosition ? "outline" : "secondary"} className="text-xs mt-1">
                         {player.position}
                       </Badge>
+                      {isAlternativePosition && (
+                        <div className="text-[10px] text-orange-500 font-semibold mt-0.5">Vị trí phụ</div>
+                      )}
                     </div>
 
                     <div className="flex-1 min-w-0">
@@ -237,7 +247,17 @@ export default function PlayerSelectionDialog({
                       <div className="text-sm text-muted-foreground truncate">
                         {player.club} • {player.nation}
                       </div>
-                      {player.alternative_positions && player.alternative_positions.length > 0 && (
+                      {isAlternativePosition && selectedRank < 2 && (
+                        <div className="text-xs text-orange-500 mt-1 font-medium">
+                          ⚠️ Rank {selectedRank}: OVR giảm {ovrPenalty} điểm • Cần Rank 2+ để unlock vị trí phụ
+                        </div>
+                      )}
+                      {isAlternativePosition && selectedRank >= 2 && (
+                        <div className="text-xs text-blue-500 mt-1 font-medium">
+                          ✓ Rank {selectedRank}: OVR giảm {ovrPenalty} điểm khi chơi vị trí phụ
+                        </div>
+                      )}
+                      {player.alternative_positions && player.alternative_positions.length > 0 && !isAlternativePosition && (
                         <div className="text-xs text-muted-foreground mt-1">
                           Vị trí phụ: {player.alternative_positions.join(", ")}
                         </div>
