@@ -62,7 +62,7 @@ export default function PlayerSelectionDialog({
       let query = supabase
         .from("players")
         .select("*")
-        .order("ovr", { ascending: false })
+        .order("rating", { ascending: false })
         .limit(100);
 
       if (searchQuery) {
