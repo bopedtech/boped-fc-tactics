@@ -43,6 +43,7 @@ export type Database = {
       }
       players: {
         Row: {
+          alternative_positions: Json | null
           club: string | null
           created_at: string | null
           id: number
@@ -57,6 +58,7 @@ export type Database = {
           work_rate_def: string | null
         }
         Insert: {
+          alternative_positions?: Json | null
           club?: string | null
           created_at?: string | null
           id?: number
@@ -71,6 +73,7 @@ export type Database = {
           work_rate_def?: string | null
         }
         Update: {
+          alternative_positions?: Json | null
           club?: string | null
           created_at?: string | null
           id?: number

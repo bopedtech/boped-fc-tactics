@@ -29,6 +29,8 @@ interface Player {
   image_url?: string;
   stats: any;
   traits?: any;
+  rank?: number;
+  training?: number;
 }
 
 interface Formation {
@@ -169,12 +171,12 @@ export default function Builder() {
     setShowPlayerDialog(true);
   };
 
-  const handleSelectPlayer = (player: Player) => {
+  const handleSelectPlayer = (player: Player, rank: number, training: number) => {
     if (selectedSlotIndex !== null) {
       const newLineup = [...lineup];
-      newLineup[selectedSlotIndex] = player;
+      newLineup[selectedSlotIndex] = { ...player, rank, training };
       setLineup(newLineup);
-      toast.success(`Đã thêm ${player.name} vào đội hình`);
+      toast.success(`Đã thêm ${player.name} (Rank ${rank}, Training ${training}) vào đội hình`);
     }
   };
 
@@ -278,6 +280,7 @@ export default function Builder() {
           onClose={() => setShowPlayerDialog(false)}
           onSelectPlayer={handleSelectPlayer}
           requiredPosition={selectedSlotIndex !== null ? getRequiredPosition(selectedSlotIndex) : undefined}
+          selectedPlayerIds={lineup.filter(p => p !== null).map(p => p!.id)}
         />
       )}
 

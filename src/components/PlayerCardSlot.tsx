@@ -1,4 +1,6 @@
-import { X } from "lucide-react";
+import { Plus, X } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 interface Player {
@@ -10,6 +12,8 @@ interface Player {
   club?: string;
   image_url?: string;
   stats: any;
+  rank?: number;
+  training?: number;
 }
 
 interface PlayerCardSlotProps {
@@ -19,83 +23,92 @@ interface PlayerCardSlotProps {
   onRemove?: () => void;
 }
 
+const getRankColor = (rank?: number) => {
+  switch (rank) {
+    case 1: return "from-green-600/30 via-green-500/20 to-green-600/30 border-green-500/60";
+    case 2: return "from-blue-600/30 via-blue-500/20 to-blue-600/30 border-blue-500/60";
+    case 3: return "from-purple-600/30 via-purple-500/20 to-purple-600/30 border-purple-500/60";
+    case 4: return "from-red-600/30 via-red-500/20 to-red-600/30 border-red-500/60";
+    case 5: return "from-orange-600/30 via-orange-500/20 to-orange-600/30 border-orange-500/60";
+    default: return "from-yellow-600/30 via-yellow-500/20 to-yellow-600/30 border-yellow-600/60";
+  }
+};
+
 export default function PlayerCardSlot({ player, position, onClick, onRemove }: PlayerCardSlotProps) {
-  if (player) {
+  if (!player) {
     return (
-      <div className="group relative animate-scale-in">
-        {onRemove && (
-          <div className="absolute -top-2 -right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button
-              size="icon"
-              variant="destructive"
-              className="h-6 w-6 rounded-full shadow-lg"
-              onClick={(e) => {
-                e.stopPropagation();
-                onRemove();
-              }}
-            >
-              <X className="h-3 w-3" />
-            </Button>
-          </div>
-        )}
-        
-        <div 
-          className="relative w-20 h-24 cursor-pointer hover:scale-110 transition-transform duration-200"
-          onClick={onClick}
-        >
-          {/* Card Background - Golden frame style */}
-          <div className="absolute inset-0 bg-gradient-to-b from-yellow-600/90 via-yellow-500/80 to-yellow-700/90 rounded-lg shadow-xl border-2 border-yellow-400/50" />
-          
-          {/* Inner content */}
-          <div className="relative h-full flex flex-col items-center justify-between p-1.5 pt-2">
-            {/* OVR */}
-            <div className="text-center">
-              <div className="text-lg font-black text-gray-900 drop-shadow-sm leading-none">
-                {player.ovr}
-              </div>
-              <div className="text-[8px] font-bold text-gray-800 uppercase tracking-tight mt-0.5">
-                {player.position}
-              </div>
-            </div>
-
-            {/* Player image placeholder area */}
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center border-2 border-yellow-400/30">
-              <span className="text-[10px] font-bold text-yellow-300">{player.name.charAt(0)}</span>
-            </div>
-
-            {/* Player name */}
-            <div className="text-center w-full">
-              <div className="text-[9px] font-bold text-gray-900 truncate px-0.5 uppercase tracking-tight">
-                {player.name.split(' ').pop()}
-              </div>
-            </div>
-          </div>
-
-          {/* Position badge at bottom */}
-          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2">
-            <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-green-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-green-500/30 shadow-lg">
-              {position}
-            </div>
-          </div>
-        </div>
+      <div
+        onClick={onClick}
+        className="w-24 h-32 bg-card/30 backdrop-blur-sm border-2 border-dashed border-muted-foreground/30 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 hover:bg-card/50 transition-all group"
+      >
+        <Plus className="w-8 h-8 text-muted-foreground/50 group-hover:text-primary/70 transition-colors mb-1" />
+        <span className="text-xs text-muted-foreground/70 group-hover:text-primary/70 transition-colors font-semibold">
+          {position}
+        </span>
       </div>
     );
   }
 
+  const rankColorClass = getRankColor(player.rank);
+
   return (
-    <div 
-      className="relative w-20 h-24 cursor-pointer hover:scale-105 transition-transform duration-200 group animate-fade-in"
-      onClick={onClick}
-    >
-      {/* Empty slot background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-gray-900/80 to-gray-800/80 rounded-lg border-2 border-dashed border-gray-600/50 group-hover:border-primary/50 transition-colors backdrop-blur-sm" />
-      
-      <div className="relative h-full flex flex-col items-center justify-center p-2">
-        <div className="text-4xl text-gray-600 group-hover:text-primary/70 transition-colors mb-1">+</div>
-        <div className="text-[9px] font-semibold text-gray-500 group-hover:text-primary/70 transition-colors uppercase">
-          {position}
+    <div className="relative group">
+      <Card className={`w-24 h-32 bg-gradient-to-br ${rankColorClass} border-2 cursor-pointer hover:scale-105 transition-all hover:shadow-lg overflow-hidden`}>
+        {/* Player Image Background */}
+        {player.image_url && (
+          <div 
+            className="absolute inset-0 bg-cover bg-center opacity-40"
+            style={{ backgroundImage: `url(${player.image_url})` }}
+          />
+        )}
+        
+        <div className="relative h-full p-2 flex flex-col">
+          {/* OVR and Position - Top Left */}
+          <div className="absolute top-1 left-1">
+            <div className="text-xl font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
+              {player.ovr}
+            </div>
+            <Badge variant="secondary" className="text-[9px] px-1 py-0 bg-black/60 text-white border-none">
+              {player.position}
+            </Badge>
+          </div>
+
+          {/* Player Name - Bottom */}
+          <div className="absolute bottom-1 left-0 right-0 px-1">
+            <div className="text-center bg-black/60 rounded px-1 py-0.5">
+              <div className="text-[10px] font-bold text-white line-clamp-1 drop-shadow">
+                {player.name.toUpperCase()}
+              </div>
+              {/* Nation and Club */}
+              <div className="flex items-center justify-center gap-1 mt-0.5">
+                {player.nation && (
+                  <span className="text-[8px] text-white/90">{player.nation}</span>
+                )}
+                {player.club && player.nation && (
+                  <span className="text-white/60">•</span>
+                )}
+                {player.club && (
+                  <span className="text-[8px] text-white/90 line-clamp-1">{player.club}</span>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      </Card>
+      
+      {onRemove && (
+        <Button
+          size="icon"
+          variant="destructive"
+          className="absolute -top-2 -right-2 h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg z-10"
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove();
+          }}
+        >
+          <X className="h-3 w-3" />
+        </Button>
+      )}
     </div>
   );
 }

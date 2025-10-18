@@ -17,13 +17,15 @@ interface Player {
   club?: string;
   image_url?: string;
   stats: any;
+  alternative_positions?: any;
 }
 
 interface PlayerSelectionDialogProps {
   open: boolean;
   onClose: () => void;
-  onSelectPlayer: (player: Player) => void;
+  onSelectPlayer: (player: Player, rank: number, training: number) => void;
   requiredPosition?: string;
+  selectedPlayerIds?: number[];
 }
 
 const positions = ["GK", "LB", "LWB", "CB", "RB", "RWB", "CDM", "CM", "CAM", "LM", "RM", "LW", "RW", "CF", "ST", "LF", "RF"];
@@ -32,12 +34,15 @@ export default function PlayerSelectionDialog({
   open, 
   onClose, 
   onSelectPlayer,
-  requiredPosition 
+  requiredPosition,
+  selectedPlayerIds = []
 }: PlayerSelectionDialogProps) {
   const [players, setPlayers] = useState<Player[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [positionFilter, setPositionFilter] = useState(requiredPosition || "all");
   const [loading, setLoading] = useState(false);
+  const [selectedRank, setSelectedRank] = useState<number>(1);
+  const [selectedTraining, setSelectedTraining] = useState<number>(0);
 
   useEffect(() => {
     if (requiredPosition) {
@@ -49,7 +54,7 @@ export default function PlayerSelectionDialog({
     if (open) {
       fetchPlayers();
     }
-  }, [open, positionFilter]);
+  }, [open, positionFilter, selectedRank]);
 
   const fetchPlayers = async () => {
     try {
@@ -58,11 +63,7 @@ export default function PlayerSelectionDialog({
         .from("players")
         .select("*")
         .order("ovr", { ascending: false })
-        .limit(50);
-
-      if (positionFilter !== "all") {
-        query = query.eq("position", positionFilter);
-      }
+        .limit(100);
 
       if (searchQuery) {
         query = query.ilike("name", `%${searchQuery}%`);
@@ -70,7 +71,26 @@ export default function PlayerSelectionDialog({
 
       const { data, error } = await query;
       if (error) throw error;
-      setPlayers(data || []);
+      
+      // Filter by position (including alternative positions for rank 2+)
+      let filteredPlayers = data || [];
+      if (positionFilter !== "all") {
+        filteredPlayers = filteredPlayers.filter(player => {
+          if (player.position === positionFilter) return true;
+          
+          // Check alternative positions (only if rank 2+)
+          if (selectedRank >= 2 && player.alternative_positions) {
+            const altPositions = Array.isArray(player.alternative_positions) 
+              ? player.alternative_positions 
+              : [];
+            return altPositions.includes(positionFilter);
+          }
+          
+          return false;
+        });
+      }
+      
+      setPlayers(filteredPlayers);
     } catch (error: any) {
       console.error(error);
     } finally {
@@ -83,8 +103,11 @@ export default function PlayerSelectionDialog({
   };
 
   const handleSelectPlayer = (player: Player) => {
-    onSelectPlayer(player);
+    onSelectPlayer(player, selectedRank, selectedTraining);
     onClose();
+    // Reset selections
+    setSelectedRank(1);
+    setSelectedTraining(0);
   };
 
   return (
@@ -130,6 +153,48 @@ export default function PlayerSelectionDialog({
                 </SelectContent>
               </Select>
             </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold">Chọn Rank</Label>
+              <div className="grid grid-cols-5 gap-2">
+                {[1, 2, 3, 4, 5].map((rank) => (
+                  <button
+                    key={rank}
+                    onClick={() => setSelectedRank(rank)}
+                    className={`aspect-square rounded-lg border-2 transition-all flex flex-col items-center justify-center p-2 ${
+                      selectedRank === rank 
+                        ? 'border-primary bg-primary/20 scale-105' 
+                        : 'border-muted hover:border-primary/50 bg-card/50'
+                    }`}
+                  >
+                    <div className={`w-6 h-6 mb-1 ${
+                      rank === 1 ? 'bg-green-500' :
+                      rank === 2 ? 'bg-blue-500' :
+                      rank === 3 ? 'bg-purple-500' :
+                      rank === 4 ? 'bg-red-500' :
+                      'bg-orange-500'
+                    } clip-hexagon`} />
+                    <span className="text-xs font-bold">{rank}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold">Training Level</Label>
+              <Select value={selectedTraining.toString()} onValueChange={(v) => setSelectedTraining(parseInt(v))}>
+                <SelectTrigger className="bg-card/50">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="max-h-[200px]">
+                  {Array.from({ length: 21 }, (_, i) => i).map((level) => (
+                    <SelectItem key={level} value={level.toString()}>
+                      Training Level {level}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="md:col-span-3 space-y-3 max-h-[60vh] overflow-y-auto pr-2">
@@ -142,11 +207,17 @@ export default function PlayerSelectionDialog({
                 Không tìm thấy cầu thủ
               </div>
             ) : (
-              players.map((player) => (
+              players.map((player) => {
+                const isSelected = selectedPlayerIds.includes(player.id);
+                return (
                 <div
                   key={player.id}
-                  className="group bg-card/70 backdrop-blur-sm rounded-lg p-4 border border-border hover:border-primary/50 transition-all cursor-pointer hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-0.5 animate-fade-in"
-                  onClick={() => handleSelectPlayer(player)}
+                  className={`group bg-card/70 backdrop-blur-sm rounded-lg p-4 border transition-all ${
+                    isSelected 
+                      ? 'border-muted-foreground/30 opacity-50 cursor-not-allowed' 
+                      : 'border-border hover:border-primary/50 cursor-pointer hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-0.5'
+                  } animate-fade-in`}
+                  onClick={() => !isSelected && handleSelectPlayer(player)}
                 >
                   <div className="flex items-center gap-4">
                     <div className="text-center shrink-0">
@@ -159,12 +230,18 @@ export default function PlayerSelectionDialog({
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <div className="font-bold text-lg truncate group-hover:text-primary transition-colors">
+                      <div className={`font-bold text-lg truncate transition-colors ${!isSelected && 'group-hover:text-primary'}`}>
                         {player.name}
+                        {isSelected && <span className="ml-2 text-xs text-muted-foreground">(Đã chọn)</span>}
                       </div>
                       <div className="text-sm text-muted-foreground truncate">
                         {player.club} • {player.nation}
                       </div>
+                      {player.alternative_positions && player.alternative_positions.length > 0 && (
+                        <div className="text-xs text-muted-foreground mt-1">
+                          Vị trí phụ: {player.alternative_positions.join(", ")}
+                        </div>
+                      )}
                     </div>
 
                     <div className="hidden lg:grid grid-cols-6 gap-2 text-xs">
@@ -226,7 +303,8 @@ export default function PlayerSelectionDialog({
                     </div>
                   </div>
                 </div>
-              ))
+              );
+              })
             )}
           </div>
         </div>
