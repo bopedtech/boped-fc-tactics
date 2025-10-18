@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { getCountryFlag } from "@/lib/countryUtils";
 
 interface PlayerStats {
   pace?: number;
@@ -110,9 +111,13 @@ export default function PlayerCard({ player, onClick }: PlayerCardProps) {
         </h3>
 
         {/* Club and Nation */}
-        <div className="flex justify-center gap-2 mt-1 text-xs text-muted-foreground">
+        <div className="flex justify-center gap-2 mt-1 text-xs text-muted-foreground items-center">
           {player.club?.name && <span>{player.club.name}</span>}
-          {player.nation?.name && <span>• {player.nation.name}</span>}
+          {player.nation?.name && (
+            <span className="flex items-center gap-1">
+              • <span className="text-base">{getCountryFlag(player.nation.abbreviation)}</span> {player.nation.name}
+            </span>
+          )}
         </div>
 
         {/* Stats Grid */}

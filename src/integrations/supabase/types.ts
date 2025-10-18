@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      clubs: {
+        Row: {
+          club_id: number
+          created_at: string | null
+          id: number
+          league: string | null
+          logo_url: string | null
+          name: string
+          name_vi: string | null
+        }
+        Insert: {
+          club_id: number
+          created_at?: string | null
+          id?: number
+          league?: string | null
+          logo_url?: string | null
+          name: string
+          name_vi?: string | null
+        }
+        Update: {
+          club_id?: number
+          created_at?: string | null
+          id?: number
+          league?: string | null
+          logo_url?: string | null
+          name?: string
+          name_vi?: string | null
+        }
+        Relationships: []
+      }
+      countries_vi: {
+        Row: {
+          country_code: string
+          created_at: string | null
+          id: number
+          name_en: string
+          name_vi: string
+        }
+        Insert: {
+          country_code: string
+          created_at?: string | null
+          id?: number
+          name_en: string
+          name_vi: string
+        }
+        Update: {
+          country_code?: string
+          created_at?: string | null
+          id?: number
+          name_en?: string
+          name_vi?: string
+        }
+        Relationships: []
+      }
       formations: {
         Row: {
           category: string
