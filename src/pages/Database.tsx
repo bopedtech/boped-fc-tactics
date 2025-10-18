@@ -13,9 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Search, Filter, X, Database as DatabaseIcon, RefreshCw, CheckCircle2, Loader2 } from "lucide-react";
+import { Search, Filter, X } from "lucide-react";
 import { toast } from "sonner";
 
 interface Player {
@@ -42,8 +40,6 @@ export default function Database() {
   const [selectedPosition, setSelectedPosition] = useState<string>("all");
   const [ovrRange, setOvrRange] = useState([100, 120]);
   const [showFilters, setShowFilters] = useState(true);
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [syncResult, setSyncResult] = useState<any>(null);
 
   useEffect(() => {
     fetchPlayers();
@@ -101,109 +97,18 @@ export default function Database() {
     fetchPlayers();
   };
 
-  const handleSync = async (mode: 'test' | 'full') => {
-    setIsSyncing(true);
-    setSyncResult(null);
-
-    try {
-      const { data, error } = await supabase.functions.invoke('sync-players', {
-        body: { mode, maxPages: mode === 'test' ? 2 : 10 }
-      });
-
-      if (error) throw error;
-
-      setSyncResult(data);
-      toast.success(`✅ Đồng bộ thành công: ${data.totalPlayers} cầu thủ`);
-      
-      // Refresh the player list
-      fetchPlayers();
-    } catch (error: any) {
-      console.error('Sync error:', error);
-      toast.error(`❌ Lỗi đồng bộ: ${error.message || "Không thể đồng bộ dữ liệu"}`);
-    } finally {
-      setIsSyncing(false);
-    }
-  };
-
   return (
     <div className="min-h-screen">
       <Header />
 
       <div className="container mx-auto py-8">
-        <div className="mb-8 space-y-4">
-          <div>
-            <h1 className="text-4xl font-bold gradient-primary bg-clip-text text-transparent mb-2">
-              Cơ sở dữ liệu cầu thủ FC Mobile
-            </h1>
-            <p className="text-muted-foreground">
-              Khám phá và tìm kiếm cầu thủ cho đội hình FC Mobile của bạn
-            </p>
-          </div>
-
-          {/* Sync Section */}
-          <Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <DatabaseIcon className="h-5 w-5" />
-                    Đồng bộ dữ liệu
-                  </CardTitle>
-                  <CardDescription>
-                    Cập nhật database từ FIFA Renderz
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  onClick={() => handleSync('test')}
-                  disabled={isSyncing}
-                  variant="outline"
-                  size="sm"
-                >
-                  {isSyncing ? (
-                    <>
-                      <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-                      Đang sync...
-                    </>
-                  ) : (
-                    <>
-                      <RefreshCw className="mr-2 h-3 w-3" />
-                      Test (~200 cầu thủ)
-                    </>
-                  )}
-                </Button>
-                <Button
-                  onClick={() => handleSync('full')}
-                  disabled={isSyncing}
-                  size="sm"
-                >
-                  {isSyncing ? (
-                    <>
-                      <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-                      Đang sync...
-                    </>
-                  ) : (
-                    <>
-                      <DatabaseIcon className="mr-2 h-3 w-3" />
-                      Full (~1000 cầu thủ)
-                    </>
-                  )}
-                </Button>
-              </div>
-
-              {syncResult && (
-                <Alert className="bg-green-500/10 border-green-500/20">
-                  <CheckCircle2 className="h-4 w-4 text-green-600" />
-                  <AlertDescription className="text-sm">
-                    ✅ Đã sync {syncResult.totalPlayers} cầu thủ ({syncResult.mode === 'test' ? 'Test' : 'Full'})
-                  </AlertDescription>
-                </Alert>
-              )}
-            </CardContent>
-          </Card>
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold gradient-primary bg-clip-text text-transparent mb-2">
+            Cơ sở dữ liệu cầu thủ FC Mobile
+          </h1>
+          <p className="text-muted-foreground">
+            Khám phá và tìm kiếm cầu thủ cho đội hình FC Mobile của bạn
+          </p>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-6">
@@ -247,7 +152,7 @@ export default function Database() {
                   <SelectTrigger>
                     <SelectValue placeholder="Chọn vị trí" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-popover">
                     <SelectItem value="all">Tất cả vị trí</SelectItem>
                     {positions.map((pos) => (
                       <SelectItem key={pos} value={pos}>
