@@ -26,6 +26,9 @@ const NATION_NAME_TO_CODE: Record<string, string> = {
   'Vietnam': 'VNM',
   'Norway': 'NOR',
   'Egypt': 'EGY',
+  'Nigeria': 'NGA',
+  'Morocco': 'MAR',
+  'Scotland': 'SCO',
 };
 
 /**
@@ -62,6 +65,8 @@ export function getCountryFlag(countryCode: string): string {
     'CAN': 'CA',
     'CHI': 'CL',
     'COL': 'CO',
+    'NGA': 'NG',
+    'MAR': 'MA',
   };
   
   const code = codeMap[countryCode.toUpperCase()] || countryCode;
