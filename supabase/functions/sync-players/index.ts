@@ -136,10 +136,8 @@ Deno.serve(async (req) => {
       // Build the Elasticsearch query payload
       const payload: any = {
         size: BATCH_SIZE,
-        sort: [{ id: 'asc' }], // Consistent sorting by ID
-        query: {
-          match_all: {} // Get all players
-        }
+        sort: [{ "id.keyword": { order: "asc" } }], // Sort by ID keyword field
+        _source: true, // Include source
       };
 
       // Add search_after cursor if not first request
@@ -147,15 +145,20 @@ Deno.serve(async (req) => {
         payload.search_after = cursor;
       }
 
+      console.log('Request payload:', JSON.stringify(payload));
+
       // Make request to Renderz API
       const response = await fetch(RENDERZ_API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          'Accept': 'application/json',
         },
         body: JSON.stringify(payload),
       });
+
+      console.log('Response status:', response.status);
 
       if (!response.ok) {
         if (response.status === 429) {
@@ -167,6 +170,8 @@ Deno.serve(async (req) => {
       }
 
       const data = await response.json();
+      console.log('Response data structure:', JSON.stringify(data).substring(0, 500));
+      
       const rawPlayers = data?.hits?.hits || [];
 
       console.log(`Received ${rawPlayers.length} players`);
