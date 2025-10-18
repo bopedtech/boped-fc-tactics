@@ -1,0 +1,111 @@
+-- Insert mock player data for testing
+
+INSERT INTO public.players (
+  asset_id, player_id, first_name, last_name, common_name, card_name,
+  position, rating, weak_foot, foot, height, weight, birthday,
+  nation, club, league, work_rate_att, work_rate_def,
+  skill_moves_level, stats, avg_stats, images, traits, auctionable, rank
+) VALUES
+-- Marcelo (LB)
+(30904814, 176676, 'Marcelo', 'Vieira da Silva', 'Marcelo', 'Marcelo',
+ 'LB', 113, 4, 2, 174, 75, '1988-05-12',
+ '{"id": 54, "name": "Brazil"}'::jsonb,
+ '{"id": 114154, "name": "Real Madrid"}'::jsonb,
+ '{"id": 2118, "name": "La Liga"}'::jsonb,
+ 2, 2, 5,
+ '{"pace": 137, "shooting": 90, "passing": 123, "dribbling": 135, "defense": 124, "physicality": 97}'::jsonb,
+ '{"avg1": 137, "avg2": 90, "avg3": 123, "avg4": 135, "avg5": 124, "avg6": 97}'::jsonb,
+ '{"playerCardImage": "https://ui-avatars.com/api/?name=Marcelo&background=38B2AC&color=fff&size=256", "flagImage": "https://flagcdn.com/w80/br.png"}'::jsonb,
+ '[{"id": 15, "title": "Flair"}, {"id": 18, "title": "Technical Dribbler"}]'::jsonb,
+ false, 1),
+
+-- Cristiano Ronaldo (ST)
+(30904815, 20801, 'Cristiano', 'Ronaldo dos Santos', 'C. Ronaldo', 'Ronaldo',
+ 'ST', 120, 4, 1, 187, 83, '1985-02-05',
+ '{"id": 38, "name": "Portugal"}'::jsonb,
+ '{"id": 243, "name": "Al Nassr"}'::jsonb,
+ '{"id": 2149, "name": "Saudi Pro League"}'::jsonb,
+ 3, 1, 5,
+ '{"pace": 135, "shooting": 145, "passing": 120, "dribbling": 138, "defense": 65, "physicality": 130}'::jsonb,
+ '{"avg1": 135, "avg2": 145, "avg3": 120, "avg4": 138, "avg5": 65, "avg6": 130}'::jsonb,
+ '{"playerCardImage": "https://ui-avatars.com/api/?name=C+Ronaldo&background=D4AF37&color=fff&size=256", "flagImage": "https://flagcdn.com/w80/pt.png"}'::jsonb,
+ '[{"id": 1, "title": "Power Header"}, {"id": 5, "title": "Speed Dribbler"}]'::jsonb,
+ false, 2),
+
+-- Lionel Messi (RW)
+(30904816, 158023, 'Lionel', 'Messi', 'L. Messi', 'Messi',
+ 'RW', 118, 4, 2, 170, 72, '1987-06-24',
+ '{"id": 52, "name": "Argentina"}'::jsonb,
+ '{"id": 73, "name": "Inter Miami"}'::jsonb,
+ '{"id": 2142, "name": "MLS"}'::jsonb,
+ 2, 2, 5,
+ '{"pace": 132, "shooting": 140, "passing": 142, "dribbling": 148, "defense": 60, "physicality": 88}'::jsonb,
+ '{"avg1": 132, "avg2": 140, "avg3": 142, "avg4": 148, "avg5": 60, "avg6": 88}'::jsonb,
+ '{"playerCardImage": "https://ui-avatars.com/api/?name=L+Messi&background=D4AF37&color=fff&size=256", "flagImage": "https://flagcdn.com/w80/ar.png"}'::jsonb,
+ '[{"id": 3, "title": "Finesse Shot"}, {"id": 7, "title": "Clinical Finisher"}]'::jsonb,
+ false, 3),
+
+-- Virgil van Dijk (CB)
+(30904817, 203376, 'Virgil', 'van Dijk', 'V. van Dijk', 'Van Dijk',
+ 'CB', 115, 3, 1, 193, 92, '1991-07-08',
+ '{"id": 34, "name": "Netherlands"}'::jsonb,
+ '{"id": 9, "name": "Liverpool"}'::jsonb,
+ '{"id": 13, "name": "Premier League"}'::jsonb,
+ 1, 3, 2,
+ '{"pace": 110, "shooting": 75, "passing": 115, "dribbling": 95, "defense": 142, "physicality": 138}'::jsonb,
+ '{"avg1": 110, "avg2": 75, "avg3": 115, "avg4": 95, "avg5": 142, "avg6": 138}'::jsonb,
+ '{"playerCardImage": "https://ui-avatars.com/api/?name=Van+Dijk&background=C41230&color=fff&size=256", "flagImage": "https://flagcdn.com/w80/nl.png"}'::jsonb,
+ '[{"id": 10, "title": "Aerial Threat"}, {"id": 12, "title": "Tactician"}]'::jsonb,
+ false, 4),
+
+-- Kevin De Bruyne (CM)
+(30904818, 192985, 'Kevin', 'De Bruyne', 'K. De Bruyne', 'De Bruyne',
+ 'CM', 117, 5, 1, 181, 70, '1991-06-28',
+ '{"id": 7, "name": "Belgium"}'::jsonb,
+ '{"id": 10, "name": "Manchester City"}'::jsonb,
+ '{"id": 13, "name": "Premier League"}'::jsonb,
+ 3, 2, 4,
+ '{"pace": 118, "shooting": 135, "passing": 145, "dribbling": 132, "defense": 95, "physicality": 105}'::jsonb,
+ '{"avg1": 118, "avg2": 135, "avg3": 145, "avg4": 132, "avg5": 95, "avg6": 105}'::jsonb,
+ '{"playerCardImage": "https://ui-avatars.com/api/?name=De+Bruyne&background=6CABDD&color=fff&size=256", "flagImage": "https://flagcdn.com/w80/be.png"}'::jsonb,
+ '[{"id": 8, "title": "Playmaker"}, {"id": 11, "title": "Vision"}]'::jsonb,
+ false, 5),
+
+-- Alisson (GK)
+(30904819, 212831, 'Alisson', 'Becker', 'Alisson', 'Alisson',
+ 'GK', 114, 3, 1, 191, 91, '1992-10-02',
+ '{"id": 54, "name": "Brazil"}'::jsonb,
+ '{"id": 9, "name": "Liverpool"}'::jsonb,
+ '{"id": 13, "name": "Premier League"}'::jsonb,
+ 1, 1, 1,
+ '{"diving": 140, "handling": 138, "kicking": 125, "reflexes": 142, "speed": 115, "positioning": 135}'::jsonb,
+ '{"avg1": 140, "avg2": 138, "avg3": 125, "avg4": 142, "avg5": 115, "avg6": 135}'::jsonb,
+ '{"playerCardImage": "https://ui-avatars.com/api/?name=Alisson&background=C41230&color=fff&size=256", "flagImage": "https://flagcdn.com/w80/br.png"}'::jsonb,
+ '[{"id": 20, "title": "Sweeper Keeper"}]'::jsonb,
+ false, 0),
+
+-- Kylian Mbappé (ST)
+(30904820, 231747, 'Kylian', 'Mbappé', 'K. Mbappé', 'Mbappé',
+ 'ST', 121, 4, 1, 178, 73, '1998-12-20',
+ '{"id": 18, "name": "France"}'::jsonb,
+ '{"id": 243, "name": "Real Madrid"}'::jsonb,
+ '{"id": 2118, "name": "La Liga"}'::jsonb,
+ 3, 2, 5,
+ '{"pace": 148, "shooting": 138, "passing": 120, "dribbling": 140, "defense": 62, "physicality": 115}'::jsonb,
+ '{"avg1": 148, "avg2": 138, "avg3": 120, "avg4": 140, "avg5": 62, "avg6": 115}'::jsonb,
+ '{"playerCardImage": "https://ui-avatars.com/api/?name=Mbappe&background=D4AF37&color=fff&size=256", "flagImage": "https://flagcdn.com/w80/fr.png"}'::jsonb,
+ '[{"id": 2, "title": "Speed Demon"}, {"id": 4, "title": "Clinical Finisher"}]'::jsonb,
+ false, 1),
+
+-- Erling Haaland (ST)
+(30904821, 239085, 'Erling', 'Haaland', 'E. Haaland', 'Haaland',
+ 'ST', 119, 3, 2, 194, 88, '2000-07-21',
+ '{"id": 36, "name": "Norway"}'::jsonb,
+ '{"id": 10, "name": "Manchester City"}'::jsonb,
+ '{"id": 13, "name": "Premier League"}'::jsonb,
+ 3, 2, 3,
+ '{"pace": 142, "shooting": 145, "passing": 108, "dribbling": 118, "defense": 68, "physicality": 135}'::jsonb,
+ '{"avg1": 142, "avg2": 145, "avg3": 108, "avg4": 118, "avg5": 68, "avg6": 135}'::jsonb,
+ '{"playerCardImage": "https://ui-avatars.com/api/?name=Haaland&background=6CABDD&color=fff&size=256", "flagImage": "https://flagcdn.com/w80/no.png"}'::jsonb,
+ '[{"id": 6, "title": "Poacher"}, {"id": 9, "title": "Power Header"}]'::jsonb,
+ false, 2);
