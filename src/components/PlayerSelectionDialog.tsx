@@ -10,14 +10,14 @@ import { Badge } from "@/components/ui/badge";
 
 interface Player {
   id: number;
-  name: string;
-  ovr: number;
+  common_name: string;
+  rating: number;
   position: string;
-  nation?: string;
-  club?: string;
-  image_url?: string;
+  nation?: any;
+  club?: any;
+  images?: any;
   stats: any;
-  alternative_positions?: any;
+  potential_positions?: any;
 }
 
 interface PlayerSelectionDialogProps {
@@ -66,22 +66,22 @@ export default function PlayerSelectionDialog({
         .limit(100);
 
       if (searchQuery) {
-        query = query.ilike("name", `%${searchQuery}%`);
+        query = query.ilike("common_name", `%${searchQuery}%`);
       }
 
       const { data, error } = await query;
       if (error) throw error;
       
-      // Filter by position (including alternative positions for rank 2+)
+      // Filter by position (including potential positions for rank 2+)
       let filteredPlayers = data || [];
       if (positionFilter !== "all") {
         filteredPlayers = filteredPlayers.filter(player => {
           if (player.position === positionFilter) return true;
           
-          // Check alternative positions for any rank (not just 2+)
-          if (player.alternative_positions) {
-            const altPositions = Array.isArray(player.alternative_positions) 
-              ? player.alternative_positions 
+          // Check potential positions for any rank (not just 2+)
+          if (player.potential_positions) {
+            const altPositions = Array.isArray(player.potential_positions) 
+              ? player.potential_positions 
               : [];
             return altPositions.includes(positionFilter);
           }
@@ -211,7 +211,7 @@ export default function PlayerSelectionDialog({
                 const isSelected = selectedPlayerIds.includes(player.id);
                 const isAlternativePosition = positionFilter !== "all" && player.position !== positionFilter;
                 const ovrPenalty = isAlternativePosition && selectedRank < 2 ? 2 : isAlternativePosition ? 1 : 0;
-                const displayOvr = player.ovr - ovrPenalty;
+                const displayOvr = player.rating - ovrPenalty;
                 
                 return (
                 <div
@@ -241,11 +241,11 @@ export default function PlayerSelectionDialog({
 
                     <div className="flex-1 min-w-0">
                       <div className={`font-bold text-lg truncate transition-colors ${!isSelected && 'group-hover:text-primary'}`}>
-                        {player.name}
+                        {player.common_name}
                         {isSelected && <span className="ml-2 text-xs text-muted-foreground">(Đã chọn)</span>}
                       </div>
                       <div className="text-sm text-muted-foreground truncate">
-                        {player.club} • {player.nation}
+                        {player.club?.name} • {player.nation?.name}
                       </div>
                       {isAlternativePosition && selectedRank < 2 && (
                         <div className="text-xs text-orange-500 mt-1 font-medium">
@@ -257,9 +257,9 @@ export default function PlayerSelectionDialog({
                           ✓ Rank {selectedRank}: OVR giảm {ovrPenalty} điểm khi chơi vị trí phụ
                         </div>
                       )}
-                      {player.alternative_positions && player.alternative_positions.length > 0 && !isAlternativePosition && (
+                      {player.potential_positions && player.potential_positions.length > 0 && !isAlternativePosition && (
                         <div className="text-xs text-muted-foreground mt-1">
-                          Vị trí phụ: {player.alternative_positions.join(", ")}
+                          Vị trí phụ: {player.potential_positions.join(", ")}
                         </div>
                       )}
                     </div>

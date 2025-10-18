@@ -6,49 +6,90 @@ const corsHeaders = {
 };
 
 interface RawPlayerData {
-  _source: {
-    id: string;
-    c: string; // name
-    r: number; // rating/ovr
-    pos: string; // position
-    n: string; // nation
-    t?: string; // club
-    s?: {
-      pac?: number;
-      sho?: number;
-      pas?: number;
-      dri?: number;
-      def?: number;
-      phy?: number;
-      // GK stats
-      div?: number;
-      han?: number;
-      kic?: number;
-      ref?: number;
-      spd?: number;
-      pos_gk?: number;
-    };
-    wf?: number; // work rate
-    wr?: string; // work rates combined
-    sk?: string[]; // traits
-    alt_p?: string[]; // alternative positions
-  };
+  assetId: number;
+  playerId: number;
+  firstName: string;
+  lastName: string;
+  commonName: string;
+  cardName: string;
+  position: string;
+  rating: number;
+  weakFoot: number;
+  foot: number;
+  workRateAtt: number;
+  workRateDef: number;
+  weight: number;
+  height: number;
+  birthday: string;
+  bio?: string;
+  bindingXml?: string;
+  animation?: any;
+  tags?: string;
+  skillStyleId?: number;
+  skillStyleSkills?: any[];
+  images: any;
+  skillMoves?: any;
+  skillMovesLevel?: number;
+  celebration?: any;
+  traits?: any[];
+  club: any;
+  league: any;
+  nation: any;
+  potentialPositions?: string[];
+  avgStats?: any;
+  avgGkStats?: any;
+  stats: any;
+  priceData?: any;
+  auctionable?: boolean;
+  rank?: number;
+  likes?: number;
+  added?: string;
+  revealOn?: string;
+  source?: string;
   sort?: any[];
 }
 
 interface ProcessedPlayer {
-  external_id: string;
-  name: string;
-  ovr: number;
+  asset_id: number;
+  player_id: number;
+  first_name: string;
+  last_name: string;
+  common_name: string;
+  card_name: string;
   position: string;
-  nation?: string;
-  club?: string;
-  image_url?: string;
+  rating: number;
+  weak_foot: number;
+  foot: number;
+  work_rate_att: number;
+  work_rate_def: number;
+  weight: number;
+  height: number;
+  birthday: string;
+  bio?: string;
+  binding_xml?: string;
+  animation?: any;
+  tags?: string;
+  skill_style_id?: number;
+  skill_style_skills?: any[];
+  images: any;
+  skill_moves?: any;
+  skill_moves_level?: number;
+  celebration?: any;
+  traits?: any[];
+  club: any;
+  league: any;
+  nation: any;
+  potential_positions?: string[];
+  avg_stats?: any;
+  avg_gk_stats?: any;
   stats: any;
-  traits?: string[];
-  work_rate_att?: string;
-  work_rate_def?: string;
-  alternative_positions?: string[];
+  price_data?: any;
+  auctionable?: boolean;
+  rank?: number;
+  likes?: number;
+  added?: string;
+  reveal_on?: string;
+  source?: string;
 }
 
 const RENDERZ_API_URL = 'https://renderz.app/api/search/elasticsearch';
@@ -83,51 +124,48 @@ function extractPlayersFromObject(responseData: any): RawPlayerData[] | null {
 }
 
 function processPlayerData(rawPlayers: RawPlayerData[]): ProcessedPlayer[] {
-  return rawPlayers.map((item) => {
-    const player = item._source;
-    const isGK = player.pos === 'GK';
-    
-    // Parse work rates
-    let workRateAtt = 'Medium';
-    let workRateDef = 'Medium';
-    if (player.wr) {
-      const rates = player.wr.split('/');
-      if (rates.length === 2) {
-        workRateAtt = rates[0].trim();
-        workRateDef = rates[1].trim();
-      }
-    }
-
-    // Process stats based on position
-    const stats = isGK ? {
-      speed: player.s?.spd || 50,
-      diving: player.s?.div || 50,
-      handling: player.s?.han || 50,
-      kicking: player.s?.kic || 50,
-      reflexes: player.s?.ref || 50,
-      positioning: player.s?.pos_gk || 50,
-    } : {
-      pace: player.s?.pac || 50,
-      shooting: player.s?.sho || 50,
-      passing: player.s?.pas || 50,
-      dribbling: player.s?.dri || 50,
-      defense: player.s?.def || 50,
-      physicality: player.s?.phy || 50,
-    };
-
+  return rawPlayers.map((player) => {
     return {
-      external_id: player.id,
-      name: player.c,
-      ovr: player.r,
-      position: player.pos,
-      nation: player.n,
-      club: player.t,
-      image_url: `https://cdn.sofifa.com/players/${player.id.slice(0, 3)}/${player.id.slice(3)}/25_120.png`,
-      stats,
-      traits: player.sk || [],
-      work_rate_att: workRateAtt,
-      work_rate_def: workRateDef,
-      alternative_positions: player.alt_p || [],
+      asset_id: player.assetId,
+      player_id: player.playerId,
+      first_name: player.firstName,
+      last_name: player.lastName,
+      common_name: player.commonName,
+      card_name: player.cardName,
+      position: player.position,
+      rating: player.rating,
+      weak_foot: player.weakFoot,
+      foot: player.foot,
+      work_rate_att: player.workRateAtt,
+      work_rate_def: player.workRateDef,
+      weight: player.weight,
+      height: player.height,
+      birthday: player.birthday,
+      bio: player.bio,
+      binding_xml: player.bindingXml,
+      animation: player.animation,
+      tags: player.tags,
+      skill_style_id: player.skillStyleId,
+      skill_style_skills: player.skillStyleSkills,
+      images: player.images,
+      skill_moves: player.skillMoves,
+      skill_moves_level: player.skillMovesLevel,
+      celebration: player.celebration,
+      traits: player.traits,
+      club: player.club,
+      league: player.league,
+      nation: player.nation,
+      potential_positions: player.potentialPositions,
+      avg_stats: player.avgStats,
+      avg_gk_stats: player.avgGkStats,
+      stats: player.stats,
+      price_data: player.priceData,
+      auctionable: player.auctionable,
+      rank: player.rank,
+      likes: player.likes,
+      added: player.added,
+      reveal_on: player.revealOn,
+      source: player.source,
     };
   });
 }
@@ -260,7 +298,7 @@ Deno.serve(async (req) => {
       const { error } = await supabase
         .from('players')
         .upsert(processedPlayers, { 
-          onConflict: 'external_id',
+          onConflict: 'asset_id',
           ignoreDuplicates: false 
         });
 

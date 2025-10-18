@@ -19,14 +19,14 @@ interface PlayerStats {
 
 interface Player {
   id: number;
-  name: string;
-  ovr: number;
+  common_name: string;
+  rating: number;
   position: string;
-  nation?: string;
-  club?: string;
-  image_url?: string;
+  nation?: any;
+  club?: any;
+  images?: any;
   stats: PlayerStats;
-  traits?: string[];
+  traits?: any[];
 }
 
 interface PlayerCardProps {
@@ -79,7 +79,7 @@ export default function PlayerCard({ player, onClick }: PlayerCardProps) {
         {/* OVR and Position */}
         <div className="absolute top-2 left-2 z-10">
           <div className="text-3xl font-bold gradient-primary bg-clip-text text-transparent">
-            {player.ovr}
+            {player.rating}
           </div>
           <div className="text-xs font-semibold text-muted-foreground">
             {player.position}
@@ -88,31 +88,31 @@ export default function PlayerCard({ player, onClick }: PlayerCardProps) {
 
         {/* Player Image */}
         <div className="flex justify-center items-center h-32 mt-4">
-          {player.image_url ? (
+          {player.images?.playerCardImage ? (
             <img
-              src={player.image_url}
-              alt={player.name}
+              src={player.images.playerCardImage}
+              alt={player.common_name}
               className="h-full object-contain"
               onError={(e) => {
-                e.currentTarget.src = `https://ui-avatars.com/api/?name=${player.name}&background=38B2AC&color=fff&size=128`;
+                e.currentTarget.src = `https://ui-avatars.com/api/?name=${player.common_name}&background=38B2AC&color=fff&size=128`;
               }}
             />
           ) : (
             <div className="w-24 h-24 rounded-full gradient-primary flex items-center justify-center text-3xl font-bold text-white">
-              {player.name[0]}
+              {player.common_name[0]}
             </div>
           )}
         </div>
 
         {/* Player Name */}
         <h3 className="text-center font-bold text-lg mt-2 truncate">
-          {player.name}
+          {player.common_name}
         </h3>
 
         {/* Club and Nation */}
         <div className="flex justify-center gap-2 mt-1 text-xs text-muted-foreground">
-          {player.club && <span>{player.club}</span>}
-          {player.nation && <span>• {player.nation}</span>}
+          {player.club?.name && <span>{player.club.name}</span>}
+          {player.nation?.name && <span>• {player.nation.name}</span>}
         </div>
 
         {/* Stats Grid */}
@@ -136,7 +136,7 @@ export default function PlayerCard({ player, onClick }: PlayerCardProps) {
                 variant="secondary"
                 className="text-xs"
               >
-                {trait}
+                {trait.title || trait.name || 'Trait'}
               </Badge>
             ))}
           </div>

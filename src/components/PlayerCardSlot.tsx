@@ -5,12 +5,12 @@ import { Button } from "@/components/ui/button";
 
 interface Player {
   id: number;
-  name: string;
-  ovr: number;
+  common_name: string;
+  rating: number;
   position: string;
-  nation?: string;
-  club?: string;
-  image_url?: string;
+  nation?: any;
+  club?: any;
+  images?: any;
   stats: any;
   rank?: number;
   training?: number;
@@ -55,10 +55,10 @@ export default function PlayerCardSlot({ player, position, onClick, onRemove }: 
     <div className="relative group">
       <Card className={`w-24 h-32 bg-gradient-to-br ${rankColorClass} border-2 cursor-pointer hover:scale-105 transition-all hover:shadow-lg overflow-hidden`}>
         {/* Player Image Background */}
-        {player.image_url && (
+        {player.images?.playerCardImage && (
           <div 
             className="absolute inset-0 bg-cover bg-center opacity-40"
-            style={{ backgroundImage: `url(${player.image_url})` }}
+            style={{ backgroundImage: `url(${player.images.playerCardImage})` }}
           />
         )}
         
@@ -66,7 +66,7 @@ export default function PlayerCardSlot({ player, position, onClick, onRemove }: 
           {/* OVR and Position - Top Left */}
           <div className="absolute top-1 left-1">
             <div className="text-xl font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
-              {player.ovr}
+              {player.rating}
             </div>
             <Badge variant="secondary" className="text-[9px] px-1 py-0 bg-black/60 text-white border-none">
               {player.position}
@@ -77,18 +77,18 @@ export default function PlayerCardSlot({ player, position, onClick, onRemove }: 
           <div className="absolute bottom-1 left-0 right-0 px-1">
             <div className="text-center bg-black/60 rounded px-1 py-0.5">
               <div className="text-[10px] font-bold text-white line-clamp-1 drop-shadow">
-                {player.name.toUpperCase()}
+                {player.common_name.toUpperCase()}
               </div>
               {/* Nation and Club */}
               <div className="flex items-center justify-center gap-1 mt-0.5">
-                {player.nation && (
-                  <span className="text-[8px] text-white/90">{player.nation}</span>
+                {player.nation?.name && (
+                  <span className="text-[8px] text-white/90">{player.nation.name}</span>
                 )}
-                {player.club && player.nation && (
+                {player.club?.name && player.nation?.name && (
                   <span className="text-white/60">•</span>
                 )}
-                {player.club && (
-                  <span className="text-[8px] text-white/90 line-clamp-1">{player.club}</span>
+                {player.club?.name && (
+                  <span className="text-[8px] text-white/90 line-clamp-1">{player.club.name}</span>
                 )}
               </div>
             </div>

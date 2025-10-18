@@ -21,12 +21,12 @@ import { Save, Sparkles, Trash2, Calculator } from "lucide-react";
 
 interface Player {
   id: number;
-  name: string;
-  ovr: number;
+  common_name: string;
+  rating: number;
   position: string;
-  nation?: string;
-  club?: string;
-  image_url?: string;
+  nation?: any;
+  club?: any;
+  images?: any;
   stats: any;
   traits?: any;
   rank?: number;
@@ -176,7 +176,7 @@ export default function Builder() {
       const newLineup = [...lineup];
       newLineup[selectedSlotIndex] = { ...player, rank, training };
       setLineup(newLineup);
-      toast.success(`Đã thêm ${player.name} (Rank ${rank}, Training ${training}) vào đội hình`);
+      toast.success(`Đã thêm ${player.common_name} (Rank ${rank}, Training ${training}) vào đội hình`);
     }
   };
 
@@ -226,8 +226,8 @@ export default function Builder() {
         players: lineup.map((player, index) => ({
           position: index,
           player_id: player?.id,
-          player_name: player?.name,
-          player_ovr: player?.ovr,
+          player_name: player?.common_name,
+          player_ovr: player?.rating,
         })),
       };
 
@@ -252,7 +252,7 @@ export default function Builder() {
 
   const filledCount = lineup.filter((p) => p !== null).length;
   const totalOVR = Math.round(
-    lineup.reduce((sum, player) => sum + (player?.ovr || 0), 0) / 11
+    lineup.reduce((sum, player) => sum + (player?.rating || 0), 0) / 11
   );
 
   const formationLayout = selectedFormation 

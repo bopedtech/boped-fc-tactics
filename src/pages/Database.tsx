@@ -19,16 +19,16 @@ import { Card } from "@/components/ui/card";
 
 interface Player {
   id: number;
-  name: string;
-  ovr: number;
+  common_name: string;
+  rating: number;
   position: string;
-  nation?: string;
-  club?: string;
-  image_url?: string;
+  nation?: any;
+  club?: any;
+  images?: any;
   stats: any;
   traits?: any;
-  work_rate_att?: string;
-  work_rate_def?: string;
+  work_rate_att?: number;
+  work_rate_def?: number;
   created_at?: string;
 }
 
@@ -54,7 +54,7 @@ export default function Database() {
       const { data, error } = await supabase
         .from("players")
         .select("*")
-        .order("ovr", { ascending: false });
+        .order("rating", { ascending: false });
 
       if (error) throw error;
       setPlayers(data || []);
@@ -72,16 +72,16 @@ export default function Database() {
       let query = supabase.from("players").select("*");
 
       if (searchName) {
-        query = query.ilike("name", `%${searchName}%`);
+        query = query.ilike("common_name", `%${searchName}%`);
       }
 
       if (selectedPosition !== "all") {
         query = query.eq("position", selectedPosition);
       }
 
-      query = query.gte("ovr", ovrRange[0]).lte("ovr", ovrRange[1]);
+      query = query.gte("rating", ovrRange[0]).lte("rating", ovrRange[1]);
 
-      const { data, error } = await query.order("ovr", { ascending: false });
+      const { data, error } = await query.order("rating", { ascending: false });
 
       if (error) throw error;
       setPlayers(data || []);

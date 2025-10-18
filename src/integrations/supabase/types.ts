@@ -43,49 +43,139 @@ export type Database = {
       }
       players: {
         Row: {
-          alternative_positions: Json | null
-          club: string | null
+          added: string | null
+          animation: Json | null
+          asset_id: number
+          auctionable: boolean | null
+          avg_gk_stats: Json | null
+          avg_stats: Json | null
+          binding_xml: string | null
+          bio: string | null
+          birthday: string | null
+          card_name: string | null
+          celebration: Json | null
+          club: Json | null
+          common_name: string | null
           created_at: string | null
+          first_name: string | null
+          foot: number | null
+          height: number | null
           id: number
-          image_url: string | null
-          name: string
-          nation: string | null
-          ovr: number
+          images: Json | null
+          last_name: string | null
+          league: Json | null
+          likes: number | null
+          nation: Json | null
+          player_id: number
           position: string
+          potential_positions: Json | null
+          price_data: Json | null
+          rank: number | null
+          rating: number
+          reveal_on: string | null
+          skill_moves: Json | null
+          skill_moves_level: number | null
+          skill_style_id: number | null
+          skill_style_skills: Json | null
+          source: string | null
           stats: Json | null
+          tags: string | null
           traits: Json | null
-          work_rate_att: string | null
-          work_rate_def: string | null
+          updated_at: string | null
+          weak_foot: number | null
+          weight: number | null
+          work_rate_att: number | null
+          work_rate_def: number | null
         }
         Insert: {
-          alternative_positions?: Json | null
-          club?: string | null
+          added?: string | null
+          animation?: Json | null
+          asset_id: number
+          auctionable?: boolean | null
+          avg_gk_stats?: Json | null
+          avg_stats?: Json | null
+          binding_xml?: string | null
+          bio?: string | null
+          birthday?: string | null
+          card_name?: string | null
+          celebration?: Json | null
+          club?: Json | null
+          common_name?: string | null
           created_at?: string | null
+          first_name?: string | null
+          foot?: number | null
+          height?: number | null
           id?: number
-          image_url?: string | null
-          name: string
-          nation?: string | null
-          ovr: number
+          images?: Json | null
+          last_name?: string | null
+          league?: Json | null
+          likes?: number | null
+          nation?: Json | null
+          player_id: number
           position: string
+          potential_positions?: Json | null
+          price_data?: Json | null
+          rank?: number | null
+          rating: number
+          reveal_on?: string | null
+          skill_moves?: Json | null
+          skill_moves_level?: number | null
+          skill_style_id?: number | null
+          skill_style_skills?: Json | null
+          source?: string | null
           stats?: Json | null
+          tags?: string | null
           traits?: Json | null
-          work_rate_att?: string | null
-          work_rate_def?: string | null
+          updated_at?: string | null
+          weak_foot?: number | null
+          weight?: number | null
+          work_rate_att?: number | null
+          work_rate_def?: number | null
         }
         Update: {
-          alternative_positions?: Json | null
-          club?: string | null
+          added?: string | null
+          animation?: Json | null
+          asset_id?: number
+          auctionable?: boolean | null
+          avg_gk_stats?: Json | null
+          avg_stats?: Json | null
+          binding_xml?: string | null
+          bio?: string | null
+          birthday?: string | null
+          card_name?: string | null
+          celebration?: Json | null
+          club?: Json | null
+          common_name?: string | null
           created_at?: string | null
+          first_name?: string | null
+          foot?: number | null
+          height?: number | null
           id?: number
-          image_url?: string | null
-          name?: string
-          nation?: string | null
-          ovr?: number
+          images?: Json | null
+          last_name?: string | null
+          league?: Json | null
+          likes?: number | null
+          nation?: Json | null
+          player_id?: number
           position?: string
+          potential_positions?: Json | null
+          price_data?: Json | null
+          rank?: number | null
+          rating?: number
+          reveal_on?: string | null
+          skill_moves?: Json | null
+          skill_moves_level?: number | null
+          skill_style_id?: number | null
+          skill_style_skills?: Json | null
+          source?: string | null
           stats?: Json | null
+          tags?: string | null
           traits?: Json | null
-          work_rate_att?: string | null
-          work_rate_def?: string | null
+          updated_at?: string | null
+          weak_foot?: number | null
+          weight?: number | null
+          work_rate_att?: number | null
+          work_rate_def?: number | null
         }
         Relationships: []
       }
