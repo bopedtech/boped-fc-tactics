@@ -55,29 +55,29 @@ const calculateFormationLayout = (positions: string[]): Array<{ top: string; lef
     'LF': 12,
     'RF': 12,
     
-    // Wing attackers/midfielders
-    'LM': 30,
-    'RM': 30,
+    // Attacking midfielders (CAM cao hơn LM/RM)
+    'CAM': 25,
     
-    // Attacking midfielders
-    'CAM': 35,
+    // Wing attackers/midfielders
+    'LM': 35,
+    'RM': 35,
     
     // Central midfielders
-    'CM': 45,
+    'CM': 48,
     
     // Defensive midfielders
-    'CDM': 55,
+    'CDM': 58,
     
     // Wing backs
-    'LWB': 62,
-    'RWB': 62,
+    'LWB': 65,
+    'RWB': 65,
     
     // Full backs
-    'LB': 70,
-    'RB': 70,
+    'LB': 73,
+    'RB': 73,
     
     // Center backs
-    'CB': 75,
+    'CB': 78,
     
     // Goalkeeper
     'GK': 90
@@ -130,43 +130,43 @@ const calculateFormationLayout = (positions: string[]): Array<{ top: string; lef
     
     // Xử lý vị trí bên trái
     if (leftPositions.length === 1) {
-      layout.push({ top: y, left: '15%', position: leftPositions[0].pos });
+      layout.push({ top: y, left: '12%', position: leftPositions[0].pos });
     } else if (leftPositions.length > 1) {
       leftPositions.forEach((p, idx) => {
-        const leftX = 10 + (idx * 8);
+        const leftX = 8 + (idx * 8);
         layout.push({ top: y, left: `${leftX}%`, position: p.pos });
       });
     }
     
-    // Xử lý vị trí trung tâm
+    // Xử lý vị trí trung tâm (giãn khoảng cách hơn)
     if (centerPositions.length === 1) {
       layout.push({ top: y, left: '50%', position: centerPositions[0].pos });
     } else if (centerPositions.length === 2) {
-      layout.push({ top: y, left: '40%', position: centerPositions[0].pos });
-      layout.push({ top: y, left: '60%', position: centerPositions[1].pos });
+      layout.push({ top: y, left: '35%', position: centerPositions[0].pos });
+      layout.push({ top: y, left: '65%', position: centerPositions[1].pos });
     } else if (centerPositions.length === 3) {
-      layout.push({ top: y, left: '30%', position: centerPositions[0].pos });
-      layout.push({ top: y, left: '50%', position: centerPositions[1].pos });
-      layout.push({ top: y, left: '70%', position: centerPositions[2].pos });
-    } else if (centerPositions.length === 4) {
       layout.push({ top: y, left: '25%', position: centerPositions[0].pos });
-      layout.push({ top: y, left: '42%', position: centerPositions[1].pos });
-      layout.push({ top: y, left: '58%', position: centerPositions[2].pos });
-      layout.push({ top: y, left: '75%', position: centerPositions[3].pos });
-    } else if (centerPositions.length === 5) {
+      layout.push({ top: y, left: '50%', position: centerPositions[1].pos });
+      layout.push({ top: y, left: '75%', position: centerPositions[2].pos });
+    } else if (centerPositions.length === 4) {
       layout.push({ top: y, left: '20%', position: centerPositions[0].pos });
-      layout.push({ top: y, left: '35%', position: centerPositions[1].pos });
+      layout.push({ top: y, left: '40%', position: centerPositions[1].pos });
+      layout.push({ top: y, left: '60%', position: centerPositions[2].pos });
+      layout.push({ top: y, left: '80%', position: centerPositions[3].pos });
+    } else if (centerPositions.length === 5) {
+      layout.push({ top: y, left: '15%', position: centerPositions[0].pos });
+      layout.push({ top: y, left: '32%', position: centerPositions[1].pos });
       layout.push({ top: y, left: '50%', position: centerPositions[2].pos });
-      layout.push({ top: y, left: '65%', position: centerPositions[3].pos });
-      layout.push({ top: y, left: '80%', position: centerPositions[4].pos });
+      layout.push({ top: y, left: '68%', position: centerPositions[3].pos });
+      layout.push({ top: y, left: '85%', position: centerPositions[4].pos });
     }
     
     // Xử lý vị trí bên phải
     if (rightPositions.length === 1) {
-      layout.push({ top: y, left: '85%', position: rightPositions[0].pos });
+      layout.push({ top: y, left: '88%', position: rightPositions[0].pos });
     } else if (rightPositions.length > 1) {
       rightPositions.forEach((p, idx) => {
-        const rightX = 82 + (idx * 8);
+        const rightX = 84 + (idx * 8);
         layout.push({ top: y, left: `${rightX}%`, position: p.pos });
       });
     }
