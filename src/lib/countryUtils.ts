@@ -1,3 +1,5 @@
+import flag from 'country-code-emoji';
+
 // Mapping tên quốc gia (tiếng Anh) sang mã quốc gia
 const NATION_NAME_TO_CODE: Record<string, string> = {
   'England': 'ENG',
@@ -25,19 +27,6 @@ const NATION_NAME_TO_CODE: Record<string, string> = {
   'Norway': 'NOR',
   'Egypt': 'EGY',
 };
-
-/**
- * Chuyển mã quốc gia ISO 3166-1 alpha-2 sang emoji cờ
- */
-function codeToFlag(code: string): string {
-  if (!code || code.length !== 2) return '🏴';
-  
-  return code
-    .toUpperCase()
-    .split('')
-    .map(char => String.fromCodePoint(127397 + char.charCodeAt(0)))
-    .join('');
-}
 
 /**
  * Lấy emoji cờ từ mã quốc gia
@@ -76,7 +65,7 @@ export function getCountryFlag(countryCode: string): string {
   };
   
   const code = codeMap[countryCode.toUpperCase()] || countryCode;
-  return codeToFlag(code);
+  return flag(code) || '';
 }
 
 /**
