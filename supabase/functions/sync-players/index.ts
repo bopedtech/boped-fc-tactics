@@ -59,14 +59,20 @@ const MIN_OVR = 40;
 const MAX_OVR = 130;
 
 // Extract players from Object response (not standard Elasticsearch format)
-function extractPlayersFromObject(responseData: any): RawPlayerData[] {
-  const players: RawPlayerData[] = [];
-  
-  // Check for error or invalid format
-  if (typeof responseData !== 'object' || responseData === null || responseData === 'error') {
-    console.log('Invalid response format or error received');
-    return players;
+function extractPlayersFromObject(responseData: any): RawPlayerData[] | null {
+  // Check if response is a valid object (not string, null, array, etc.)
+  if (typeof responseData !== 'object' || responseData === null || Array.isArray(responseData)) {
+    console.error('Invalid response format: not an object');
+    return null;
   }
+  
+  // Check for explicit error response
+  if (responseData === 'error' || (typeof responseData === 'string')) {
+    console.error('Error response received from API');
+    return null;
+  }
+  
+  const players: RawPlayerData[] = [];
   
   // Loop through all keys in the object
   for (const [key, value] of Object.entries(responseData)) {
@@ -164,17 +170,24 @@ Deno.serve(async (req) => {
       while (offset <= MAX_OFFSET) {
         console.log(`Fetching OVR ${currentOvr}, offset ${offset}...`);
         
-        // Build the payload with OVR filter
+        // Build the payload with OVR filter using Nested Bool Query structure
         const payload = {
           size: BATCH_SIZE,
           from: offset,
           query: {
             bool: {
               filter: [
-                { term: { platform: "mobile" } },
-                { term: { is_card: true } },
-                { term: { is_sold: false } },
-                { term: { "stats.rating": currentOvr } } // OVR filter
+                {
+                  // NESTED BOOL QUERY: Wrap all conditions in bool -> must
+                  bool: {
+                    must: [
+                      { term: { platform: "mobile" } },
+                      { term: { is_card: true } },
+                      { term: { is_sold: false } },
+                      { term: { "stats.rating": currentOvr } } // OVR filter
+                    ]
+                  }
+                }
               ]
             }
           },
@@ -202,13 +215,33 @@ Deno.serve(async (req) => {
             await delay(60000);
             continue; // Retry the same request
           }
+          const errorText = await response.text();
+          console.error(`HTTP error! status: ${response.status}`);
+          console.error(`RAW ERROR RESPONSE (first 1000 chars): ${errorText.substring(0, 1000)}`);
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data = await response.json();
+        // Get raw response text first for error logging
+        const rawResponseText = await response.text();
+        
+        let data;
+        try {
+          data = JSON.parse(rawResponseText);
+        } catch (parseError) {
+          console.error('JSON PARSE ERROR: Unable to parse response (might be HTML)');
+          console.error(`RAW RESPONSE BODY (first 1000 chars): ${rawResponseText.substring(0, 1000)}`);
+          throw new Error('Invalid JSON response from API');
+        }
         
         // Extract players using the new Object-based logic
         const rawPlayers = extractPlayersFromObject(data);
+
+        // Check if extraction failed (null return)
+        if (rawPlayers === null) {
+          console.error('FORMAT ERROR: Invalid response format or error received');
+          console.error(`RAW RESPONSE BODY (first 1000 chars): ${rawResponseText.substring(0, 1000)}`);
+          throw new Error('Invalid response format from API');
+        }
 
         console.log(`Received ${rawPlayers.length} players for OVR ${currentOvr}`);
 
