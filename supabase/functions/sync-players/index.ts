@@ -170,7 +170,7 @@ Deno.serve(async (req) => {
       while (offset <= MAX_OFFSET) {
         console.log(`Fetching OVR ${currentOvr}, offset ${offset}...`);
         
-        // Build the payload with OVR filter using Nested Bool Query structure
+        // Build the payload with OVR filter using "Kitchen Sink" structure
         const payload = {
           size: BATCH_SIZE,
           from: offset,
@@ -181,11 +181,33 @@ Deno.serve(async (req) => {
                   // NESTED BOOL QUERY: Wrap all conditions in bool -> must
                   bool: {
                     must: [
+                      // Basic filters (required)
                       { term: { platform: "mobile" } },
                       { term: { is_card: true } },
                       { term: { is_sold: false } },
-                      { term: { "stats.rating": currentOvr } } // OVR filter
+                      
+                      // OVR filter (changes per outer loop)
+                      { term: { "stats.rating": currentOvr } },
+                      
+                      // Additional "Kitchen Sink" filters (must be present, even if empty)
+                      { terms: { program: [] } },
+                      { terms: { league: [] } },
+                      { terms: { nation: [] } },
+                      { terms: { club: [] } },
+                      { terms: { "skills.id": [] } },
+                      { terms: { "traits.id": [] } },
+                      { terms: { foot: [] } },
+                      { terms: { "workRates.attack": [] } },
+                      { terms: { "workRates.defense": [] } }
                     ]
+                  }
+                },
+                // Search filter (must be present, even if empty)
+                {
+                  query_string: {
+                    query: "",
+                    fields: ["firstName", "lastName", "commonName"],
+                    default_operator: "AND"
                   }
                 }
               ]
@@ -194,15 +216,32 @@ Deno.serve(async (req) => {
           sort: [{ "id": "asc" }] // Consistent sorting within OVR
         };
 
-        // Make request to Renderz API
+        // Make request to Renderz API with full browser simulation headers
         const response = await fetch(RENDERZ_API_URL, {
           method: 'POST',
           headers: {
+            // Content type and accept
+            'Accept': 'application/json, text/plain, */*',
             'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
+            
+            // Origin information
             'Origin': 'https://renderz.app',
             'Referer': 'https://renderz.app/',
+            
+            // Modern Chrome browser simulation
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+            'Sec-Ch-Ua': '"Chromium";v="125", "Google Chrome";v="125", "Not-A-Brand";v="99"',
+            'Sec-Ch-Ua-Mobile': '?0',
+            'Sec-Ch-Ua-Platform': '"Windows"',
+            
+            // Encoding and language
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Accept-Language': 'en-US,en;q=0.9,vi;q=0.8',
+            
+            // Security headers (CORS/Fetch Metadata)
+            'Sec-Fetch-Dest': 'empty',
+            'Sec-Fetch-Mode': 'cors',
+            'Sec-Fetch-Site': 'same-origin',
           },
           body: JSON.stringify(payload),
         });
