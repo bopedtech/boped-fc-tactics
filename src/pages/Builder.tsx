@@ -260,7 +260,7 @@ export default function Builder() {
     : [];
 
   const getRequiredPosition = (index: number) => {
-    return selectedFormation?.positions[index] || "";
+    return formationLayout[index]?.position || "";
   };
 
   return (
