@@ -137,15 +137,25 @@ Deno.serve(async (req) => {
       const payload: any = {
         size: BATCH_SIZE,
         query: {
-          match_all: {} // Get all players
+          bool: {
+            filter: [
+              {
+                bool: {
+                  must: [
+                    { term: { platform: "mobile" } },
+                    { term: { is_card: true } },
+                    { term: { is_sold: false } }
+                  ]
+                }
+              }
+            ]
+          }
         },
-        sort: [{ "_id": "asc" }], // Sort by internal _id for consistency
+        sort: [
+          { "stats.rating": "desc" },
+          { "id": "asc" }
+        ]
       };
-
-      // Track total hits on first request
-      if (pageCount === 0) {
-        payload.track_total_hits = true;
-      }
 
       // Add search_after cursor if not first request
       if (cursor) {
@@ -159,8 +169,10 @@ Deno.serve(async (req) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
           'Accept': 'application/json',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
+          'Origin': 'https://renderz.app',
+          'Referer': 'https://renderz.app/',
         },
         body: JSON.stringify(payload),
       });
