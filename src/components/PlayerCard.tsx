@@ -45,14 +45,9 @@ export default function PlayerCard({ player, onClick, clubsData, countriesData }
   const clubLogoUrl = clubInfo?.logoUrl;
   const clubName = clubInfo?.nameVi || player.club?.name;
   
-  // Lấy mã quốc gia từ database và tên tiếng Việt
-  const nationCode = player.nation?.name ? getNationCode(player.nation.name, countriesData) : '';
-  
-  const countryNameVi = nationCode 
-    ? getCountryNameVi(nationCode, countriesData) || player.nation?.name
-    : player.nation?.name;
-  
-  const flagEmoji = nationCode ? getCountryFlag(nationCode) : '';
+  // Lấy flag và tên từ player data
+  const flagImage = player.images?.flagImage;
+  const countryNameVi = player.nation?.name;
 
   const statColors: Record<string, string> = {
     pace: "text-stat-pace",
@@ -148,7 +143,13 @@ export default function PlayerCard({ player, onClick, clubsData, countriesData }
           {/* Nation */}
           {countryNameVi && (
             <div className="flex items-center gap-1.5">
-              {flagEmoji && <span className="text-base leading-none">{flagEmoji}</span>}
+              {flagImage && (
+                <img 
+                  src={flagImage} 
+                  alt={countryNameVi}
+                  className="w-5 h-4 object-cover rounded-sm"
+                />
+              )}
               <span className="text-muted-foreground">{countryNameVi}</span>
             </div>
           )}
