@@ -40,12 +40,29 @@ export default function Database() {
   const [showFilters, setShowFilters] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [syncStatus, setSyncStatus] = useState<string>("");
+  const [clubsData, setClubsData] = useState<any[]>([]);
+  const [countriesData, setCountriesData] = useState<any[]>([]);
   
   const { filters, setFilters, resetFilters: resetFilterState, applyFiltersToQuery } = usePlayerFilters();
 
   useEffect(() => {
     fetchPlayers();
+    fetchClubsAndCountries();
   }, []);
+
+  const fetchClubsAndCountries = async () => {
+    try {
+      const [clubsResponse, countriesResponse] = await Promise.all([
+        supabase.from("clubs").select("*"),
+        supabase.from("countries_vi").select("*")
+      ]);
+
+      if (clubsResponse.data) setClubsData(clubsResponse.data);
+      if (countriesResponse.data) setCountriesData(countriesResponse.data);
+    } catch (error) {
+      console.error("Error fetching clubs/countries:", error);
+    }
+  };
 
   const fetchPlayers = async () => {
     try {
@@ -248,7 +265,12 @@ export default function Database() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {displayedPlayers.map((player) => (
-                  <PlayerCard key={player.id} player={player} />
+                  <PlayerCard 
+                    key={player.id} 
+                    player={player} 
+                    clubsData={clubsData}
+                    countriesData={countriesData}
+                  />
                 ))}
               </div>
             )}

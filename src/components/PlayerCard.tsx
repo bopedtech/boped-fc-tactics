@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { getCountryFlag } from "@/lib/countryUtils";
+import { getCountryFlag, getCountryNameVi, getClubInfo } from "@/lib/countryUtils";
 
 interface PlayerStats {
   pace?: number;
@@ -33,10 +33,22 @@ interface Player {
 interface PlayerCardProps {
   player: Player;
   onClick?: () => void;
+  clubsData?: Array<{ club_id: number; name_vi: string; logo_url: string }>;
+  countriesData?: Array<{ country_code: string; name_vi: string }>;
 }
 
-export default function PlayerCard({ player, onClick }: PlayerCardProps) {
+export default function PlayerCard({ player, onClick, clubsData, countriesData }: PlayerCardProps) {
   const isGK = player.position === "GK";
+  
+  // Lấy thông tin club
+  const clubInfo = player.club?.id ? getClubInfo(player.club.id, clubsData) : null;
+  const clubLogoUrl = clubInfo?.logoUrl || player.club?.image;
+  const clubName = clubInfo?.nameVi || player.club?.name;
+  
+  // Lấy tên quốc gia tiếng Việt
+  const countryNameVi = player.nation?.abbreviation 
+    ? getCountryNameVi(player.nation.abbreviation, countriesData) || player.nation.name
+    : player.nation?.name;
 
   const statColors: Record<string, string> = {
     pace: "text-stat-pace",
@@ -111,12 +123,30 @@ export default function PlayerCard({ player, onClick }: PlayerCardProps) {
         </h3>
 
         {/* Club and Nation */}
-        <div className="flex justify-center gap-2 mt-1 text-xs text-muted-foreground items-center">
-          {player.club?.name && <span>{player.club.name}</span>}
-          {player.nation?.name && (
-            <span className="flex items-center gap-1">
-              • <span className="text-base">{getCountryFlag(player.nation.abbreviation)}</span> {player.nation.name}
-            </span>
+        <div className="flex justify-center gap-3 mt-2 text-xs items-center">
+          {/* Club */}
+          {clubName && (
+            <div className="flex items-center gap-1.5">
+              {clubLogoUrl && (
+                <img 
+                  src={clubLogoUrl} 
+                  alt={clubName}
+                  className="w-4 h-4 object-contain"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              )}
+              <span className="text-muted-foreground">{clubName}</span>
+            </div>
+          )}
+          
+          {/* Nation */}
+          {countryNameVi && (
+            <div className="flex items-center gap-1.5">
+              <span className="text-base leading-none">{getCountryFlag(player.nation?.abbreviation || '')}</span>
+              <span className="text-muted-foreground">{countryNameVi}</span>
+            </div>
           )}
         </div>
 
