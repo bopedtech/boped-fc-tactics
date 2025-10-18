@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      formations: {
+        Row: {
+          category: string
+          created_at: string | null
+          id: number
+          name: string
+          name_en: string
+          positions: Json
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          id?: number
+          name: string
+          name_en: string
+          positions: Json
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          id?: number
+          name?: string
+          name_en?: string
+          positions?: Json
+        }
+        Relationships: []
+      }
       players: {
         Row: {
           club: string | null
