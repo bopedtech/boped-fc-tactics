@@ -88,6 +88,7 @@ export default function PlayerSelectionDialog({
       const { data, error } = await supabase
         .from("players")
         .select("*")
+        .like("tags", "%2526BASE%") // Chỉ lấy cầu thủ có tag 2526BASE
         .order("rating", { ascending: false })
         .limit(500);
 
