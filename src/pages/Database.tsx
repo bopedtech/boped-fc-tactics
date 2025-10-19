@@ -26,7 +26,7 @@ interface Player {
   height?: number;
   weight?: number;
   weakFoot?: number;
-  skillMoves?: number;
+  skillMovesLevel?: number;
   foot?: number;
   createdAt?: string;
 }

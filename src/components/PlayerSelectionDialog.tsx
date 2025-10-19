@@ -23,7 +23,7 @@ interface Player {
   stats: any;
   potentialPositions?: any;
   weakFoot?: number;
-  skillMoves?: number;
+  skillMovesLevel?: number;
   height?: number;
   weight?: number;
   workRates?: any;
@@ -312,9 +312,9 @@ export default function PlayerSelectionDialog({
                                   Chân thuận: {player.weakFoot}⭐
                                 </Badge>
                               )}
-                              {player.skillMoves && (
+                              {player.skillMovesLevel && (
                                 <Badge variant="outline" className="text-xs">
-                                  Kỹ năng: {player.skillMoves}⭐
+                                  Kỹ năng: {player.skillMovesLevel}⭐
                                 </Badge>
                               )}
                               {player.height && (

@@ -86,7 +86,7 @@ export const usePlayerFilters = (initialPosition?: string) => {
     // Skill moves filter
     if (filters.skillMovesLevel > 0) {
       filtered = filtered.filter(p =>
-        (p.skillMoves || 0) >= filters.skillMovesLevel
+        (p.skillMovesLevel || 0) >= filters.skillMovesLevel
       );
     }
 
