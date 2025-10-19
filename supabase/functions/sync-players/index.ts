@@ -51,7 +51,7 @@ interface RawPlayerData {
 }
 
 const RENDERZ_API_URL = 'https://renderz.app/api/search/elasticsearch';
-const BATCH_SIZE = 500; // Increased batch size for better performance
+const BATCH_SIZE = 10; // Test mode: Only 10 players
 const DELAY_MS = 1500; // 1.5 second delay between requests
 
 // Xử lý phản hồi API và trích xuất cầu thủ + cursor
