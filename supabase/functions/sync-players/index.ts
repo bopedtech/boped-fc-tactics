@@ -125,22 +125,36 @@ function extractPlayersFromObject(responseData: any): RawPlayerData[] | null {
 
 function processPlayerData(rawPlayers: RawPlayerData[]): ProcessedPlayer[] {
   return rawPlayers.map((player) => {
+    // Validate and provide defaults for required NOT NULL fields
+    const asset_id = player.assetId ?? 0;
+    const player_id = player.playerId ?? 0;
+    const rating = player.rating ?? 0;
+    const position = player.position || 'Unknown';
+    
+    // Log warning if critical fields are missing
+    if (!player.assetId) {
+      console.warn(`⚠️ Missing assetId for player:`, JSON.stringify(player).substring(0, 200));
+    }
+    if (!player.playerId) {
+      console.warn(`⚠️ Missing playerId for player:`, JSON.stringify(player).substring(0, 200));
+    }
+    
     return {
-      asset_id: player.assetId,
-      player_id: player.playerId,
-      first_name: player.firstName,
-      last_name: player.lastName,
-      common_name: player.commonName,
-      card_name: player.cardName,
-      position: player.position,
-      rating: player.rating,
-      weak_foot: player.weakFoot,
-      foot: player.foot,
-      work_rate_att: player.workRateAtt,
-      work_rate_def: player.workRateDef,
-      weight: player.weight,
-      height: player.height,
-      birthday: player.birthday,
+      asset_id,
+      player_id,
+      first_name: player.firstName || '',
+      last_name: player.lastName || '',
+      common_name: player.commonName || '',
+      card_name: player.cardName || '',
+      position,
+      rating,
+      weak_foot: player.weakFoot ?? 0,
+      foot: player.foot ?? 0,
+      work_rate_att: player.workRateAtt ?? 0,
+      work_rate_def: player.workRateDef ?? 0,
+      weight: player.weight ?? 0,
+      height: player.height ?? 0,
+      birthday: player.birthday || '1990-01-01',
       bio: player.bio,
       binding_xml: player.bindingXml,
       animation: player.animation,
@@ -160,9 +174,9 @@ function processPlayerData(rawPlayers: RawPlayerData[]): ProcessedPlayer[] {
       avg_gk_stats: player.avgGkStats,
       stats: player.stats,
       price_data: player.priceData,
-      auctionable: player.auctionable,
-      rank: player.rank,
-      likes: player.likes,
+      auctionable: player.auctionable ?? false,
+      rank: player.rank ?? 0,
+      likes: player.likes ?? 0,
       added: player.added,
       reveal_on: player.revealOn,
       source: player.source,
@@ -293,6 +307,9 @@ Deno.serve(async (req) => {
 
       // Process and save players
       const processedPlayers = processPlayerData(rawPlayers);
+      
+      // Log first record before upsert for debugging
+      console.log('📝 Sample record to upsert:', JSON.stringify(processedPlayers[0], null, 2));
       
       // Upsert to Supabase
       const { error } = await supabase
