@@ -54,69 +54,48 @@ const RENDERZ_API_URL = 'https://renderz.app/api/search/elasticsearch';
 const BATCH_SIZE = 500; // Increased batch size for better performance
 const DELAY_MS = 1500; // 1.5 second delay between requests
 
-// Extract và validate players từ Object response
-function extractPlayersFromObject(responseData: any): RawPlayerData[] {
-  // Kiểm tra đầu vào cơ bản
-  if (typeof responseData !== 'object' || responseData === null || Array.isArray(responseData)) {
-    console.error('Invalid response format: not an object');
-    return [];
+// Xử lý phản hồi API và trích xuất cầu thủ + cursor
+function processApiResponse(responseData: any): { extractedPlayers: RawPlayerData[], nextCursor: any[] | null } {
+  // 1. Xác thực phản hồi cơ bản
+  if (typeof responseData !== 'object' || responseData === null) {
+    console.error('Định dạng phản hồi API không hợp lệ.');
+    return { extractedPlayers: [], nextCursor: null };
   }
-  
-  // Check for explicit error response
-  if (responseData === 'error' || (typeof responseData === 'string')) {
-    console.error('Error response received from API');
-    return [];
+
+  // 2. Trích xuất Cầu thủ (Trực tiếp từ khóa 'players')
+  const players = responseData.players;
+
+  // Kiểm tra nếu khóa 'players' không tồn tại hoặc không phải là mảng
+  if (!Array.isArray(players)) {
+    console.warn("Khóa 'players' không tìm thấy hoặc không phải mảng. Dừng xử lý.");
+    return { extractedPlayers: [], nextCursor: null };
   }
-  
-  const validPlayers: RawPlayerData[] = [];
-  
-  // Loop through all keys in the object
-  for (const [key, value] of Object.entries(responseData)) {
-    // Bỏ qua _pagination
-    if (key === '_pagination') continue;
-    
-    let item = value; // Sử dụng 'let' vì sẽ gán lại giá trị sau khi unwrap
-    
-    // --- LOGIC MỚI: Xử lý thông minh định dạng Mảng (Unwrapping) ---
-    
-    // Kiểm tra nếu item là một Mảng (Array)
-    if (Array.isArray(item)) {
-      
-      // Trường hợp A: "Mảng Cầu thủ" hợp lệ (Ví dụ: [{"assetId": ...}])
-      // Điều kiện: Độ dài là 1, phần tử đầu tiên là Object, và không phải null/array
-      if (item.length === 1 && typeof item[0] === 'object' && item[0] !== null && !Array.isArray(item[0])) {
-        item = item[0]; // Trích xuất (Unwrap) đối tượng cầu thủ từ mảng
-        console.log(`✅ Unwrapped player array for key ${key}`);
-      } 
-      
-      // Trường hợp B: "Mảng Sort" hoặc mảng không hợp lệ (Ví dụ: [110, 24021501])
-      else {
-        console.warn(`⚠️ Bỏ qua item: Định dạng Mảng không hợp lệ (có thể là mảng sort)`, JSON.stringify(item));
-        continue; // Bỏ qua và chuyển sang item tiếp theo
-      }
-    }
-    
-    // Kiểm tra lại sau khi trích xuất: Đảm bảo item bây giờ là một Object hợp lệ
-    if (typeof item !== 'object' || item === null) {
-      console.warn(`⚠️ Bỏ qua item: Không phải là Object hợp lệ`, JSON.stringify(item));
-      continue;
-    }
-    
-    // --- KẾT THÚC LOGIC MỚI ---
-    
-    const playerData = item as any;
-    
-    // Đảm bảo các trường cơ bản tồn tại
-    if (!playerData.assetId || !playerData.playerId) {
-      console.warn(`⚠️ Bỏ qua item: Thiếu assetId/playerId`, JSON.stringify(playerData).substring(0, 200));
-      continue;
-    }
-    
-    // Nếu vượt qua tất cả kiểm tra, đây là cầu thủ hợp lệ
-    validPlayers.push(playerData as RawPlayerData);
+
+  // 3. Xác thực từng cầu thủ trong danh sách
+  const validPlayers = players.filter((player: any) =>
+    player && 
+    typeof player === 'object' && 
+    !Array.isArray(player) &&
+    player.assetId && 
+    player.playerId
+  );
+
+  console.log(`✅ Đã lọc ${validPlayers.length}/${players.length} cầu thủ hợp lệ`);
+
+  // 4. Trích xuất Cursor 
+  let nextCursor = responseData.pagination || responseData._pagination;
+
+  // 5. Xác thực định dạng Cursor
+  if (!Array.isArray(nextCursor) || nextCursor.length === 0) {
+    console.warn('Định dạng cursor không hợp lệ hoặc không tìm thấy. Sẽ dừng sau trang này.');
+    nextCursor = null;
   }
-  
-  return validPlayers;
+
+  // 6. Trả về kết quả
+  return {
+    extractedPlayers: validPlayers,
+    nextCursor: nextCursor
+  };
 }
 
 // Đơn giản hóa: Chuyển đổi trực tiếp sang camelCase schema
@@ -246,22 +225,24 @@ Deno.serve(async (req) => {
         throw new Error('Invalid JSON response from API');
       }
       
-      // Extract và validate players
-      const rawPlayers = extractPlayersFromObject(data);
+      // Xử lý phản hồi API bằng hàm mới
+      const { extractedPlayers, nextCursor } = processApiResponse(data);
 
-      console.log(`✅ Received ${rawPlayers.length} valid players on page ${pageCount}`);
+      console.log(`✅ Nhận được ${extractedPlayers.length} cầu thủ hợp lệ ở trang ${pageCount}`);
 
-      // If no more players, pagination complete
-      if (rawPlayers.length === 0) {
-        console.log('No more players. Pagination complete.');
+      // Nếu không còn cầu thủ, dừng đồng bộ
+      if (extractedPlayers.length === 0) {
+        console.log('Không còn cầu thủ. Hoàn tất đồng bộ.');
         break;
       }
 
       // Process và prepare data
-      const processedPlayers = processPlayerData(rawPlayers);
+      const processedPlayers = processPlayerData(extractedPlayers);
       
       // Log sample record
-      console.log('📝 Sample record to upsert:', JSON.stringify(processedPlayers[0], null, 2));
+      if (processedPlayers.length > 0) {
+        console.log('📝 Sample record to upsert:', JSON.stringify(processedPlayers[0], null, 2));
+      }
       
       // Upsert to Supabase (sử dụng assetId làm khóa chính)
       const { error } = await supabase
@@ -277,15 +258,15 @@ Deno.serve(async (req) => {
       }
 
       totalSynced += processedPlayers.length;
-      console.log(`Synced ${processedPlayers.length} players. Total: ${totalSynced}`);
+      console.log(`Đã đồng bộ ${processedPlayers.length} cầu thủ. Tổng: ${totalSynced}`);
 
-      // Extract cursor from last player's sort field
-      const lastPlayer = rawPlayers[rawPlayers.length - 1];
-      if (lastPlayer && lastPlayer.sort) {
-        cursor = lastPlayer.sort;
-        console.log(`Extracted cursor from last player: ${JSON.stringify(cursor)}`);
+      // Cập nhật cursor từ phản hồi API
+      cursor = nextCursor;
+      
+      if (cursor) {
+        console.log(`Cursor tiếp theo: ${JSON.stringify(cursor)}`);
       } else {
-        console.log('No sort field found on last player. Pagination complete.');
+        console.log('Không có cursor tiếp theo. Hoàn tất đồng bộ.');
         break;
       }
 
