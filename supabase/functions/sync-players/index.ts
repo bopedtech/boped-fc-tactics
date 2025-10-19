@@ -75,23 +75,45 @@ function extractPlayersFromObject(responseData: any): RawPlayerData[] {
     // Bỏ qua _pagination
     if (key === '_pagination') continue;
     
-    // KIỂM TRA QUAN TRỌNG: Đảm bảo value là Object và KHÔNG PHẢI Array
-    // Điều này ngăn chặn việc xử lý mảng sort như [110, 24021501]
-    if (typeof value !== 'object' || value === null || Array.isArray(value)) {
-      console.warn(`⚠️ Bỏ qua item: Định dạng không hợp lệ (có thể là mảng sort)`, JSON.stringify(value));
+    let item = value; // Sử dụng 'let' vì sẽ gán lại giá trị sau khi unwrap
+    
+    // --- LOGIC MỚI: Xử lý thông minh định dạng Mảng (Unwrapping) ---
+    
+    // Kiểm tra nếu item là một Mảng (Array)
+    if (Array.isArray(item)) {
+      
+      // Trường hợp A: "Mảng Cầu thủ" hợp lệ (Ví dụ: [{"assetId": ...}])
+      // Điều kiện: Độ dài là 1, phần tử đầu tiên là Object, và không phải null/array
+      if (item.length === 1 && typeof item[0] === 'object' && item[0] !== null && !Array.isArray(item[0])) {
+        item = item[0]; // Trích xuất (Unwrap) đối tượng cầu thủ từ mảng
+        console.log(`✅ Unwrapped player array for key ${key}`);
+      } 
+      
+      // Trường hợp B: "Mảng Sort" hoặc mảng không hợp lệ (Ví dụ: [110, 24021501])
+      else {
+        console.warn(`⚠️ Bỏ qua item: Định dạng Mảng không hợp lệ (có thể là mảng sort)`, JSON.stringify(item));
+        continue; // Bỏ qua và chuyển sang item tiếp theo
+      }
+    }
+    
+    // Kiểm tra lại sau khi trích xuất: Đảm bảo item bây giờ là một Object hợp lệ
+    if (typeof item !== 'object' || item === null) {
+      console.warn(`⚠️ Bỏ qua item: Không phải là Object hợp lệ`, JSON.stringify(item));
       continue;
     }
     
-    const item = value as any;
+    // --- KẾT THÚC LOGIC MỚI ---
+    
+    const playerData = item as any;
     
     // Đảm bảo các trường cơ bản tồn tại
-    if (!item.assetId || !item.playerId) {
-      console.warn(`⚠️ Bỏ qua item: Thiếu assetId/playerId`, JSON.stringify(item).substring(0, 200));
+    if (!playerData.assetId || !playerData.playerId) {
+      console.warn(`⚠️ Bỏ qua item: Thiếu assetId/playerId`, JSON.stringify(playerData).substring(0, 200));
       continue;
     }
     
     // Nếu vượt qua tất cả kiểm tra, đây là cầu thủ hợp lệ
-    validPlayers.push(item as RawPlayerData);
+    validPlayers.push(playerData as RawPlayerData);
   }
   
   return validPlayers;
