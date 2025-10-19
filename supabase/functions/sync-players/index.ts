@@ -71,15 +71,13 @@ function processApiResponse(responseData: any): { extractedPlayers: RawPlayerDat
     return { extractedPlayers: [], nextCursor: null };
   }
 
-  // 3. Xác thực từng cầu thủ trong danh sách và lọc theo tag "2526BASE"
+  // 3. Xác thực từng cầu thủ trong danh sách
   const validPlayers = players.filter((player: any) =>
     player && 
     typeof player === 'object' && 
     !Array.isArray(player) &&
     player.assetId && 
-    player.playerId &&
-    player.tags && 
-    player.tags.includes('2526BASE') // Chỉ lấy cầu thủ có tag 2526BASE
+    player.playerId
   );
 
   console.log(`✅ Đã lọc ${validPlayers.length}/${players.length} cầu thủ hợp lệ`);
