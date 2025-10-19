@@ -47,15 +47,15 @@ export function getCountryFlag(countryCode: string): string {
  */
 export function getNationCode(
   nationName: string,
-  countriesData?: Array<{ country_code: string; name_en: string }>
+  countriesData?: Array<{ countryCode: string; nameEn: string }>
 ): string {
   if (!nationName || !countriesData) return '';
   
   const country = countriesData.find(
-    c => c.name_en.toLowerCase() === nationName.toLowerCase()
+    c => c.nameEn.toLowerCase() === nationName.toLowerCase()
   );
   
-  return country?.country_code || '';
+  return country?.countryCode || '';
 }
 
 /**
@@ -63,15 +63,15 @@ export function getNationCode(
  */
 export function getCountryNameVi(
   countryCode: string, 
-  countriesData?: Array<{ country_code: string; name_vi: string }>
+  countriesData?: Array<{ countryCode: string; nameVi: string }>
 ): string {
   if (!countryCode || !countriesData) return '';
   
   const country = countriesData.find(
-    c => c.country_code.toUpperCase() === countryCode.toUpperCase()
+    c => c.countryCode.toUpperCase() === countryCode.toUpperCase()
   );
   
-  return country?.name_vi || '';
+  return country?.nameVi || '';
 }
 
 /**
@@ -79,14 +79,14 @@ export function getCountryNameVi(
  */
 export function getClubInfo(
   clubId: number,
-  clubsData?: Array<{ club_id: number; name_vi: string; logo_url: string }>
+  clubsData?: Array<{ clubId: number; nameVi: string; logoUrl: string }>
 ): { nameVi: string; logoUrl: string } | null {
   if (!clubId || !clubsData) return null;
   
-  const club = clubsData.find(c => c.club_id === clubId);
+  const club = clubsData.find(c => c.clubId === clubId);
   
   return club ? {
-    nameVi: club.name_vi || '',
-    logoUrl: club.logo_url || ''
+    nameVi: club.nameVi || '',
+    logoUrl: club.logoUrl || ''
   } : null;
 }

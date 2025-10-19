@@ -11,8 +11,8 @@ import PlayerFilters from "@/components/PlayerFilters";
 import { usePlayerFilters } from "@/hooks/usePlayerFilters";
 
 interface Player {
-  id: number;
-  common_name: string;
+  assetId: number;
+  commonName: string;
   rating: number;
   position: string;
   nation?: any;
@@ -21,15 +21,14 @@ interface Player {
   images?: any;
   stats: any;
   traits?: any;
-  work_rate_att?: number;
-  work_rate_def?: number;
-  potential_positions?: any;
+  workRates?: any;
+  potentialPositions?: any;
   height?: number;
   weight?: number;
-  weak_foot?: number;
-  skill_moves_level?: number;
+  weakFoot?: number;
+  skillMoves?: number;
   foot?: number;
-  created_at?: string;
+  createdAt?: string;
 }
 
 export default function Database() {
@@ -90,7 +89,7 @@ export default function Database() {
     // Apply search filter
     if (searchName) {
       filtered = filtered.filter(p =>
-        p.common_name?.toLowerCase().includes(searchName.toLowerCase())
+        p.commonName?.toLowerCase().includes(searchName.toLowerCase())
       );
     }
 
@@ -266,7 +265,7 @@ export default function Database() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {displayedPlayers.map((player) => (
                   <PlayerCard 
-                    key={player.id} 
+                    key={player.assetId} 
                     player={player} 
                     clubsData={clubsData}
                     countriesData={countriesData}

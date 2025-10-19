@@ -4,8 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 interface Player {
-  id: number;
-  common_name: string;
+  assetId: number;
+  commonName: string;
   rating: number;
   position: string;
   nation?: any;
@@ -77,7 +77,7 @@ export default function PlayerCardSlot({ player, position, onClick, onRemove }: 
           <div className="absolute bottom-1 left-0 right-0 px-1">
             <div className="text-center bg-black/60 rounded px-1 py-0.5">
               <div className="text-[10px] font-bold text-white line-clamp-1 drop-shadow">
-                {player.common_name.toUpperCase()}
+                {player.commonName.toUpperCase()}
               </div>
               {/* Nation and Club */}
               <div className="flex items-center justify-center gap-1 mt-0.5">

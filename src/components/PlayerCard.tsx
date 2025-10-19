@@ -19,8 +19,8 @@ interface PlayerStats {
 }
 
 interface Player {
-  id: number;
-  common_name: string;
+  assetId: number;
+  commonName: string;
   rating: number;
   position: string;
   nation?: any;
@@ -33,8 +33,8 @@ interface Player {
 interface PlayerCardProps {
   player: Player;
   onClick?: () => void;
-  clubsData?: Array<{ club_id: number; name_vi: string; logo_url: string }>;
-  countriesData?: Array<{ country_code: string; name_vi: string; name_en: string }>;
+  clubsData?: Array<{ clubId: number; nameVi: string; logoUrl: string }>;
+  countriesData?: Array<{ countryCode: string; nameVi: string; nameEn: string }>;
 }
 
 export default function PlayerCard({ player, onClick, clubsData, countriesData }: PlayerCardProps) {
@@ -103,22 +103,22 @@ export default function PlayerCard({ player, onClick, clubsData, countriesData }
           {player.images?.playerCardImage ? (
             <img
               src={player.images.playerCardImage}
-              alt={player.common_name}
+              alt={player.commonName}
               className="h-full object-contain"
               onError={(e) => {
-                e.currentTarget.src = `https://ui-avatars.com/api/?name=${player.common_name}&background=38B2AC&color=fff&size=128`;
+                e.currentTarget.src = `https://ui-avatars.com/api/?name=${player.commonName}&background=38B2AC&color=fff&size=128`;
               }}
             />
           ) : (
             <div className="w-24 h-24 rounded-full gradient-primary flex items-center justify-center text-3xl font-bold text-white">
-              {player.common_name[0]}
+              {player.commonName[0]}
             </div>
           )}
         </div>
 
         {/* Player Name */}
         <h3 className="text-center font-bold text-lg mt-2 truncate">
-          {player.common_name}
+          {player.commonName}
         </h3>
 
         {/* Club and Nation */}

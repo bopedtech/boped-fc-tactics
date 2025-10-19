@@ -9,11 +9,11 @@ import { toast } from "sonner";
 
 interface Squad {
   id: string;
-  squad_name: string;
+  squadName: string;
   formation: string;
   lineup: any;
   playstyle?: string;
-  created_at: string;
+  createdAt: string;
 }
 
 export default function MySquads() {
@@ -42,8 +42,8 @@ export default function MySquads() {
       const { data, error } = await supabase
         .from("squads")
         .select("*")
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false });
+        .eq("userId", userId)
+        .order("createdAt", { ascending: false });
 
       if (error) throw error;
       setSquads(data || []);
@@ -118,7 +118,7 @@ export default function MySquads() {
             {squads.map((squad) => (
               <Card key={squad.id} className="p-6 card-hover">
                 <div className="mb-4">
-                  <h3 className="text-xl font-bold mb-1">{squad.squad_name}</h3>
+                  <h3 className="text-xl font-bold mb-1">{squad.squadName}</h3>
                   <p className="text-sm text-muted-foreground">
                     Sơ đồ: {squad.formation}
                   </p>

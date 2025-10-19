@@ -16,81 +16,81 @@ export type Database = {
     Tables: {
       clubs: {
         Row: {
-          club_id: number
-          created_at: string | null
+          clubId: number
+          createdAt: string | null
           id: number
           league: string | null
-          logo_url: string | null
+          logoUrl: string | null
           name: string
-          name_vi: string | null
+          nameVi: string | null
         }
         Insert: {
-          club_id: number
-          created_at?: string | null
+          clubId: number
+          createdAt?: string | null
           id?: number
           league?: string | null
-          logo_url?: string | null
+          logoUrl?: string | null
           name: string
-          name_vi?: string | null
+          nameVi?: string | null
         }
         Update: {
-          club_id?: number
-          created_at?: string | null
+          clubId?: number
+          createdAt?: string | null
           id?: number
           league?: string | null
-          logo_url?: string | null
+          logoUrl?: string | null
           name?: string
-          name_vi?: string | null
+          nameVi?: string | null
         }
         Relationships: []
       }
       countries_vi: {
         Row: {
-          country_code: string
-          created_at: string | null
+          countryCode: string
+          createdAt: string | null
           id: number
-          name_en: string
-          name_vi: string
+          nameEn: string
+          nameVi: string
         }
         Insert: {
-          country_code: string
-          created_at?: string | null
+          countryCode: string
+          createdAt?: string | null
           id?: number
-          name_en: string
-          name_vi: string
+          nameEn: string
+          nameVi: string
         }
         Update: {
-          country_code?: string
-          created_at?: string | null
+          countryCode?: string
+          createdAt?: string | null
           id?: number
-          name_en?: string
-          name_vi?: string
+          nameEn?: string
+          nameVi?: string
         }
         Relationships: []
       }
       formations: {
         Row: {
           category: string
-          created_at: string | null
+          createdAt: string | null
           id: number
           name: string
-          name_en: string
+          nameEn: string
           positions: Json
         }
         Insert: {
           category: string
-          created_at?: string | null
+          createdAt?: string | null
           id?: number
           name: string
-          name_en: string
+          nameEn: string
           positions: Json
         }
         Update: {
           category?: string
-          created_at?: string | null
+          createdAt?: string | null
           id?: number
           name?: string
-          name_en?: string
+          nameEn?: string
           positions?: Json
         }
         Relationships: []
@@ -99,170 +99,167 @@ export type Database = {
         Row: {
           added: string | null
           animation: Json | null
-          asset_id: number
+          assetId: number
           auctionable: boolean | null
-          avg_gk_stats: Json | null
-          avg_stats: Json | null
-          binding_xml: string | null
+          avgGkStats: Json | null
+          avgStats: Json | null
+          bindingXml: string | null
           bio: string | null
           birthday: string | null
-          card_name: string | null
+          cardName: string | null
           celebration: Json | null
           club: Json | null
-          common_name: string | null
-          created_at: string | null
-          first_name: string | null
+          commonName: string | null
+          createdAt: string | null
+          firstName: string | null
           foot: number | null
           height: number | null
-          id: number
           images: Json | null
-          last_name: string | null
+          lastName: string | null
           league: Json | null
           likes: number | null
           nation: Json | null
-          player_id: number
-          position: string
-          potential_positions: Json | null
-          price_data: Json | null
+          platform: string | null
+          playerId: number
+          position: string | null
+          potentialPositions: Json | null
+          priceData: Json | null
           rank: number | null
           rating: number
-          reveal_on: string | null
-          skill_moves: Json | null
-          skill_moves_level: number | null
-          skill_style_id: number | null
-          skill_style_skills: Json | null
+          rawData: Json
+          revealOn: string | null
+          skillMoves: number | null
+          skillStyleId: number | null
+          skillStyleSkills: Json | null
           source: string | null
           stats: Json | null
           tags: string | null
           traits: Json | null
-          updated_at: string | null
-          weak_foot: number | null
+          updatedAt: string | null
+          weakFoot: number | null
           weight: number | null
-          work_rate_att: number | null
-          work_rate_def: number | null
+          workRates: Json | null
         }
         Insert: {
           added?: string | null
           animation?: Json | null
-          asset_id: number
+          assetId: number
           auctionable?: boolean | null
-          avg_gk_stats?: Json | null
-          avg_stats?: Json | null
-          binding_xml?: string | null
+          avgGkStats?: Json | null
+          avgStats?: Json | null
+          bindingXml?: string | null
           bio?: string | null
           birthday?: string | null
-          card_name?: string | null
+          cardName?: string | null
           celebration?: Json | null
           club?: Json | null
-          common_name?: string | null
-          created_at?: string | null
-          first_name?: string | null
+          commonName?: string | null
+          createdAt?: string | null
+          firstName?: string | null
           foot?: number | null
           height?: number | null
-          id?: number
           images?: Json | null
-          last_name?: string | null
+          lastName?: string | null
           league?: Json | null
           likes?: number | null
           nation?: Json | null
-          player_id: number
-          position: string
-          potential_positions?: Json | null
-          price_data?: Json | null
+          platform?: string | null
+          playerId: number
+          position?: string | null
+          potentialPositions?: Json | null
+          priceData?: Json | null
           rank?: number | null
           rating: number
-          reveal_on?: string | null
-          skill_moves?: Json | null
-          skill_moves_level?: number | null
-          skill_style_id?: number | null
-          skill_style_skills?: Json | null
+          rawData: Json
+          revealOn?: string | null
+          skillMoves?: number | null
+          skillStyleId?: number | null
+          skillStyleSkills?: Json | null
           source?: string | null
           stats?: Json | null
           tags?: string | null
           traits?: Json | null
-          updated_at?: string | null
-          weak_foot?: number | null
+          updatedAt?: string | null
+          weakFoot?: number | null
           weight?: number | null
-          work_rate_att?: number | null
-          work_rate_def?: number | null
+          workRates?: Json | null
         }
         Update: {
           added?: string | null
           animation?: Json | null
-          asset_id?: number
+          assetId?: number
           auctionable?: boolean | null
-          avg_gk_stats?: Json | null
-          avg_stats?: Json | null
-          binding_xml?: string | null
+          avgGkStats?: Json | null
+          avgStats?: Json | null
+          bindingXml?: string | null
           bio?: string | null
           birthday?: string | null
-          card_name?: string | null
+          cardName?: string | null
           celebration?: Json | null
           club?: Json | null
-          common_name?: string | null
-          created_at?: string | null
-          first_name?: string | null
+          commonName?: string | null
+          createdAt?: string | null
+          firstName?: string | null
           foot?: number | null
           height?: number | null
-          id?: number
           images?: Json | null
-          last_name?: string | null
+          lastName?: string | null
           league?: Json | null
           likes?: number | null
           nation?: Json | null
-          player_id?: number
-          position?: string
-          potential_positions?: Json | null
-          price_data?: Json | null
+          platform?: string | null
+          playerId?: number
+          position?: string | null
+          potentialPositions?: Json | null
+          priceData?: Json | null
           rank?: number | null
           rating?: number
-          reveal_on?: string | null
-          skill_moves?: Json | null
-          skill_moves_level?: number | null
-          skill_style_id?: number | null
-          skill_style_skills?: Json | null
+          rawData?: Json
+          revealOn?: string | null
+          skillMoves?: number | null
+          skillStyleId?: number | null
+          skillStyleSkills?: Json | null
           source?: string | null
           stats?: Json | null
           tags?: string | null
           traits?: Json | null
-          updated_at?: string | null
-          weak_foot?: number | null
+          updatedAt?: string | null
+          weakFoot?: number | null
           weight?: number | null
-          work_rate_att?: number | null
-          work_rate_def?: number | null
+          workRates?: Json | null
         }
         Relationships: []
       }
       squads: {
         Row: {
-          created_at: string | null
+          createdAt: string | null
           formation: string
           id: string
           lineup: Json
           playstyle: string | null
-          squad_name: string
-          updated_at: string | null
-          user_id: string
+          squadName: string
+          updatedAt: string | null
+          userId: string
         }
         Insert: {
-          created_at?: string | null
+          createdAt?: string | null
           formation: string
           id?: string
           lineup: Json
           playstyle?: string | null
-          squad_name: string
-          updated_at?: string | null
-          user_id: string
+          squadName: string
+          updatedAt?: string | null
+          userId: string
         }
         Update: {
-          created_at?: string | null
+          createdAt?: string | null
           formation?: string
           id?: string
           lineup?: Json
           playstyle?: string | null
-          squad_name?: string
-          updated_at?: string | null
-          user_id?: string
+          squadName?: string
+          updatedAt?: string | null
+          userId?: string
         }
         Relationships: []
       }

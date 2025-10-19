@@ -5,40 +5,41 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Interface cho dữ liệu từ API Renderz (giữ nguyên để nhận dữ liệu)
 interface RawPlayerData {
-  assetId: number;
-  playerId: number;
-  firstName: string;
-  lastName: string;
-  commonName: string;
-  cardName: string;
-  position: string;
-  rating: number;
-  weakFoot: number;
-  foot: number;
-  workRateAtt: number;
-  workRateDef: number;
-  weight: number;
-  height: number;
-  birthday: string;
+  assetId?: number;
+  playerId?: number;
+  firstName?: string;
+  lastName?: string;
+  commonName?: string;
+  cardName?: string;
+  position?: string;
+  rating?: number;
+  weakFoot?: number;
+  foot?: number;
+  workRateAtt?: number;
+  workRateDef?: number;
+  weight?: number;
+  height?: number;
+  birthday?: string;
   bio?: string;
   bindingXml?: string;
   animation?: any;
   tags?: string;
   skillStyleId?: number;
   skillStyleSkills?: any[];
-  images: any;
+  images?: any;
   skillMoves?: any;
   skillMovesLevel?: number;
   celebration?: any;
   traits?: any[];
-  club: any;
-  league: any;
-  nation: any;
-  potentialPositions?: string[];
+  club?: any;
+  league?: any;
+  nation?: any;
+  potentialPositions?: any[];
   avgStats?: any;
   avgGkStats?: any;
-  stats: any;
+  stats?: any;
   priceData?: any;
   auctionable?: boolean;
   rank?: number;
@@ -46,141 +47,77 @@ interface RawPlayerData {
   added?: string;
   revealOn?: string;
   source?: string;
-  sort?: any[];
-}
-
-interface ProcessedPlayer {
-  asset_id: number;
-  player_id: number;
-  first_name: string;
-  last_name: string;
-  common_name: string;
-  card_name: string;
-  position: string;
-  rating: number;
-  weak_foot: number;
-  foot: number;
-  work_rate_att: number;
-  work_rate_def: number;
-  weight: number;
-  height: number;
-  birthday: string;
-  bio?: string;
-  binding_xml?: string;
-  animation?: any;
-  tags?: string;
-  skill_style_id?: number;
-  skill_style_skills?: any[];
-  images: any;
-  skill_moves?: any;
-  skill_moves_level?: number;
-  celebration?: any;
-  traits?: any[];
-  club: any;
-  league: any;
-  nation: any;
-  potential_positions?: string[];
-  avg_stats?: any;
-  avg_gk_stats?: any;
-  stats: any;
-  price_data?: any;
-  auctionable?: boolean;
-  rank?: number;
-  likes?: number;
-  added?: string;
-  reveal_on?: string;
-  source?: string;
+  sort?: any[]; // Trường phân trang - sẽ bị loại bỏ
 }
 
 const RENDERZ_API_URL = 'https://renderz.app/api/search/elasticsearch';
 const BATCH_SIZE = 500; // Increased batch size for better performance
 const DELAY_MS = 1500; // 1.5 second delay between requests
 
-// Extract players from Object response (not standard Elasticsearch format)
-function extractPlayersFromObject(responseData: any): RawPlayerData[] | null {
-  // Check if response is a valid object (not string, null, array, etc.)
+// Extract và validate players từ Object response
+function extractPlayersFromObject(responseData: any): RawPlayerData[] {
+  // Kiểm tra đầu vào cơ bản
   if (typeof responseData !== 'object' || responseData === null || Array.isArray(responseData)) {
     console.error('Invalid response format: not an object');
-    return null;
+    return [];
   }
   
   // Check for explicit error response
   if (responseData === 'error' || (typeof responseData === 'string')) {
     console.error('Error response received from API');
-    return null;
+    return [];
   }
   
-  const players: RawPlayerData[] = [];
+  const validPlayers: RawPlayerData[] = [];
   
   // Loop through all keys in the object
   for (const [key, value] of Object.entries(responseData)) {
-    // Skip the _pagination key
-    if (key !== '_pagination') {
-      players.push(value as RawPlayerData);
+    // Bỏ qua _pagination
+    if (key === '_pagination') continue;
+    
+    // KIỂM TRA QUAN TRỌNG: Đảm bảo value là Object và KHÔNG PHẢI Array
+    // Điều này ngăn chặn việc xử lý mảng sort như [110, 24021501]
+    if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+      console.warn(`⚠️ Bỏ qua item: Định dạng không hợp lệ (có thể là mảng sort)`, JSON.stringify(value));
+      continue;
     }
+    
+    const item = value as any;
+    
+    // Đảm bảo các trường cơ bản tồn tại
+    if (!item.assetId || !item.playerId) {
+      console.warn(`⚠️ Bỏ qua item: Thiếu assetId/playerId`, JSON.stringify(item).substring(0, 200));
+      continue;
+    }
+    
+    // Nếu vượt qua tất cả kiểm tra, đây là cầu thủ hợp lệ
+    validPlayers.push(item as RawPlayerData);
   }
   
-  return players;
+  return validPlayers;
 }
 
-function processPlayerData(rawPlayers: RawPlayerData[]): ProcessedPlayer[] {
+// Đơn giản hóa: Chuyển đổi trực tiếp sang camelCase schema
+function processPlayerData(rawPlayers: RawPlayerData[]): any[] {
   return rawPlayers.map((player) => {
-    // Validate and provide defaults for required NOT NULL fields
-    const asset_id = player.assetId ?? 0;
-    const player_id = player.playerId ?? 0;
-    const rating = player.rating ?? 0;
-    const position = player.position || 'Unknown';
+    // Tạo bản sao để thao tác
+    const record: any = { ...player };
     
-    // Log warning if critical fields are missing
-    if (!player.assetId) {
-      console.warn(`⚠️ Missing assetId for player:`, JSON.stringify(player).substring(0, 200));
-    }
-    if (!player.playerId) {
-      console.warn(`⚠️ Missing playerId for player:`, JSON.stringify(player).substring(0, 200));
-    }
+    // Loại bỏ trường 'sort' (dùng cho phân trang, không có trong schema DB)
+    delete record.sort;
     
-    return {
-      asset_id,
-      player_id,
-      first_name: player.firstName || '',
-      last_name: player.lastName || '',
-      common_name: player.commonName || '',
-      card_name: player.cardName || '',
-      position,
-      rating,
-      weak_foot: player.weakFoot ?? 0,
-      foot: player.foot ?? 0,
-      work_rate_att: player.workRateAtt ?? 0,
-      work_rate_def: player.workRateDef ?? 0,
-      weight: player.weight ?? 0,
-      height: player.height ?? 0,
-      birthday: player.birthday || '1990-01-01',
-      bio: player.bio,
-      binding_xml: player.bindingXml,
-      animation: player.animation,
-      tags: player.tags,
-      skill_style_id: player.skillStyleId,
-      skill_style_skills: player.skillStyleSkills,
-      images: player.images,
-      skill_moves: player.skillMoves,
-      skill_moves_level: player.skillMovesLevel,
-      celebration: player.celebration,
-      traits: player.traits,
-      club: player.club,
-      league: player.league,
-      nation: player.nation,
-      potential_positions: player.potentialPositions,
-      avg_stats: player.avgStats,
-      avg_gk_stats: player.avgGkStats,
-      stats: player.stats,
-      price_data: player.priceData,
-      auctionable: player.auctionable ?? false,
-      rank: player.rank ?? 0,
-      likes: player.likes ?? 0,
-      added: player.added,
-      reveal_on: player.revealOn,
-      source: player.source,
-    };
+    // Lưu dữ liệu gốc vào rawData (bắt buộc theo schema mới)
+    record.rawData = player;
+    
+    // Đảm bảo các trường NOT NULL có giá trị
+    record.assetId = player.assetId ?? 0;
+    record.playerId = player.playerId ?? 0;
+    record.rating = player.rating ?? 0;
+    
+    // Cập nhật timestamp
+    record.updatedAt = new Date().toISOString();
+    
+    return record;
   });
 }
 
@@ -287,17 +224,10 @@ Deno.serve(async (req) => {
         throw new Error('Invalid JSON response from API');
       }
       
-      // Extract players using the Object-based logic
+      // Extract và validate players
       const rawPlayers = extractPlayersFromObject(data);
 
-      // Check if extraction failed (null return)
-      if (rawPlayers === null) {
-        console.error('FORMAT ERROR: Invalid response format or error received');
-        console.error(`RAW RESPONSE BODY (first 1000 chars): ${rawResponseText.substring(0, 1000)}`);
-        throw new Error('Invalid response format from API');
-      }
-
-      console.log(`Received ${rawPlayers.length} players on page ${pageCount}`);
+      console.log(`✅ Received ${rawPlayers.length} valid players on page ${pageCount}`);
 
       // If no more players, pagination complete
       if (rawPlayers.length === 0) {
@@ -305,17 +235,17 @@ Deno.serve(async (req) => {
         break;
       }
 
-      // Process and save players
+      // Process và prepare data
       const processedPlayers = processPlayerData(rawPlayers);
       
-      // Log first record before upsert for debugging
+      // Log sample record
       console.log('📝 Sample record to upsert:', JSON.stringify(processedPlayers[0], null, 2));
       
-      // Upsert to Supabase
+      // Upsert to Supabase (sử dụng assetId làm khóa chính)
       const { error } = await supabase
         .from('players')
         .upsert(processedPlayers, { 
-          onConflict: 'asset_id',
+          onConflict: 'assetId',
           ignoreDuplicates: false 
         });
 

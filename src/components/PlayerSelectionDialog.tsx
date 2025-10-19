@@ -12,8 +12,8 @@ import PlayerFilters from "@/components/PlayerFilters";
 import { usePlayerFilters } from "@/hooks/usePlayerFilters";
 
 interface Player {
-  id: number;
-  common_name: string;
+  assetId: number;
+  commonName: string;
   rating: number;
   position: string;
   nation?: any;
@@ -21,14 +21,13 @@ interface Player {
   league?: any;
   images?: any;
   stats: any;
-  potential_positions?: any;
-  weak_foot?: number;
-  skill_moves_level?: number;
+  potentialPositions?: any;
+  weakFoot?: number;
+  skillMoves?: number;
   height?: number;
   weight?: number;
-  work_rate_att?: number;
-  work_rate_def?: number;
-  traits?: any[];
+  workRates?: any;
+  traits?: any;
 }
 
 interface PlayerSelectionDialogProps {
@@ -93,8 +92,8 @@ export default function PlayerSelectionDialog({
         .limit(500);
 
       if (error) throw error;
-      setAllPlayers((data || []) as Player[]);
-      applyFilters((data || []) as Player[]);
+      setAllPlayers(data || []);
+      applyFilters(data || []);
     } catch (error: any) {
       console.error(error);
     } finally {
@@ -108,7 +107,7 @@ export default function PlayerSelectionDialog({
     // Apply search filter
     if (searchQuery) {
       filtered = filtered.filter(p =>
-        p.common_name?.toLowerCase().includes(searchQuery.toLowerCase())
+        p.commonName?.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
@@ -264,14 +263,14 @@ export default function PlayerSelectionDialog({
               ) : (
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
                   {displayedPlayers.map((player) => {
-                    const isSelected = selectedPlayerIds.includes(player.id);
+                    const isSelected = selectedPlayerIds.includes(player.assetId);
                     const isAlternativePosition = requiredPosition && player.position !== requiredPosition;
                     const ovrPenalty = isAlternativePosition && selectedRank < 2 ? 2 : isAlternativePosition ? 1 : 0;
                     const displayOvr = player.rating - ovrPenalty;
                     
                     return (
                       <div
-                        key={player.id}
+                        key={player.assetId}
                         className={`group bg-card rounded-lg p-4 border transition-all ${
                           isSelected 
                             ? 'border-muted-foreground/30 opacity-50 cursor-not-allowed' 
@@ -297,7 +296,7 @@ export default function PlayerSelectionDialog({
 
                           <div className="flex-1 min-w-0">
                             <div className={`font-bold text-base truncate transition-colors ${!isSelected && 'group-hover:text-primary'}`}>
-                              {player.common_name}
+                              {player.commonName}
                               {isSelected && <span className="ml-2 text-xs text-muted-foreground">(Đã chọn)</span>}
                             </div>
                             <div className="text-sm text-muted-foreground truncate flex items-center gap-2">
@@ -308,14 +307,14 @@ export default function PlayerSelectionDialog({
                             
                             {/* Player attributes */}
                             <div className="flex flex-wrap gap-1 mt-2">
-                              {player.weak_foot && (
+                              {player.weakFoot && (
                                 <Badge variant="outline" className="text-xs">
-                                  Chân thuận: {player.weak_foot}⭐
+                                  Chân thuận: {player.weakFoot}⭐
                                 </Badge>
                               )}
-                              {player.skill_moves_level && (
+                              {player.skillMoves && (
                                 <Badge variant="outline" className="text-xs">
-                                  Kỹ năng: {player.skill_moves_level}⭐
+                                  Kỹ năng: {player.skillMoves}⭐
                                 </Badge>
                               )}
                               {player.height && (

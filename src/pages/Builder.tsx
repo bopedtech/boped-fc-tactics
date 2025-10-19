@@ -20,8 +20,8 @@ import { toast } from "sonner";
 import { Save, Sparkles, Trash2, Calculator } from "lucide-react";
 
 interface Player {
-  id: number;
-  common_name: string;
+  assetId: number;
+  commonName: string;
   rating: number;
   position: string;
   nation?: any;
@@ -36,7 +36,7 @@ interface Player {
 interface Formation {
   id: number;
   name: string;
-  name_en: string;
+  nameEn: string;
   category: string;
   positions: string[];
 }
@@ -240,7 +240,7 @@ export default function Builder() {
       const newLineup = [...lineup];
       newLineup[selectedSlotIndex] = { ...player, rank, training };
       setLineup(newLineup);
-      toast.success(`Đã thêm ${player.common_name} (Rank ${rank}, Training ${training}) vào đội hình`);
+      toast.success(`Đã thêm ${player.commonName} (Rank ${rank}, Training ${training}) vào đội hình`);
     }
   };
 
@@ -289,15 +289,15 @@ export default function Builder() {
         formation: selectedFormation?.name || "",
         players: lineup.map((player, index) => ({
           position: index,
-          player_id: player?.id,
-          player_name: player?.common_name,
-          player_ovr: player?.rating,
+          playerId: player?.assetId,
+          playerName: player?.commonName,
+          playerOvr: player?.rating,
         })),
       };
 
       const { error } = await supabase.from("squads").insert({
-        user_id: user.id,
-        squad_name: squadName,
+        userId: user.id,
+        squadName: squadName,
         formation: selectedFormation?.name || "",
         lineup: lineupData,
       });
@@ -344,7 +344,7 @@ export default function Builder() {
           onClose={() => setShowPlayerDialog(false)}
           onSelectPlayer={handleSelectPlayer}
           requiredPosition={selectedSlotIndex !== null ? getRequiredPosition(selectedSlotIndex) : undefined}
-          selectedPlayerIds={lineup.filter(p => p !== null).map(p => p!.id)}
+          selectedPlayerIds={lineup.filter(p => p !== null).map(p => p!.assetId)}
         />
       )}
 

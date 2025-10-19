@@ -52,9 +52,9 @@ export const usePlayerFilters = (initialPosition?: string) => {
     if (filters.positionFilter !== "all") {
       filtered = filtered.filter(p => {
         if (p.position === filters.positionFilter) return true;
-        if (p.potential_positions) {
-          const altPositions = Array.isArray(p.potential_positions)
-            ? p.potential_positions
+        if (p.potentialPositions) {
+          const altPositions = Array.isArray(p.potentialPositions)
+            ? p.potentialPositions
             : [];
           return altPositions.includes(filters.positionFilter);
         }
@@ -65,9 +65,9 @@ export const usePlayerFilters = (initialPosition?: string) => {
     // Alternate positions filter
     if (filters.alternatePositions.length > 0) {
       filtered = filtered.filter(p => {
-        if (!p.potential_positions) return false;
-        const altPositions = Array.isArray(p.potential_positions)
-          ? p.potential_positions
+        if (!p.potentialPositions) return false;
+        const altPositions = Array.isArray(p.potentialPositions)
+          ? p.potentialPositions
           : [];
         return filters.alternatePositions.some(pos => altPositions.includes(pos));
       });
@@ -86,14 +86,14 @@ export const usePlayerFilters = (initialPosition?: string) => {
     // Skill moves filter
     if (filters.skillMovesLevel > 0) {
       filtered = filtered.filter(p =>
-        (p.skill_moves_level || 0) >= filters.skillMovesLevel
+        (p.skillMoves || 0) >= filters.skillMovesLevel
       );
     }
 
     // Weak foot filter
     if (filters.weakFoot > 0) {
       filtered = filtered.filter(p =>
-        (p.weak_foot || 0) >= filters.weakFoot
+        (p.weakFoot || 0) >= filters.weakFoot
       );
     }
 
@@ -106,16 +106,18 @@ export const usePlayerFilters = (initialPosition?: string) => {
 
     // Work rate attack filter
     if (filters.workRateAtt > 0) {
-      filtered = filtered.filter(p =>
-        (p.work_rate_att || 0) === filters.workRateAtt
-      );
+      filtered = filtered.filter(p => {
+        const workRates = p.workRates;
+        return (workRates?.attack || workRates?.att || 0) === filters.workRateAtt;
+      });
     }
 
     // Work rate defense filter
     if (filters.workRateDef > 0) {
-      filtered = filtered.filter(p =>
-        (p.work_rate_def || 0) === filters.workRateDef
-      );
+      filtered = filtered.filter(p => {
+        const workRates = p.workRates;
+        return (workRates?.defense || workRates?.def || 0) === filters.workRateDef;
+      });
     }
 
     return filtered;
