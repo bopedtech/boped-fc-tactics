@@ -98,24 +98,26 @@ function processApiResponse(responseData: any): { extractedPlayers: RawPlayerDat
   };
 }
 
-// Đơn giản hóa: Chuyển đổi trực tiếp sang camelCase schema
+// Direct Upsert An toàn: Xử lý dữ liệu trước khi lưu
 function processPlayerData(rawPlayers: RawPlayerData[]): any[] {
   return rawPlayers.map((player) => {
-    // Tạo bản sao để thao tác
+    // 1. Tạo bản sao để thao tác
     const record: any = { ...player };
     
-    // Loại bỏ trường 'sort' (dùng cho phân trang, không có trong schema DB)
-    delete record.sort;
+    // 2. Loại bỏ trường 'sort' nếu có (Elasticsearch search_after thêm vào)
+    if (record.sort) {
+      delete record.sort;
+    }
     
-    // Lưu dữ liệu gốc vào rawData (bắt buộc theo schema mới)
+    // 3. Lưu dữ liệu gốc vào rawData (bắt buộc theo schema)
     record.rawData = player;
     
-    // Đảm bảo các trường NOT NULL có giá trị
+    // 4. Đảm bảo các trường NOT NULL có giá trị
     record.assetId = player.assetId ?? 0;
     record.playerId = player.playerId ?? 0;
     record.rating = player.rating ?? 0;
     
-    // Cập nhật timestamp
+    // 5. Cập nhật timestamp
     record.updatedAt = new Date().toISOString();
     
     return record;

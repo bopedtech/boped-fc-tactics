@@ -114,21 +114,27 @@ export type Database = {
           firstName: string | null
           foot: number | null
           height: number | null
+          id: number | null
           images: Json | null
+          isCard: boolean | null
+          isSold: boolean | null
           lastName: string | null
           league: Json | null
           likes: number | null
+          liveOvr: Json | null
           nation: Json | null
           platform: string | null
           playerId: number
           position: string | null
           potentialPositions: Json | null
           priceData: Json | null
+          program: Json | null
           rank: number | null
           rating: number
           rawData: Json
           revealOn: string | null
-          skillMoves: number | null
+          skillMoves: Json | null
+          skillMovesLevel: number | null
           skillStyleId: number | null
           skillStyleSkills: Json | null
           source: string | null
@@ -138,6 +144,8 @@ export type Database = {
           updatedAt: string | null
           weakFoot: number | null
           weight: number | null
+          workRateAtt: number | null
+          workRateDef: number | null
           workRates: Json | null
         }
         Insert: {
@@ -158,21 +166,27 @@ export type Database = {
           firstName?: string | null
           foot?: number | null
           height?: number | null
+          id?: number | null
           images?: Json | null
+          isCard?: boolean | null
+          isSold?: boolean | null
           lastName?: string | null
           league?: Json | null
           likes?: number | null
+          liveOvr?: Json | null
           nation?: Json | null
           platform?: string | null
           playerId: number
           position?: string | null
           potentialPositions?: Json | null
           priceData?: Json | null
+          program?: Json | null
           rank?: number | null
           rating: number
           rawData: Json
           revealOn?: string | null
-          skillMoves?: number | null
+          skillMoves?: Json | null
+          skillMovesLevel?: number | null
           skillStyleId?: number | null
           skillStyleSkills?: Json | null
           source?: string | null
@@ -182,6 +196,8 @@ export type Database = {
           updatedAt?: string | null
           weakFoot?: number | null
           weight?: number | null
+          workRateAtt?: number | null
+          workRateDef?: number | null
           workRates?: Json | null
         }
         Update: {
@@ -202,21 +218,27 @@ export type Database = {
           firstName?: string | null
           foot?: number | null
           height?: number | null
+          id?: number | null
           images?: Json | null
+          isCard?: boolean | null
+          isSold?: boolean | null
           lastName?: string | null
           league?: Json | null
           likes?: number | null
+          liveOvr?: Json | null
           nation?: Json | null
           platform?: string | null
           playerId?: number
           position?: string | null
           potentialPositions?: Json | null
           priceData?: Json | null
+          program?: Json | null
           rank?: number | null
           rating?: number
           rawData?: Json
           revealOn?: string | null
-          skillMoves?: number | null
+          skillMoves?: Json | null
+          skillMovesLevel?: number | null
           skillStyleId?: number | null
           skillStyleSkills?: Json | null
           source?: string | null
@@ -226,6 +248,8 @@ export type Database = {
           updatedAt?: string | null
           weakFoot?: number | null
           weight?: number | null
+          workRateAtt?: number | null
+          workRateDef?: number | null
           workRates?: Json | null
         }
         Relationships: []
