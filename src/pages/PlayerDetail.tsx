@@ -96,38 +96,39 @@ const statLabels: Record<string, string> = {
   sprintSpeed: "Tốc Độ Chạy",
   
   // Shooting
-  positioning_att: "Dứt Điểm",
+  positioning_att: "Chọn Vị Trí",
   finishing: "Dứt Điểm",
-  shotPower: "Sút Xa",
-  longShots: "Lực Sút",
-  volleys: "Chọn Vị Trí",
-  penalties: "Vô Lê",
+  shotPower: "Lực Sút",
+  longShots: "Sút Xa",
+  volleys: "Vô Lê",
+  penalties: "Phạt Đền",
   
   // Passing
-  vision: "Phạt Đền",
-  crossing: "Chuyền Ngắn",
-  fkAccuracy: "Chuyền Dài",
+  vision: "Tầm Nhìn",
+  crossing: "Tạt Bóng",
+  fkAccuracy: "Đá Phạt",
   shortPassing: "Chuyền Ngắn",
   longPassing: "Chuyền Dài",
-  curve: "Tầm Nhìn",
+  curve: "Sút Xoáy",
   
   // Dribbling
-  agility: "Tạt Bóng",
-  balance: "Sút xoáy",
-  reactions: "Đá Phạt",
-  ballControl: "Rê Dắt",
-  composure: "Khéo Léo",
+  agility: "Khéo Léo",
+  balance: "Cân Bằng",
+  reactions: "Phản Ứng",
+  ballControl: "Kiểm Soát Bóng",
+  composure: "Bình Tĩnh",
+  dribbling_detail: "Rê Dắt",
   
   // Defense
-  interceptions: "Phản Ứng",
-  headingAccuracy: "Kiểm Soát Bóng",
-  defAwareness: "Rê Dắt",
-  standTackle: "Khéo Léo",
+  interceptions: "Cắt Bóng",
+  headingAccuracy: "Đánh Đầu",
+  defAwareness: "Ý Thức Phòng Thủ",
+  standTackle: "Tranh Bóng Đứng",
   slideTackle: "Xoạc Bóng",
   
   // Physical
-  jumping: "Phản Ứng",
-  stamina: "Cân Trọng",
+  jumping: "Nhảy",
+  stamina: "Sức Bền",
   strength: "Sức Mạnh",
   aggression: "Quyết Đoán",
   

@@ -55,8 +55,8 @@ export default function PlayerCard({ player, onClick, clubsData, countriesData }
   
   // Map avgStats to Vietnamese stat labels
   const statLabels = isGK 
-    ? ["BẮT", "XỬ LÝ", "SÚT", "PHẢ", "TĐ", "VỊ TRÍ"]
-    : ["TĐ", "SÚT", "CHUYỀN", "RÊ", "PN", "TL"];
+    ? ["Bắt Bóng", "Xử Lý", "Sút", "Phản Xạ", "Tốc Độ", "Vị Trí"]
+    : ["Tốc Độ", "Sút", "Chuyền", "Rê Dắt", "Phòng Ngự", "Thể Lực"];
   
   const statsToShow = isGK ? avgGkStats : avgStats;
 
@@ -154,13 +154,13 @@ export default function PlayerCard({ player, onClick, clubsData, countriesData }
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-3 gap-2 mt-4">
+        <div className="grid grid-cols-3 gap-1.5 mt-4">
           {displayStats.map((stat, idx) => (
-            <div key={idx} className="text-center">
-              <div className={`text-sm font-bold ${statColors[stat.name.toLowerCase()]}`}>
+            <div key={idx} className="text-center bg-muted/30 rounded p-1.5">
+              <div className="text-sm font-bold text-primary">
                 {stat.value || 0}
               </div>
-              <div className="text-xs text-muted-foreground">{stat.name}</div>
+              <div className="text-[9px] text-muted-foreground leading-tight">{stat.name}</div>
             </div>
           ))}
         </div>
