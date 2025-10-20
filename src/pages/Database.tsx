@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import PlayerCard from "@/components/PlayerCard";
 import { Input } from "@/components/ui/input";
@@ -10,16 +11,35 @@ import { Card } from "@/components/ui/card";
 import PlayerFilters from "@/components/PlayerFilters";
 import { usePlayerFilters } from "@/hooks/usePlayerFilters";
 
+interface PlayerStats {
+  pace?: number;
+  shooting?: number;
+  passing?: number;
+  dribbling?: number;
+  defense?: number;
+  physicality?: number;
+  diving?: number;
+  handling?: number;
+  kicking?: number;
+  reflexes?: number;
+  speed?: number;
+  positioning?: number;
+}
+
 interface Player {
   assetId: number;
-  commonName: string;
+  playerId: number;
+  firstName?: string;
+  lastName?: string;
+  commonName?: string;
+  cardName?: string;
   rating: number;
-  position: string;
+  position?: string;
   nation?: any;
   club?: any;
   league?: any;
   images?: any;
-  stats: any;
+  stats?: PlayerStats;
   traits?: any;
   workRates?: any;
   potentialPositions?: any;
@@ -28,24 +48,37 @@ interface Player {
   weakFoot?: number;
   skillMovesLevel?: number;
   foot?: number;
+  birthday?: string;
+  bio?: string;
+  tags?: string;
+  priceData?: any;
+  avgStats?: any;
+  avgGkStats?: any;
+  skillMoves?: any;
+  skillStyleId?: number;
+  skillStyleSkills?: any;
+  animation?: any;
+  celebration?: any;
+  rawData?: any;
   createdAt?: string;
+  updatedAt?: string;
 }
 
+const PAGE_SIZE = 20;
+
 export default function Database() {
-  const [allPlayers, setAllPlayers] = useState<Player[]>([]);
-  const [displayedPlayers, setDisplayedPlayers] = useState<Player[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [searchName, setSearchName] = useState("");
   const [showFilters, setShowFilters] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [syncStatus, setSyncStatus] = useState<string>("");
   const [clubsData, setClubsData] = useState<any[]>([]);
   const [countriesData, setCountriesData] = useState<any[]>([]);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
   
-  const { filters, setFilters, resetFilters: resetFilterState, applyFiltersToQuery } = usePlayerFilters();
+  const { filters, setFilters, resetFilters: resetFilterState } = usePlayerFilters();
 
   useEffect(() => {
-    fetchPlayers();
     fetchClubsAndCountries();
   }, []);
 
@@ -63,51 +96,107 @@ export default function Database() {
     }
   };
 
-  const fetchPlayers = async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from("players")
-        .select("*")
-        .order("rating", { ascending: false })
-        .limit(500);
-
-      if (error) throw error;
-      setAllPlayers(data || []);
-      applyFilters(data || []);
-    } catch (error: any) {
-      toast.error("Không thể tải dữ liệu cầu thủ");
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const applyFilters = (playerList: Player[] = allPlayers) => {
-    let filtered = [...playerList];
+  const fetchPlayersPage = async ({ pageParam = 0 }) => {
+    let query = supabase
+      .from("players")
+      .select("*", { count: "exact" })
+      .order("rating", { ascending: false })
+      .order("assetId", { ascending: false });
 
     // Apply search filter
-    if (searchName) {
-      filtered = filtered.filter(p =>
-        p.commonName?.toLowerCase().includes(searchName.toLowerCase())
-      );
+    if (searchName.trim()) {
+      query = query.or(`commonName.ilike.%${searchName}%,cardName.ilike.%${searchName}%,firstName.ilike.%${searchName}%,lastName.ilike.%${searchName}%`);
     }
 
-    // Apply filter component filters
-    filtered = applyFiltersToQuery(filtered);
+    // Apply rating filter
+    if (filters.ratingRange[0] > 0) {
+      query = query.gte("rating", filters.ratingRange[0]);
+    }
+    if (filters.ratingRange[1] < 125) {
+      query = query.lte("rating", filters.ratingRange[1]);
+    }
 
-    setDisplayedPlayers(filtered);
+    // Apply position filter
+    if (filters.positionFilter !== "all") {
+      query = query.eq("position", filters.positionFilter);
+    }
+
+    // Apply nation filter
+    if (filters.nations.length > 0) {
+      const nationFilters = filters.nations.map(n => `nation->>id.eq.${n}`).join(',');
+      query = query.or(nationFilters);
+    }
+
+    // Apply club filter
+    if (filters.clubs.length > 0) {
+      const clubFilters = filters.clubs.map(c => `club->>id.eq.${c}`).join(',');
+      query = query.or(clubFilters);
+    }
+
+    // Apply league filter
+    if (filters.leagues.length > 0) {
+      const leagueFilters = filters.leagues.map(l => `league->>id.eq.${l}`).join(',');
+      query = query.or(leagueFilters);
+    }
+
+    // Pagination
+    query = query.range(pageParam, pageParam + PAGE_SIZE - 1);
+
+    const { data, error, count } = await query;
+
+    if (error) throw error;
+
+    return {
+      players: data || [],
+      nextPage: data && data.length === PAGE_SIZE ? pageParam + PAGE_SIZE : undefined,
+      totalCount: count || 0,
+    };
   };
+
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    isError,
+  } = useInfiniteQuery({
+    queryKey: ["players", searchName, filters],
+    queryFn: fetchPlayersPage,
+    getNextPageParam: (lastPage) => lastPage.nextPage,
+    initialPageParam: 0,
+  });
+
+  // Infinite scroll observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const currentRef = loadMoreRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const resetFilters = () => {
     setSearchName("");
     resetFilterState();
-    setDisplayedPlayers(allPlayers);
   };
 
-  useEffect(() => {
-    applyFilters();
-  }, [filters, searchName, allPlayers]);
+  const allPlayers = data?.pages.flatMap(page => page.players) || [];
+  const totalCount = data?.pages[0]?.totalCount || 0;
 
   const handleSync = async (mode: 'test' | 'full', maxPages: number = 2) => {
     try {
@@ -124,7 +213,7 @@ export default function Database() {
       toast.success(`Đã đồng bộ ${data.totalPlayers} cầu thủ`);
       
       // Refresh the player list
-      await fetchPlayers();
+      queryClient.invalidateQueries({ queryKey: ["players"] });
     } catch (error: any) {
       console.error('Sync error:', error);
       setSyncStatus('Lỗi khi đồng bộ dữ liệu');
@@ -245,33 +334,63 @@ export default function Database() {
                 Bộ lọc
               </Button>
               <p className="text-sm text-muted-foreground">
-                {displayedPlayers.length} cầu thủ
+                {allPlayers.length} / {totalCount} cầu thủ
               </p>
             </div>
 
-            {loading ? (
+            {isLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {[...Array(8)].map((_, i) => (
                   <div key={i} className="h-96 bg-card animate-pulse rounded-lg" />
                 ))}
               </div>
-            ) : displayedPlayers.length === 0 ? (
+            ) : isError ? (
+              <div className="text-center py-16">
+                <p className="text-xl text-destructive">
+                  Có lỗi xảy ra khi tải dữ liệu
+                </p>
+              </div>
+            ) : allPlayers.length === 0 ? (
               <div className="text-center py-16">
                 <p className="text-xl text-muted-foreground">
                   Không tìm thấy cầu thủ nào
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {displayedPlayers.map((player) => (
-                  <PlayerCard 
-                    key={player.assetId} 
-                    player={player} 
-                    clubsData={clubsData}
-                    countriesData={countriesData}
-                  />
-                ))}
-              </div>
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {allPlayers.map((player) => (
+                    <PlayerCard 
+                      key={player.assetId} 
+                      player={player as any} 
+                      clubsData={clubsData}
+                      countriesData={countriesData}
+                    />
+                  ))}
+                </div>
+                
+                {/* Infinite scroll trigger */}
+                <div ref={loadMoreRef} className="py-8 text-center">
+                  {isFetchingNextPage ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <Loader2 className="h-6 w-6 animate-spin" />
+                      <span className="text-muted-foreground">Đang tải thêm...</span>
+                    </div>
+                  ) : hasNextPage ? (
+                    <Button
+                      onClick={() => fetchNextPage()}
+                      variant="outline"
+                      className="min-w-[200px]"
+                    >
+                      Tải thêm cầu thủ
+                    </Button>
+                  ) : (
+                    <p className="text-muted-foreground">
+                      Đã hiển thị tất cả {totalCount} cầu thủ
+                    </p>
+                  )}
+                </div>
+              </>
             )}
           </div>
         </div>
