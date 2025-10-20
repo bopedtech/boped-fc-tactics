@@ -4,13 +4,13 @@ import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import PlayerCard from "@/components/PlayerCard";
 import { Input } from "@/components/ui/input";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Search, Filter, X, RefreshCw, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 import PlayerFilters from "@/components/PlayerFilters";
 import { usePlayerFilters } from "@/hooks/usePlayerFilters";
+import PlayerDetailDialog from "@/components/PlayerDetailDialog";
 
 interface PlayerStats {
   pace?: number;
@@ -69,7 +69,6 @@ const PAGE_SIZE = 20;
 
 export default function Database() {
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
   const [searchName, setSearchName] = useState("");
   const [showFilters, setShowFilters] = useState(true);
   const [syncing, setSyncing] = useState(false);
@@ -77,9 +76,16 @@ export default function Database() {
   const [clubsData, setClubsData] = useState<any[]>([]);
   const [countriesData, setCountriesData] = useState<any[]>([]);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [selectedPlayerAssetId, setSelectedPlayerAssetId] = useState<number | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   
   const { filters, setFilters, resetFilters: resetFilterState } = usePlayerFilters();
+
+  const handlePlayerClick = (assetId: number) => {
+    setSelectedPlayerAssetId(assetId);
+    setIsDialogOpen(true);
+  };
 
   useEffect(() => {
     fetchClubsAndCountries();
@@ -391,7 +397,7 @@ export default function Database() {
                       player={player as any} 
                       clubsData={clubsData}
                       countriesData={countriesData}
-                      onClick={() => navigate(`/player/${player.assetId}`)}
+                      onClick={() => handlePlayerClick(player.assetId)}
                     />
                   ))}
                 </div>
@@ -422,6 +428,12 @@ export default function Database() {
           </div>
         </div>
       </div>
+
+      <PlayerDetailDialog
+        assetId={selectedPlayerAssetId}
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+      />
     </div>
   );
 }

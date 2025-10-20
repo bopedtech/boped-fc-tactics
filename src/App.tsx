@@ -5,7 +5,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Database from "./pages/Database";
-import PlayerDetail from "./pages/PlayerDetail";
 import Builder from "./pages/Builder";
 import MySquads from "./pages/MySquads";
 import NotFound from "./pages/NotFound";
@@ -21,7 +20,6 @@ const App = () => (
         <Route path="/" element={<Index />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/database" element={<Database />} />
-        <Route path="/player/:assetId" element={<PlayerDetail />} />
         <Route path="/builder" element={<Builder />} />
         <Route path="/my-squads" element={<MySquads />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
