@@ -71,16 +71,36 @@ function processApiResponse(responseData: any): { extractedPlayers: RawPlayerDat
     return { extractedPlayers: [], nextCursor: null };
   }
 
-  // 3. Xác thực từng cầu thủ trong danh sách
-  const validPlayers = players.filter((player: any) =>
-    player && 
-    typeof player === 'object' && 
-    !Array.isArray(player) &&
-    player.assetId && 
-    player.playerId
-  );
+  // 3. Xác thực và LỌC từng cầu thủ trong danh sách (LOGIC MỚI)
+  const validPlayers = players.filter((player: any) => {
+    
+    // A. Kiểm tra cấu trúc cơ bản (Là Object hợp lệ, có assetId và playerId)
+    const isValidStructure = player &&
+                             typeof player === 'object' &&
+                             !Array.isArray(player) &&
+                             player.assetId &&
+                             player.playerId;
 
-  console.log(`✅ Đã lọc ${validPlayers.length}/${players.length} cầu thủ hợp lệ`);
+    if (!isValidStructure) {
+      return false;
+    }
+
+    // B. Logic Lọc theo Season (Mới)
+    
+    // Kiểm tra nếu trường 'tags' không tồn tại hoặc không phải là chuỗi
+    if (typeof player.tags !== 'string') {
+      // Nếu thiếu tags, loại bỏ cầu thủ
+      return false;
+    }
+
+    // Kiểm tra nếu chuỗi tags chứa "25" HOẶC "26"
+    const isInSeason = player.tags.includes("25") || player.tags.includes("26");
+
+    return isInSeason;
+  });
+  
+  // In ra thông tin về số lượng cầu thủ đã lọc
+  console.log(`Trang hiện tại: Nhận được ${players.length} từ API. Hợp lệ và đúng Season: ${validPlayers.length}.`);
 
   // 4. Trích xuất Cursor 
   let nextCursor = responseData.pagination || responseData._pagination;
