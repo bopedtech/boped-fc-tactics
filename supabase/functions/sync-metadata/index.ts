@@ -60,8 +60,10 @@ async function upsertData(supabase: any, tableName: string, dataList: any[]): Pr
     .upsert(dataList, { onConflict: 'id' });
 
   if (error) {
-    console.error(`❌ Lỗi khi upsert vào bảng ${tableName}:`, error);
-    throw error;
+    console.error(`❌ Lỗi nghiêm trọng khi Upsert vào bảng ${tableName}:`);
+    console.error(`Code: ${error.code}, Message: ${error.message}`);
+    console.error(`Details: ${JSON.stringify(error.details || {})}`);
+    throw new Error(`Supabase Upsert failed on table ${tableName}. Code: ${error.code}`);
   } else {
     console.log(`✅ Upsert thành công ${dataList.length} bản ghi vào ${tableName}`);
   }
@@ -80,34 +82,59 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // 1. Gọi API
+    // 1. Gọi API với xử lý lỗi chi tiết
     console.log(`📡 Đang gọi API: ${METADATA_API_URL}`);
-    const response = await fetch(METADATA_API_URL, {
-      method: 'GET',
-      headers: {
-        'Accept': '*/*',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Referer': 'https://renderz.app/',
-        'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36',
-        'Sec-Ch-Ua': '"Chromium";v="141", "Google Chrome";v="141", "Not?A_Brand";v="8"',
-        'Sec-Ch-Ua-Mobile': '?1',
-        'Sec-Ch-Ua-Platform': '"Android"',
-        'Sec-Fetch-Dest': 'empty',
-        'Sec-Fetch-Mode': 'cors',
-        'Sec-Fetch-Site': 'same-origin',
-        'Accept-Encoding': 'gzip, deflate, br',
-      },
-    });
+    let response;
+    let rawApiData;
+    
+    try {
+      response = await fetch(METADATA_API_URL, {
+        method: 'GET',
+        headers: {
+          'Accept': '*/*',
+          'Accept-Language': 'en-US,en;q=0.9',
+          'Referer': 'https://renderz.app/',
+          'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36',
+          'Sec-Ch-Ua': '"Chromium";v="141", "Google Chrome";v="141", "Not?A_Brand";v="8"',
+          'Sec-Ch-Ua-Mobile': '?1',
+          'Sec-Ch-Ua-Platform': '"Android"',
+          'Sec-Fetch-Dest': 'empty',
+          'Sec-Fetch-Mode': 'cors',
+          'Sec-Fetch-Site': 'same-origin',
+          'Accept-Encoding': 'gzip, deflate, br',
+        },
+      });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`❌ HTTP error! status: ${response.status}`);
-      console.error(`Error response: ${errorText.substring(0, 500)}`);
-      throw new Error(`HTTP error! status: ${response.status}`);
+      // Kiểm tra HTTP status
+      console.log(`📊 Response status: ${response.status}`);
+      console.log(`📊 Response headers: ${JSON.stringify(Object.fromEntries(response.headers.entries()))}`);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`❌ LỖI HTTP: API Renderz trả về status ${response.status}`);
+        console.error(`❌ Nội dung phản hồi (1000 ký tự đầu): ${errorText.substring(0, 1000)}`);
+        throw new Error(`API Fetch Failure: Status ${response.status}`);
+      }
+
+      // Kiểm tra Content-Type
+      const contentType = response.headers.get('content-type');
+      console.log(`📊 Content-Type: ${contentType}`);
+
+      // Phân tích JSON
+      console.log('🔄 Đang phân tích JSON...');
+      const responseText = await response.text();
+      console.log(`📊 Response length: ${responseText.length} characters`);
+      console.log(`📊 First 500 chars: ${responseText.substring(0, 500)}`);
+      
+      rawApiData = JSON.parse(responseText);
+      console.log('✅ Phân tích JSON thành công');
+      
+    } catch (error) {
+      console.error('❌ LỖI CRITICAL (Fetch/Parse):');
+      console.error(`Message: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(`Stack: ${error instanceof Error ? error.stack : 'No stack trace'}`);
+      throw error;
     }
-
-    const rawApiData = await response.json();
-    console.log('✅ Nhận được dữ liệu từ API');
 
     // Bộ chứa để lưu trữ kết quả
     const foundData = {
@@ -181,12 +208,17 @@ Deno.serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('❌ Sync error:', error);
+    console.error('❌ LỖI NGHIÊM TRỌNG (Global Handler):');
+    console.error(`Message: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    console.error(`Stack: ${error instanceof Error ? error.stack : 'No stack trace'}`);
+    
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     return new Response(
       JSON.stringify({
         success: false,
+        message: 'Internal Server Error during metadata sync',
         error: errorMessage,
+        timestamp: new Date().toISOString()
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
