@@ -49,6 +49,17 @@ export default function PlayerCard({ player, onClick, clubsData, countriesData }
   const flagImage = player.images?.flagImage;
   const countryNameVi = player.nation?.name;
 
+  // Get avgStats array (6 values for outfield, 6 for GK)
+  const avgStats = (player as any).avgStats || [];
+  const avgGkStats = (player as any).avgGkStats || [];
+  
+  // Map avgStats to Vietnamese stat labels
+  const statLabels = isGK 
+    ? ["BẮT", "XỬ LÝ", "SÚT", "PHẢ", "TĐ", "VỊ TRÍ"]
+    : ["TĐ", "SÚT", "CHUYỀN", "RÊ", "PN", "TL"];
+  
+  const statsToShow = isGK ? avgGkStats : avgStats;
+
   const statColors: Record<string, string> = {
     pace: "text-stat-pace",
     shooting: "text-stat-shooting",
@@ -64,23 +75,10 @@ export default function PlayerCard({ player, onClick, clubsData, countriesData }
     positioning: "text-stat-physical",
   };
 
-  const displayStats = isGK
-    ? [
-        { name: "DIV", value: player.stats.diving },
-        { name: "HAN", value: player.stats.handling },
-        { name: "KIC", value: player.stats.kicking },
-        { name: "REF", value: player.stats.reflexes },
-        { name: "SPD", value: player.stats.speed },
-        { name: "POS", value: player.stats.positioning },
-      ]
-    : [
-        { name: "PAC", value: player.stats.pace },
-        { name: "SHO", value: player.stats.shooting },
-        { name: "PAS", value: player.stats.passing },
-        { name: "DRI", value: player.stats.dribbling },
-        { name: "DEF", value: player.stats.defense },
-        { name: "PHY", value: player.stats.physicality },
-      ];
+  const displayStats = statLabels.map((label, index) => ({
+    name: label,
+    value: statsToShow[index] || 0
+  }));
 
   return (
     <Card

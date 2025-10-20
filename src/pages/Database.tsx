@@ -4,6 +4,7 @@ import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import PlayerCard from "@/components/PlayerCard";
 import { Input } from "@/components/ui/input";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Search, Filter, X, RefreshCw, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -68,19 +69,42 @@ const PAGE_SIZE = 20;
 
 export default function Database() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [searchName, setSearchName] = useState("");
   const [showFilters, setShowFilters] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [syncStatus, setSyncStatus] = useState<string>("");
   const [clubsData, setClubsData] = useState<any[]>([]);
   const [countriesData, setCountriesData] = useState<any[]>([]);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   
   const { filters, setFilters, resetFilters: resetFilterState } = usePlayerFilters();
 
   useEffect(() => {
     fetchClubsAndCountries();
+    checkSuperAdminRole();
   }, []);
+
+  const checkSuperAdminRole = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("role", "super_admin")
+        .single();
+
+      if (data && !error) {
+        setIsSuperAdmin(true);
+      }
+    } catch (error) {
+      console.error("Error checking super admin role:", error);
+    }
+  };
 
   const fetchClubsAndCountries = async () => {
     try {
@@ -237,48 +261,50 @@ export default function Database() {
           </p>
         </div>
 
-        {/* Sync Controls */}
-        <Card className="p-6 mb-6">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div>
-              <h3 className="text-lg font-semibold mb-1">Đồng bộ dữ liệu</h3>
-              <p className="text-sm text-muted-foreground">
-                Cập nhật cơ sở dữ liệu cầu thủ từ FIFA Renderz
-              </p>
+        {/* Sync Controls - Only for Super Admin */}
+        {isSuperAdmin && (
+          <Card className="p-6 mb-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div>
+                <h3 className="text-lg font-semibold mb-1">Đồng bộ dữ liệu</h3>
+                <p className="text-sm text-muted-foreground">
+                  Cập nhật cơ sở dữ liệu cầu thủ từ FIFA Renderz
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => handleSync('test', 2)}
+                  disabled={syncing}
+                  variant="outline"
+                >
+                  {syncing ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                  )}
+                  Test (2 trang)
+                </Button>
+                <Button
+                  onClick={() => handleSync('full', 100)}
+                  disabled={syncing}
+                  className="gradient-primary"
+                >
+                  {syncing ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                  )}
+                  Full Sync
+                </Button>
+              </div>
             </div>
-            <div className="flex gap-2">
-              <Button
-                onClick={() => handleSync('test', 2)}
-                disabled={syncing}
-                variant="outline"
-              >
-                {syncing ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                )}
-                Test (2 trang)
-              </Button>
-              <Button
-                onClick={() => handleSync('full', 100)}
-                disabled={syncing}
-                className="gradient-primary"
-              >
-                {syncing ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                )}
-                Full Sync
-              </Button>
-            </div>
-          </div>
-          {syncStatus && (
-            <div className="mt-4 p-3 bg-muted rounded-md">
-              <p className="text-sm">{syncStatus}</p>
-            </div>
-          )}
-        </Card>
+            {syncStatus && (
+              <div className="mt-4 p-3 bg-muted rounded-md">
+                <p className="text-sm">{syncStatus}</p>
+              </div>
+            )}
+          </Card>
+        )}
 
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Sidebar Filters */}
@@ -365,6 +391,7 @@ export default function Database() {
                       player={player as any} 
                       clubsData={clubsData}
                       countriesData={countriesData}
+                      onClick={() => navigate(`/player/${player.assetId}`)}
                     />
                   ))}
                 </div>
