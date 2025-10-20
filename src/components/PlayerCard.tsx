@@ -49,9 +49,28 @@ export default function PlayerCard({ player, onClick, clubsData, countriesData }
   const flagImage = player.images?.flagImage;
   const countryNameVi = player.nation?.name;
 
-  // Get avgStats array (6 values for outfield, 6 for GK)
-  const avgStats = (player as any).avgStats || [];
-  const avgGkStats = (player as any).avgGkStats || [];
+  // Get avgStats object (avg1-avg6 for stats)
+  const avgStatsObj = (player as any).avgStats || {};
+  const avgGkStatsObj = (player as any).avgGkStats || {};
+  
+  // Convert object to array [avg1, avg2, avg3, avg4, avg5, avg6]
+  const avgStats = [
+    avgStatsObj.avg1 || 0,
+    avgStatsObj.avg2 || 0,
+    avgStatsObj.avg3 || 0,
+    avgStatsObj.avg4 || 0,
+    avgStatsObj.avg5 || 0,
+    avgStatsObj.avg6 || 0
+  ];
+  
+  const avgGkStats = [
+    avgGkStatsObj.avg1 || 0,
+    avgGkStatsObj.avg2 || 0,
+    avgGkStatsObj.avg3 || 0,
+    avgGkStatsObj.avg4 || 0,
+    avgGkStatsObj.avg5 || 0,
+    avgGkStatsObj.avg6 || 0
+  ];
   
   // Map avgStats to Vietnamese stat labels
   const statLabels = isGK 

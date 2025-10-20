@@ -91,63 +91,67 @@ const statLabels: Record<string, string> = {
   defense: "Phòng ngự",
   physicality: "Thể lực",
   
-  // Pace
-  acceleration: "Tăng Tốc",
-  sprintSpeed: "Tốc Độ Chạy",
+  // Pace (keys from DB)
+  acc: "Tăng Tốc",
+  spd: "Tốc Độ Chạy",
   
-  // Shooting
-  positioning_att: "Chọn Vị Trí",
-  finishing: "Dứt Điểm",
-  shotPower: "Lực Sút",
-  longShots: "Sút Xa",
-  volleys: "Vô Lê",
-  penalties: "Phạt Đền",
+  // Shooting (keys from DB)
+  pos: "Chọn Vị Trí",
+  fin: "Dứt Điểm",
+  sho: "Lực Sút",
+  lsa: "Sút Xa",
+  vol: "Vô Lê",
+  pen: "Phạt Đền",
   
-  // Passing
-  vision: "Tầm Nhìn",
-  crossing: "Tạt Bóng",
-  fkAccuracy: "Đá Phạt",
-  shortPassing: "Chuyền Ngắn",
-  longPassing: "Chuyền Dài",
-  curve: "Sút Xoáy",
+  // Passing (keys from DB)
+  vis: "Tầm Nhìn",
+  cro: "Tạt Bóng",
+  frk: "Đá Phạt",
+  spa: "Chuyền Ngắn",
+  lpa: "Chuyền Dài",
+  cur: "Sút Xoáy",
   
-  // Dribbling
-  agility: "Khéo Léo",
-  balance: "Cân Bằng",
-  reactions: "Phản Ứng",
-  ballControl: "Kiểm Soát Bóng",
-  composure: "Bình Tĩnh",
-  dribbling_detail: "Rê Dắt",
+  // Dribbling (keys from DB)
+  agi: "Khéo Léo",
+  bal: "Cân Bằng",
+  rea: "Phản Ứng",
+  bac: "Kiểm Soát Bóng",
+  dri: "Rê Dắt",
+  awr: "Bình Tĩnh",
   
-  // Defense
-  interceptions: "Cắt Bóng",
-  headingAccuracy: "Đánh Đầu",
-  defAwareness: "Ý Thức Phòng Thủ",
-  standTackle: "Tranh Bóng Đứng",
-  slideTackle: "Xoạc Bóng",
+  // Defense (keys from DB)
+  mrk: "Cắt Bóng",
+  hea: "Đánh Đầu",
+  stt: "Tranh Bóng Đứng",
+  slt: "Xoạc Bóng",
   
-  // Physical
-  jumping: "Nhảy",
-  stamina: "Sức Bền",
-  strength: "Sức Mạnh",
-  aggression: "Quyết Đoán",
+  // Physical (keys from DB)
+  jmp: "Nhảy",
+  sta: "Sức Bền",
+  str: "Sức Mạnh",
+  agg: "Quyết Đoán",
   
-  // GK stats
+  // GK stats (keys from DB)
   diving: "Bắt Bóng",
   handling: "Xử Lý",
   kicking: "Sút",
   reflexes: "Phản Xạ",
   speed: "Tốc Độ",
-  positioning: "Vị Trí"
+  positioning: "Vị Trí",
+  gkd: "Bắt Bóng",
+  han: "Xử Lý",
+  gkk: "Sút",
+  ref: "Phản Xạ",
+  gkp: "Vị Trí"
 };
 
 const detailedStatMapping: Record<string, string[]> = {
-  pace: ["acceleration", "sprintSpeed"],
-  shooting: ["positioning_att", "finishing", "shotPower", "longShots", "volleys", "penalties"],
-  passing: ["vision", "crossing", "fkAccuracy", "shortPassing", "longPassing", "curve"],
-  dribbling: ["agility", "balance", "reactions", "ballControl", "composure"],
-  defense: ["interceptions", "headingAccuracy", "defAwareness", "standTackle", "slideTackle"],
-  physicality: ["jumping", "stamina", "strength", "aggression"]
+  pace: ["acc", "spd"],
+  shooting: ["pos", "fin", "sho", "lsa", "vol", "pen"],
+  passing: ["vis", "cro", "frk", "spa", "lpa", "cur"],
+  dribbling: ["agi", "bal", "rea", "bac", "dri", "awr"],
+  defense: ["mrk", "hea", "awr", "stt", "slt"],
+  physicality: ["jmp", "sta", "str", "agg"]
 };
 
 export default function PlayerDetail() {
@@ -234,26 +238,46 @@ export default function PlayerDetail() {
   const imageUrl = (player.images as any)?.portrait || (player.images as any)?.card || "/placeholder.svg";
   const isGK = player.position === "GK";
   
-  const avgStatsArray = (player.avgStats as any) || [];
-  const avgGkStatsArray = (player.avgGkStats as any) || [];
+  // Get avgStats from database (object with avg1-avg6 keys)
+  const avgStatsObj = (player.avgStats as any) || {};
+  const avgGkStatsObj = (player.avgGkStats as any) || {};
   const playerStats = (player.stats as any) || {};
+  
+  // Convert to array
+  const avgStatsArray = [
+    avgStatsObj.avg1 || 0,
+    avgStatsObj.avg2 || 0,
+    avgStatsObj.avg3 || 0,
+    avgStatsObj.avg4 || 0,
+    avgStatsObj.avg5 || 0,
+    avgStatsObj.avg6 || 0
+  ];
+  
+  const avgGkStatsArray = [
+    avgGkStatsObj.avg1 || 0,
+    avgGkStatsObj.avg2 || 0,
+    avgGkStatsObj.avg3 || 0,
+    avgGkStatsObj.avg4 || 0,
+    avgGkStatsObj.avg5 || 0,
+    avgGkStatsObj.avg6 || 0
+  ];
   
   const mainStats = isGK 
     ? {
-        diving: avgGkStatsArray[0] || playerStats?.diving || 0,
-        handling: avgGkStatsArray[1] || playerStats?.handling || 0,
-        kicking: avgGkStatsArray[2] || playerStats?.kicking || 0,
-        reflexes: avgGkStatsArray[3] || playerStats?.reflexes || 0,
-        speed: avgGkStatsArray[4] || playerStats?.speed || 0,
-        positioning: avgGkStatsArray[5] || playerStats?.positioning || 0
+        diving: avgGkStatsArray[0] || 0,
+        handling: avgGkStatsArray[1] || 0,
+        kicking: avgGkStatsArray[2] || 0,
+        reflexes: avgGkStatsArray[3] || 0,
+        speed: avgGkStatsArray[4] || 0,
+        positioning: avgGkStatsArray[5] || 0
       }
     : {
-        pace: avgStatsArray[0] || playerStats?.pace || 0,
-        shooting: avgStatsArray[1] || playerStats?.shooting || 0,
-        passing: avgStatsArray[2] || playerStats?.passing || 0,
-        dribbling: avgStatsArray[3] || playerStats?.dribbling || 0,
-        defense: avgStatsArray[4] || playerStats?.defense || 0,
-        physicality: avgStatsArray[5] || playerStats?.physicality || 0
+        pace: avgStatsArray[0] || 0,
+        shooting: avgStatsArray[1] || 0,
+        passing: avgStatsArray[2] || 0,
+        dribbling: avgStatsArray[3] || 0,
+        defense: avgStatsArray[4] || 0,
+        physicality: avgStatsArray[5] || 0
       };
 
   return (
@@ -362,10 +386,10 @@ export default function PlayerDetail() {
                       
                       <div className="grid grid-cols-2 gap-3">
                         {detailedStats.map((statKey) => {
-                          const value = playerStats?.[statKey as keyof PlayerStats];
+                          const value = playerStats?.[statKey];
                           return (
                             <div key={statKey} className="flex items-center justify-between p-2 bg-muted/30 rounded">
-                              <span className="text-sm text-muted-foreground">{statLabels[statKey]}</span>
+                              <span className="text-sm text-muted-foreground">{statLabels[statKey] || statKey}</span>
                               <span className="font-semibold">{value || 0}</span>
                             </div>
                           );
