@@ -316,15 +316,38 @@ export default function PlayerDetail() {
                 <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
                   {player.height && <span>{player.height} cm</span>}
                   {player.weight && <span>{player.weight} kg</span>}
-                  {player.foot && <span>Chân {player.foot === 1 ? "thuận" : "trái"}</span>}
                 </div>
                 
-                <div className="flex items-center justify-center gap-2">
-                  {player.weakFoot && (
-                    <div className="flex items-center gap-1">
-                      <span>{player.weakFoot}</span>
-                      <span className="text-accent">⭐</span>
-                      <span className="text-xs text-muted-foreground">{player.skillMovesLevel || 5}</span>
+                <div className="flex items-center justify-center gap-3 flex-wrap">
+                  {/* Weak Foot & Skill Moves */}
+                  {(player.weakFoot || player.skillMovesLevel) && (
+                    <div className="flex items-center gap-2">
+                      {/* Strong Foot Icon */}
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-primary">
+                        <path d="M10 3C10 3 9 4 9 6C9 8 10 9 10 9M14 3C14 3 15 4 15 6C15 8 14 9 14 9M12 3V9M8 9C8 9 7 10 7 12C7 14 8 15 8 15M16 9C16 9 17 10 17 12C17 14 16 15 16 15M12 9V15M6 15C6 15 5 16 5 18C5 20 6 21 6 21M18 15C18 15 19 16 19 18C19 20 18 21 18 21M12 15V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                      </svg>
+                      {/* Weak Foot Stars */}
+                      {player.weakFoot && (
+                        <div className="flex items-center gap-0.5">
+                          <span className="font-semibold text-primary">{player.weakFoot}</span>
+                          {[...Array(player.weakFoot)].map((_, i) => (
+                            <span key={i} className="text-primary text-sm">★</span>
+                          ))}
+                        </div>
+                      )}
+                      {/* Weak Foot Icon (grey) */}
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-muted-foreground">
+                        <path d="M10 3C10 3 9 4 9 6C9 8 10 9 10 9M14 3C14 3 15 4 15 6C15 8 14 9 14 9M12 3V9M8 9C8 9 7 10 7 12C7 14 8 15 8 15M16 9C16 9 17 10 17 12C17 14 16 15 16 15M12 9V15M6 15C6 15 5 16 5 18C5 20 6 21 6 21M18 15C18 15 19 16 19 18C19 20 18 21 18 21M12 15V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                      </svg>
+                      {/* Skill Moves Stars */}
+                      {player.skillMovesLevel && (
+                        <div className="flex items-center gap-0.5">
+                          <span className="font-semibold text-primary">{player.skillMovesLevel}</span>
+                          {[...Array(player.skillMovesLevel)].map((_, i) => (
+                            <span key={i} className="text-primary text-sm">★</span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
                   
@@ -453,45 +476,6 @@ export default function PlayerDetail() {
                     </div>
                   )}
 
-                  {/* Height & Weight */}
-                  <div className="space-y-2">
-                    <h3 className="text-sm font-semibold text-muted-foreground">Chiều Cao / Cân Nặng</h3>
-                    <div className="font-medium">
-                      {player.height && <span>{player.height} cm</span>}
-                      {player.height && player.weight && <span> / </span>}
-                      {player.weight && <span>{player.weight} kg</span>}
-                    </div>
-                  </div>
-
-                  {/* Foot */}
-                  {player.foot && (
-                    <div className="space-y-2">
-                      <h3 className="text-sm font-semibold text-muted-foreground">Chân Thuận</h3>
-                      <div className="font-medium">{player.foot === 1 ? "Chân Phải" : player.foot === 2 ? "Chân Trái" : "Cả Hai"}</div>
-                    </div>
-                  )}
-
-                  {/* Weak Foot */}
-                  {player.weakFoot && (
-                    <div className="space-y-2">
-                      <h3 className="text-sm font-semibold text-muted-foreground">Chân Yếu</h3>
-                      <div className="flex items-center gap-1">
-                        <span className="font-medium">{player.weakFoot}</span>
-                        <span className="text-accent">⭐</span>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Skill Moves */}
-                  {player.skillMovesLevel && (
-                    <div className="space-y-2">
-                      <h3 className="text-sm font-semibold text-muted-foreground">Kỹ Năng</h3>
-                      <div className="flex items-center gap-1">
-                        <span className="font-medium">{player.skillMovesLevel}</span>
-                        <span className="text-accent">⭐</span>
-                      </div>
-                    </div>
-                  )}
 
                   {/* Added Date */}
                   {player.added && (
