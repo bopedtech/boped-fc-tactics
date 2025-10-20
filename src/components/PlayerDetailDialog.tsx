@@ -32,24 +32,25 @@ interface Player {
   cardName?: string;
   rating: number;
   position?: string;
-  nation?: any;
-  club?: any;
-  league?: any;
-  images?: any;
-  stats?: PlayerStats;
-  traits?: any;
-  workRates?: any;
-  potentialPositions?: any;
+  nation?: unknown;
+  club?: unknown;
+  league?: unknown;
+  images?: unknown;
+  stats?: unknown;
+  traits?: unknown;
+  workRates?: unknown;
+  potentialPositions?: unknown;
   height?: number;
   weight?: number;
   weakFoot?: number;
   skillMovesLevel?: number;
   foot?: number;
-  avgStats?: any;
-  avgGkStats?: any;
-  skillMoves?: any;
-  skillStyleSkills?: any;
+  avgStats?: unknown;
+  avgGkStats?: unknown;
+  skillMoves?: unknown;
+  skillStyleSkills?: unknown;
   added?: string;
+  [key: string]: unknown;
 }
 
 const statLabels: Record<string, string> = {
@@ -133,7 +134,6 @@ interface PlayerDetailDialogProps {
 export default function PlayerDetailDialog({ assetId, open, onOpenChange }: PlayerDetailDialogProps) {
   const [player, setPlayer] = useState<Player | null>(null);
   const [loading, setLoading] = useState(false);
-  const [clubData, setClubData] = useState<any>(null);
   const [countryCode, setCountryCode] = useState<string>("");
 
   useEffect(() => {
@@ -154,23 +154,12 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
         .single();
 
       if (error) throw error;
-      setPlayer(data as any);
-
-      // Fetch club data if exists
-      if (data?.club && typeof data.club === 'object' && 'id' in data.club) {
-        const clubId = (data.club as any).id;
-        const { data: club } = await supabase
-          .from("clubs")
-          .select("*")
-          .eq("clubId", clubId)
-          .single();
-        setClubData(club);
-      }
+      setPlayer(data);
 
       // Fetch country code if nation exists
       if (data?.nation && typeof data.nation === 'object' && 'name' in data.nation) {
-        const nationName = (data.nation as any).name || (data.nation as any).label;
-        if (nationName) {
+        const nationName = (data.nation as Record<string, unknown>).name || (data.nation as Record<string, unknown>).label;
+        if (nationName && typeof nationName === 'string') {
           const { data: countries } = await supabase
             .from("countries_vi")
             .select("countryCode, nameEn")
@@ -315,12 +304,12 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                           </div>
                         )}
                         
-                        {clubData && (
+                        {player.club && (
                           <div className="flex items-center gap-1">
-                            {clubData.logoUrl && (
-                              <img src={clubData.logoUrl} alt={clubData.name} className="w-6 h-6" />
+                            {(player.club as any).image && (
+                              <img src={(player.club as any).image} alt={(player.club as any).name} className="w-6 h-6" />
                             )}
-                            <span className="text-sm">{clubData.nameVi || clubData.name}</span>
+                            <span className="text-sm">{(player.club as any).name}</span>
                           </div>
                         )}
                       </div>
@@ -397,14 +386,14 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                     <TabsContent value="info" className="space-y-6 mt-6">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Team */}
-                        {clubData && (
+                        {player.club && (
                           <div className="space-y-2">
                             <h3 className="text-sm font-semibold text-muted-foreground">Đội Bóng</h3>
                             <div className="flex items-center gap-2">
-                              {clubData.logoUrl && (
-                                <img src={clubData.logoUrl} alt={clubData.name} className="w-8 h-8" />
+                              {(player.club as any).image && (
+                                <img src={(player.club as any).image} alt={(player.club as any).name} className="w-8 h-8" />
                               )}
-                              <span className="font-medium">{clubData.nameVi || clubData.name}</span>
+                              <span className="font-medium">{(player.club as any).name}</span>
                             </div>
                           </div>
                         )}

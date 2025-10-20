@@ -93,8 +93,8 @@ function processApiResponse(responseData: any): { extractedPlayers: RawPlayerDat
       return false;
     }
 
-    // Kiểm tra nếu chuỗi tags chứa "25" HOẶC "26"
-    const isInSeason = player.tags.includes("25") || player.tags.includes("26");
+    // Kiểm tra nếu chuỗi tags chứa "24" HOẶC "25" HOẶC "26"
+    const isInSeason = player.tags.includes("24") || player.tags.includes("25") || player.tags.includes("26");
 
     return isInSeason;
   });

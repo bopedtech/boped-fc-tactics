@@ -16,31 +16,28 @@ export type Database = {
     Tables: {
       clubs: {
         Row: {
-          clubId: number
           createdAt: string | null
           id: number
-          league: string | null
-          logoUrl: string | null
+          image: string | null
           name: string
-          nameVi: string | null
+          rawData: Json
+          updatedAt: string | null
         }
         Insert: {
-          clubId: number
           createdAt?: string | null
-          id?: number
-          league?: string | null
-          logoUrl?: string | null
+          id: number
+          image?: string | null
           name: string
-          nameVi?: string | null
+          rawData: Json
+          updatedAt?: string | null
         }
         Update: {
-          clubId?: number
           createdAt?: string | null
           id?: number
-          league?: string | null
-          logoUrl?: string | null
+          image?: string | null
           name?: string
-          nameVi?: string | null
+          rawData?: Json
+          updatedAt?: string | null
         }
         Relationships: []
       }
@@ -92,6 +89,60 @@ export type Database = {
           name?: string
           nameEn?: string
           positions?: Json
+        }
+        Relationships: []
+      }
+      leagues: {
+        Row: {
+          createdAt: string | null
+          id: number
+          image: string | null
+          name: string
+          rawData: Json
+          updatedAt: string | null
+        }
+        Insert: {
+          createdAt?: string | null
+          id: number
+          image?: string | null
+          name: string
+          rawData: Json
+          updatedAt?: string | null
+        }
+        Update: {
+          createdAt?: string | null
+          id?: number
+          image?: string | null
+          name?: string
+          rawData?: Json
+          updatedAt?: string | null
+        }
+        Relationships: []
+      }
+      nations: {
+        Row: {
+          createdAt: string | null
+          id: number
+          image: string | null
+          name: string
+          rawData: Json
+          updatedAt: string | null
+        }
+        Insert: {
+          createdAt?: string | null
+          id: number
+          image?: string | null
+          name: string
+          rawData: Json
+          updatedAt?: string | null
+        }
+        Update: {
+          createdAt?: string | null
+          id?: number
+          image?: string | null
+          name?: string
+          rawData?: Json
+          updatedAt?: string | null
         }
         Relationships: []
       }
@@ -251,6 +302,36 @@ export type Database = {
           workRateAtt?: number | null
           workRateDef?: number | null
           workRates?: Json | null
+        }
+        Relationships: []
+      }
+      programs: {
+        Row: {
+          createdAt: string | null
+          id: string
+          image: string | null
+          name: string
+          rawData: Json
+          sort: number | null
+          updatedAt: string | null
+        }
+        Insert: {
+          createdAt?: string | null
+          id: string
+          image?: string | null
+          name: string
+          rawData: Json
+          sort?: number | null
+          updatedAt?: string | null
+        }
+        Update: {
+          createdAt?: string | null
+          id?: string
+          image?: string | null
+          name?: string
+          rawData?: Json
+          sort?: number | null
+          updatedAt?: string | null
         }
         Relationships: []
       }
