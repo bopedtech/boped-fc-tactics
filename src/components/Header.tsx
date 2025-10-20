@@ -105,6 +105,15 @@ export default function Header() {
             >
               Đội hình của tôi
             </Link>
+            <Link
+              to="/admin"
+              className={cn(
+                "transition-colors hover:text-primary",
+                isActive("/admin") ? "text-primary font-semibold" : "text-foreground/80"
+              )}
+            >
+              Quản trị
+            </Link>
           </nav>
         </div>
 

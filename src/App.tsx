@@ -7,6 +7,7 @@ import Auth from "./pages/Auth";
 import Database from "./pages/Database";
 import Builder from "./pages/Builder";
 import MySquads from "./pages/MySquads";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App = () => (
         <Route path="/database" element={<Database />} />
         <Route path="/builder" element={<Builder />} />
         <Route path="/my-squads" element={<MySquads />} />
+        <Route path="/admin" element={<Admin />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
