@@ -80,6 +80,7 @@ interface Player {
   avgGkStats?: any;
   skillMoves?: any;
   skillStyleSkills?: any;
+  added?: string;
 }
 
 const statLabels: Record<string, string> = {
@@ -235,7 +236,7 @@ export default function PlayerDetail() {
   }
 
   const playerName = player.commonName || player.cardName || `${player.firstName} ${player.lastName}`;
-  const imageUrl = (player.images as any)?.portrait || (player.images as any)?.card || "/placeholder.svg";
+  const imageUrl = (player.images as any)?.playerCardImage || (player.images as any)?.portrait || (player.images as any)?.card || "/placeholder.svg";
   const isGK = player.position === "GK";
   
   // Get avgStats from database (object with avg1-avg6 keys)
@@ -411,15 +412,131 @@ export default function PlayerDetail() {
                 )}
               </TabsContent>
 
-              <TabsContent value="info" className="space-y-4 mt-6">
-                {/* Skills */}
-                {player.skillMoves && Array.isArray((player as any).skillMoves) && (player as any).skillMoves.length > 0 && (
+              <TabsContent value="info" className="space-y-6 mt-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Team */}
+                  {clubData && (
+                    <div className="space-y-2">
+                      <h3 className="text-sm font-semibold text-muted-foreground">Đội Bóng</h3>
+                      <div className="flex items-center gap-2">
+                        {clubData.logoUrl && (
+                          <img src={clubData.logoUrl} alt={clubData.name} className="w-8 h-8" />
+                        )}
+                        <span className="font-medium">{clubData.nameVi || clubData.name}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* League */}
+                  {player.league && (
+                    <div className="space-y-2">
+                      <h3 className="text-sm font-semibold text-muted-foreground">Giải Đấu</h3>
+                      <div className="flex items-center gap-2">
+                        {(player.images as any)?.leagueImage && (
+                          <img src={(player.images as any).leagueImage} alt="League" className="w-8 h-8" />
+                        )}
+                        <span className="font-medium">{(player.league as any).name}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Nation */}
+                  {player.nation && (
+                    <div className="space-y-2">
+                      <h3 className="text-sm font-semibold text-muted-foreground">Quốc Tịch</h3>
+                      <div className="flex items-center gap-2">
+                        {countryCode && (
+                          <span className="text-2xl">{getCountryFlag(countryCode)}</span>
+                        )}
+                        <span className="font-medium">{(player.nation as any).name || (player.nation as any).label}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Height & Weight */}
                   <div className="space-y-2">
-                    <h3 className="text-lg font-semibold">Kỹ Năng</h3>
+                    <h3 className="text-sm font-semibold text-muted-foreground">Chiều Cao / Cân Nặng</h3>
+                    <div className="font-medium">
+                      {player.height && <span>{player.height} cm</span>}
+                      {player.height && player.weight && <span> / </span>}
+                      {player.weight && <span>{player.weight} kg</span>}
+                    </div>
+                  </div>
+
+                  {/* Foot */}
+                  {player.foot && (
+                    <div className="space-y-2">
+                      <h3 className="text-sm font-semibold text-muted-foreground">Chân Thuận</h3>
+                      <div className="font-medium">{player.foot === 1 ? "Chân Phải" : player.foot === 2 ? "Chân Trái" : "Cả Hai"}</div>
+                    </div>
+                  )}
+
+                  {/* Weak Foot */}
+                  {player.weakFoot && (
+                    <div className="space-y-2">
+                      <h3 className="text-sm font-semibold text-muted-foreground">Chân Yếu</h3>
+                      <div className="flex items-center gap-1">
+                        <span className="font-medium">{player.weakFoot}</span>
+                        <span className="text-accent">⭐</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Skill Moves */}
+                  {player.skillMovesLevel && (
+                    <div className="space-y-2">
+                      <h3 className="text-sm font-semibold text-muted-foreground">Kỹ Năng</h3>
+                      <div className="flex items-center gap-1">
+                        <span className="font-medium">{player.skillMovesLevel}</span>
+                        <span className="text-accent">⭐</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Added Date */}
+                  {player.added && (
+                    <div className="space-y-2">
+                      <h3 className="text-sm font-semibold text-muted-foreground">Ngày Thêm</h3>
+                      <div className="font-medium">
+                        {new Date(player.added).toLocaleDateString('vi-VN', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Work Rates */}
+                {(player as any).workRates && (
+                  <div className="space-y-2 pt-4 border-t">
+                    <h3 className="text-sm font-semibold text-muted-foreground">Tốc Độ Làm Việc</h3>
+                    <div className="flex gap-6">
+                      {((player as any).workRates as any)?.attWorkRate && (
+                        <div>
+                          <span className="text-muted-foreground text-sm">Tấn công: </span>
+                          <span className="font-semibold">{((player as any).workRates as any).attWorkRate}</span>
+                        </div>
+                      )}
+                      {((player as any).workRates as any)?.defWorkRate && (
+                        <div>
+                          <span className="text-muted-foreground text-sm">Phòng thủ: </span>
+                          <span className="font-semibold">{((player as any).workRates as any).defWorkRate}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Alternative Positions */}
+                {player.potentialPositions && Array.isArray((player as any).potentialPositions) && (player as any).potentialPositions.length > 0 && (
+                  <div className="space-y-2 pt-4 border-t">
+                    <h3 className="text-sm font-semibold text-muted-foreground">Vị Trí Thay Thế</h3>
                     <div className="flex flex-wrap gap-2">
-                      {((player as any).skillMoves || []).map((skill: any, idx: number) => (
+                      {((player as any).potentialPositions || []).map((pos: any, idx: number) => (
                         <Badge key={idx} variant="secondary">
-                          {skill.label || skill.name}
+                          {pos.label || pos}
                         </Badge>
                       ))}
                     </div>
@@ -428,47 +545,26 @@ export default function PlayerDetail() {
 
                 {/* Traits */}
                 {player.traits && Array.isArray((player as any).traits) && (player as any).traits.length > 0 && (
-                  <div className="space-y-2">
-                    <h3 className="text-lg font-semibold">Đặc Điểm</h3>
+                  <div className="space-y-2 pt-4 border-t">
+                    <h3 className="text-sm font-semibold text-muted-foreground">Đặc Điểm</h3>
                     <div className="flex flex-wrap gap-2">
                       {((player as any).traits || []).map((trait: any, idx: number) => (
                         <Badge key={idx} variant="outline">
-                          {trait.label || trait.name}
+                          {trait.title || trait.label || trait.name}
                         </Badge>
                       ))}
                     </div>
                   </div>
                 )}
 
-                {/* Work Rates */}
-                {(player as any).workRates && (
-                  <div className="space-y-2">
-                    <h3 className="text-lg font-semibold">Tốc Độ Làm Việc</h3>
-                    <div className="flex gap-4">
-                      {((player as any).workRates as any)?.attWorkRate && (
-                        <div className="text-sm">
-                          <span className="text-muted-foreground">Tấn công: </span>
-                          <span className="font-semibold">{((player as any).workRates as any).attWorkRate}</span>
-                        </div>
-                      )}
-                      {((player as any).workRates as any)?.defWorkRate && (
-                        <div className="text-sm">
-                          <span className="text-muted-foreground">Phòng thủ: </span>
-                          <span className="font-semibold">{((player as any).workRates as any).defWorkRate}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Positions */}
-                {player.potentialPositions && Array.isArray((player as any).potentialPositions) && (player as any).potentialPositions.length > 0 && (
-                  <div className="space-y-2">
-                    <h3 className="text-lg font-semibold">Vị Trí</h3>
+                {/* Skills */}
+                {player.skillMoves && Array.isArray((player as any).skillMoves) && (player as any).skillMoves.length > 0 && (
+                  <div className="space-y-2 pt-4 border-t">
+                    <h3 className="text-sm font-semibold text-muted-foreground">Động Tác Kỹ Thuật</h3>
                     <div className="flex flex-wrap gap-2">
-                      {((player as any).potentialPositions || []).map((pos: any, idx: number) => (
+                      {((player as any).skillMoves || []).map((skill: any, idx: number) => (
                         <Badge key={idx} variant="secondary">
-                          {pos.label || pos}
+                          {skill.label || skill.name}
                         </Badge>
                       ))}
                     </div>
