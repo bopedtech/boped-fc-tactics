@@ -330,7 +330,7 @@ export default function PlayerDetail() {
                       {player.weakFoot && (
                         <div className="flex items-center gap-0.5">
                           <span className="font-semibold text-primary">{player.weakFoot}</span>
-                          {[...Array(player.weakFoot)].map((_, i) => (
+                          {Array.from({ length: player.weakFoot }).map((_, i) => (
                             <span key={i} className="text-primary text-sm">★</span>
                           ))}
                         </div>
@@ -343,7 +343,7 @@ export default function PlayerDetail() {
                       {player.skillMovesLevel && (
                         <div className="flex items-center gap-0.5">
                           <span className="font-semibold text-primary">{player.skillMovesLevel}</span>
-                          {[...Array(player.skillMovesLevel)].map((_, i) => (
+                          {Array.from({ length: player.skillMovesLevel }).map((_, i) => (
                             <span key={i} className="text-primary text-sm">★</span>
                           ))}
                         </div>
