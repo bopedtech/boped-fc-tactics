@@ -155,6 +155,7 @@ export default function PlayerDetail() {
   const [player, setPlayer] = useState<Player | null>(null);
   const [loading, setLoading] = useState(true);
   const [clubData, setClubData] = useState<any>(null);
+  const [countryCode, setCountryCode] = useState<string>("");
 
   useEffect(() => {
     fetchPlayer();
@@ -181,6 +182,23 @@ export default function PlayerDetail() {
           .eq("clubId", clubId)
           .single();
         setClubData(club);
+      }
+
+      // Fetch country code if nation exists
+      if (data?.nation && typeof data.nation === 'object' && 'name' in data.nation) {
+        const nationName = (data.nation as any).name || (data.nation as any).label;
+        if (nationName) {
+          const { data: countries } = await supabase
+            .from("countries_vi")
+            .select("countryCode, nameEn")
+            .ilike("nameEn", nationName)
+            .limit(1)
+            .single();
+          
+          if (countries?.countryCode) {
+            setCountryCode(countries.countryCode);
+          }
+        }
       }
     } catch (error) {
       console.error("Error fetching player:", error);
@@ -284,9 +302,9 @@ export default function PlayerDetail() {
                     </div>
                   )}
                   
-                  {(player.nation as any)?.id && (
+                  {countryCode && (
                     <div className="flex items-center gap-1">
-                      <span className="text-2xl">{getCountryFlag(`${(player.nation as any).id}`)}</span>
+                      <span className="text-2xl">{getCountryFlag(countryCode)}</span>
                       <span className="text-sm">{(player.nation as any).name || (player.nation as any).label}</span>
                     </div>
                   )}
