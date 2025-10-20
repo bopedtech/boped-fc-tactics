@@ -166,7 +166,7 @@ export default function PlayerDetail() {
       const { data, error } = await supabase
         .from("players")
         .select("*")
-        .eq("assetId", assetId)
+        .eq("assetId", Number(assetId))
         .single();
 
       if (error) throw error;
@@ -286,7 +286,7 @@ export default function PlayerDetail() {
                   
                   {(player.nation as any)?.id && (
                     <div className="flex items-center gap-1">
-                      <span className="text-2xl">{getCountryFlag(String((player.nation as any).id))}</span>
+                      <span className="text-2xl">{getCountryFlag(`${(player.nation as any).id}`)}</span>
                       <span className="text-sm">{(player.nation as any).name || (player.nation as any).label}</span>
                     </div>
                   )}
