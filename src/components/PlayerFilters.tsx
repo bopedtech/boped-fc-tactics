@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -6,6 +6,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface FilterState {
   ratingRange: [number, number];
@@ -65,6 +66,7 @@ const footNames: Record<string, string> = {
 };
 
 export default function PlayerFilters({ filters, onFilterChange, onReset }: PlayerFiltersProps) {
+  const [leagues, setLeagues] = useState<Array<{ id: number; name: string }>>([]);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     rating: true,
     position: true,
@@ -81,6 +83,24 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
     workrates: false,
     traits: false
   });
+
+  useEffect(() => {
+    fetchLeagues();
+  }, []);
+
+  const fetchLeagues = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('leagues')
+        .select('id, name')
+        .order('name', { ascending: true });
+      
+      if (error) throw error;
+      setLeagues(data || []);
+    } catch (error) {
+      console.error('Error fetching leagues:', error);
+    }
+  };
 
   const toggleSection = (section: string) => {
     setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
@@ -172,6 +192,37 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
                 </label>
               </div>
             ))}
+          </CollapsibleContent>
+        </Collapsible>
+
+        {/* Leagues Filter */}
+        <Collapsible open={openSections.league} onOpenChange={() => toggleSection('league')}>
+          <CollapsibleTrigger className="flex items-center justify-between w-full py-2.5 px-3 hover:bg-muted/50 rounded-md transition-colors">
+            <span className="font-medium text-sm">Giải đấu</span>
+            {openSections.league ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </CollapsibleTrigger>
+          <CollapsibleContent className="px-3 py-2">
+            <ScrollArea className="h-[200px]">
+              <div className="space-y-2 pr-4">
+                {leagues.map((league) => (
+                  <div key={league.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`league-${league.id}`}
+                      checked={filters.leagues.includes(league.id.toString())}
+                      onCheckedChange={(checked) => {
+                        const newLeagues = checked
+                          ? [...filters.leagues, league.id.toString()]
+                          : filters.leagues.filter(l => l !== league.id.toString());
+                        updateFilter('leagues', newLeagues);
+                      }}
+                    />
+                    <label htmlFor={`league-${league.id}`} className="text-xs cursor-pointer">
+                      {league.name}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
           </CollapsibleContent>
         </Collapsible>
 

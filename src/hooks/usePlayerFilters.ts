@@ -120,6 +120,14 @@ export const usePlayerFilters = (initialPosition?: string) => {
       });
     }
 
+    // Leagues filter
+    if (filters.leagues.length > 0) {
+      filtered = filtered.filter(p => {
+        const leagueId = p.league?.id?.toString();
+        return leagueId && filters.leagues.includes(leagueId);
+      });
+    }
+
     return filtered;
   };
 

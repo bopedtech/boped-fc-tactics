@@ -25,6 +25,7 @@ interface Player {
   position: string;
   nation?: any;
   club?: any;
+  league?: any;
   images?: any;
   stats: PlayerStats;
   traits?: any[];
@@ -35,15 +36,21 @@ interface PlayerCardProps {
   onClick?: () => void;
   clubsData?: Array<{ clubId: number; nameVi: string; logoUrl: string }>;
   countriesData?: Array<{ countryCode: string; nameVi: string; nameEn: string }>;
+  leaguesData?: Array<{ id: number; name: string; image?: string }>;
 }
 
-export default function PlayerCard({ player, onClick, clubsData, countriesData }: PlayerCardProps) {
+export default function PlayerCard({ player, onClick, clubsData, countriesData, leaguesData }: PlayerCardProps) {
   const isGK = player.position === "GK";
   
   // Lấy thông tin club
   const clubInfo = player.club?.id ? getClubInfo(player.club.id, clubsData) : null;
   const clubLogoUrl = clubInfo?.logoUrl;
   const clubName = clubInfo?.nameVi || player.club?.name;
+  
+  // Lấy thông tin league
+  const leagueInfo = leaguesData?.find(l => l.id === player.league?.id);
+  const leagueName = leagueInfo?.name || player.league?.name;
+  const leagueImage = leagueInfo?.image || player.league?.image;
   
   // Lấy flag và tên từ player data
   const flagImage = player.images?.flagImage;
@@ -138,8 +145,8 @@ export default function PlayerCard({ player, onClick, clubsData, countriesData }
           {player.commonName}
         </h3>
 
-        {/* Club and Nation */}
-        <div className="flex justify-center gap-3 mt-2 text-xs items-center">
+        {/* Club, League and Nation */}
+        <div className="flex justify-center gap-3 mt-2 text-xs items-center flex-wrap">
           {/* Club */}
           {clubName && (
             <div className="flex items-center gap-1.5">
@@ -154,6 +161,23 @@ export default function PlayerCard({ player, onClick, clubsData, countriesData }
                 />
               )}
               <span className="text-muted-foreground">{clubName}</span>
+            </div>
+          )}
+          
+          {/* League */}
+          {leagueName && (
+            <div className="flex items-center gap-1.5">
+              {leagueImage && (
+                <img 
+                  src={leagueImage} 
+                  alt={leagueName}
+                  className="w-4 h-4 object-contain"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              )}
+              <span className="text-muted-foreground text-[10px]">{leagueName}</span>
             </div>
           )}
           

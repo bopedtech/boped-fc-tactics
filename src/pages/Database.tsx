@@ -74,6 +74,7 @@ export default function Database() {
   const [syncing, setSyncing] = useState(false);
   const [syncStatus, setSyncStatus] = useState<string>("");
   const [countriesData, setCountriesData] = useState<any[]>([]);
+  const [leaguesData, setLeaguesData] = useState<Array<{ id: number; name: string; image?: string }>>([]);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [selectedPlayerAssetId, setSelectedPlayerAssetId] = useState<number | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -88,6 +89,7 @@ export default function Database() {
 
   useEffect(() => {
     fetchCountries();
+    fetchLeagues();
     checkSuperAdminRole();
   }, []);
 
@@ -118,6 +120,19 @@ export default function Database() {
       if (data) setCountriesData(data);
     } catch (error) {
       console.error("Error fetching countries:", error);
+    }
+  };
+
+  const fetchLeagues = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("leagues")
+        .select("id, name, image")
+        .order("name", { ascending: true });
+      if (error) throw error;
+      if (data) setLeaguesData(data);
+    } catch (error) {
+      console.error("Error fetching leagues:", error);
     }
   };
 
@@ -392,6 +407,7 @@ export default function Database() {
                       player={player as any} 
                       clubsData={[]}
                       countriesData={countriesData}
+                      leaguesData={leaguesData}
                       onClick={() => handlePlayerClick(player.assetId)}
                     />
                   ))}
