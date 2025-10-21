@@ -37,18 +37,13 @@ export default function Admin() {
     }
   };
 
-  const handleSyncLeagues = async (mode: 'single' | 'all' = 'single') => {
+  const handleSyncLeagues = async () => {
     try {
       setSyncingLeagues(true);
       setLeaguesResult(null);
-      toast.info(`Đang đồng bộ giải đấu (${mode === 'single' ? 'Season 24' : 'Tất cả seasons'})...`);
+      toast.info('Đang đồng bộ dữ liệu giải đấu toàn cục...');
 
-      const { data, error } = await supabase.functions.invoke('sync-leagues', {
-        body: { 
-          seasonId: 24,
-          mode: mode
-        }
-      });
+      const { data, error } = await supabase.functions.invoke('sync-leagues');
 
       if (error) throw error;
 
@@ -134,52 +129,30 @@ export default function Admin() {
                 <CardTitle>Đồng Bộ Giải Đấu</CardTitle>
               </div>
               <CardDescription>
-                Đồng bộ dữ liệu giải đấu từ mùa 24, 25, 26 (Composite Key: id + seasonId)
+                Đồng bộ dữ liệu giải đấu toàn cục (Universal Data - không phụ thuộc mùa)
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex gap-2">
-                <Button 
-                  onClick={() => handleSyncLeagues('single')}
-                  disabled={syncingLeagues}
-                  variant="outline"
-                  className="flex-1"
-                >
-                  {syncingLeagues ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <Play className="w-4 h-4 mr-2" />
-                  )}
-                  Season 24
-                </Button>
-                <Button 
-                  onClick={() => handleSyncLeagues('all')}
-                  disabled={syncingLeagues}
-                  className="flex-1"
-                >
-                  {syncingLeagues ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <Play className="w-4 h-4 mr-2" />
-                  )}
-                  Tất Cả Seasons
-                </Button>
-              </div>
+              <Button 
+                onClick={handleSyncLeagues}
+                disabled={syncingLeagues}
+                className="w-full"
+              >
+                {syncingLeagues ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Play className="w-4 h-4 mr-2" />
+                )}
+                Đồng Bộ Leagues
+              </Button>
 
               {leaguesResult && (
                 <div className="bg-muted p-4 rounded-lg space-y-2">
                   <p className="text-sm font-semibold text-green-600">✅ {leaguesResult.message}</p>
                   <div className="text-xs space-y-1">
                     <p>• Tổng giải đấu: {leaguesResult.totalLeagues}</p>
-                    <p>• Chế độ: {leaguesResult.mode}</p>
-                    <p>• Seasons: {leaguesResult.seasons?.join(', ')}</p>
-                    {leaguesResult.leaguesPerSeason && (
-                      <div className="mt-2">
-                        <p className="font-semibold">Chi tiết:</p>
-                        {Object.entries(leaguesResult.leaguesPerSeason).map(([season, count]) => (
-                          <p key={season}>  - Season {season}: {count as number} giải đấu</p>
-                        ))}
-                      </div>
+                    {leaguesResult.reference && (
+                      <p className="text-muted-foreground italic">• {leaguesResult.reference}</p>
                     )}
                   </div>
                 </div>

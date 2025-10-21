@@ -72,7 +72,6 @@ export type Database = {
           image: string | null
           name: string
           rawData: Json
-          seasonId: number
           updatedAt: string | null
         }
         Insert: {
@@ -81,7 +80,6 @@ export type Database = {
           image?: string | null
           name: string
           rawData: Json
-          seasonId: number
           updatedAt?: string | null
         }
         Update: {
@@ -90,7 +88,6 @@ export type Database = {
           image?: string | null
           name?: string
           rawData?: Json
-          seasonId?: number
           updatedAt?: string | null
         }
         Relationships: []
