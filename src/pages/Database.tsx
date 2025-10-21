@@ -73,7 +73,6 @@ export default function Database() {
   const [showFilters, setShowFilters] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [syncStatus, setSyncStatus] = useState<string>("");
-  const [clubsData, setClubsData] = useState<any[]>([]);
   const [countriesData, setCountriesData] = useState<any[]>([]);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [selectedPlayerAssetId, setSelectedPlayerAssetId] = useState<number | null>(null);
@@ -88,7 +87,7 @@ export default function Database() {
   };
 
   useEffect(() => {
-    fetchClubsAndCountries();
+    fetchCountries();
     checkSuperAdminRole();
   }, []);
 
@@ -112,17 +111,13 @@ export default function Database() {
     }
   };
 
-  const fetchClubsAndCountries = async () => {
+  const fetchCountries = async () => {
     try {
-      const [clubsResponse, countriesResponse] = await Promise.all([
-        supabase.from("clubs").select("*"),
-        supabase.from("countries_vi").select("*")
-      ]);
-
-      if (clubsResponse.data) setClubsData(clubsResponse.data);
-      if (countriesResponse.data) setCountriesData(countriesResponse.data);
+      const { data, error } = await supabase.from("countries_vi").select("*");
+      if (error) throw error;
+      if (data) setCountriesData(data);
     } catch (error) {
-      console.error("Error fetching clubs/countries:", error);
+      console.error("Error fetching countries:", error);
     }
   };
 
@@ -395,7 +390,7 @@ export default function Database() {
                     <PlayerCard 
                       key={player.assetId} 
                       player={player as any} 
-                      clubsData={clubsData}
+                      clubsData={[]}
                       countriesData={countriesData}
                       onClick={() => handlePlayerClick(player.assetId)}
                     />

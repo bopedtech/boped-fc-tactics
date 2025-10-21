@@ -2,6 +2,3 @@ project_id = "nhdmgiyoienkixokcoue"
 
 [functions.sync-players]
 verify_jwt = false
-
-[functions.sync-metadata]
-verify_jwt = false

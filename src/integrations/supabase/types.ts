@@ -14,33 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      clubs: {
-        Row: {
-          createdAt: string | null
-          id: number
-          image: string | null
-          name: string
-          rawData: Json
-          updatedAt: string | null
-        }
-        Insert: {
-          createdAt?: string | null
-          id: number
-          image?: string | null
-          name: string
-          rawData: Json
-          updatedAt?: string | null
-        }
-        Update: {
-          createdAt?: string | null
-          id?: number
-          image?: string | null
-          name?: string
-          rawData?: Json
-          updatedAt?: string | null
-        }
-        Relationships: []
-      }
       countries_vi: {
         Row: {
           countryCode: string
@@ -89,60 +62,6 @@ export type Database = {
           name?: string
           nameEn?: string
           positions?: Json
-        }
-        Relationships: []
-      }
-      leagues: {
-        Row: {
-          createdAt: string | null
-          id: number
-          image: string | null
-          name: string
-          rawData: Json
-          updatedAt: string | null
-        }
-        Insert: {
-          createdAt?: string | null
-          id: number
-          image?: string | null
-          name: string
-          rawData: Json
-          updatedAt?: string | null
-        }
-        Update: {
-          createdAt?: string | null
-          id?: number
-          image?: string | null
-          name?: string
-          rawData?: Json
-          updatedAt?: string | null
-        }
-        Relationships: []
-      }
-      nations: {
-        Row: {
-          createdAt: string | null
-          id: number
-          image: string | null
-          name: string
-          rawData: Json
-          updatedAt: string | null
-        }
-        Insert: {
-          createdAt?: string | null
-          id: number
-          image?: string | null
-          name: string
-          rawData: Json
-          updatedAt?: string | null
-        }
-        Update: {
-          createdAt?: string | null
-          id?: number
-          image?: string | null
-          name?: string
-          rawData?: Json
-          updatedAt?: string | null
         }
         Relationships: []
       }
@@ -302,36 +221,6 @@ export type Database = {
           workRateAtt?: number | null
           workRateDef?: number | null
           workRates?: Json | null
-        }
-        Relationships: []
-      }
-      programs: {
-        Row: {
-          createdAt: string | null
-          id: string
-          image: string | null
-          name: string
-          rawData: Json
-          sort: number | null
-          updatedAt: string | null
-        }
-        Insert: {
-          createdAt?: string | null
-          id: string
-          image?: string | null
-          name: string
-          rawData: Json
-          sort?: number | null
-          updatedAt?: string | null
-        }
-        Update: {
-          createdAt?: string | null
-          id?: string
-          image?: string | null
-          name?: string
-          rawData?: Json
-          sort?: number | null
-          updatedAt?: string | null
         }
         Relationships: []
       }
