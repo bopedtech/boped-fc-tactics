@@ -135,6 +135,7 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
   const [player, setPlayer] = useState<Player | null>(null);
   const [loading, setLoading] = useState(false);
   const [countryCode, setCountryCode] = useState<string>("");
+  const [leagueInfo, setLeagueInfo] = useState<{ id: number; name: string; image?: string } | null>(null);
 
   useEffect(() => {
     if (open && assetId) {
@@ -169,6 +170,22 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
           
           if (countries?.countryCode) {
             setCountryCode(countries.countryCode);
+          }
+        }
+      }
+
+      // Fetch league info from leagues table
+      if (data?.league && typeof data.league === 'object' && 'id' in data.league) {
+        const leagueId = (data.league as Record<string, unknown>).id;
+        if (leagueId && typeof leagueId === 'number') {
+          const { data: leagueData } = await supabase
+            .from("leagues")
+            .select("id, name, image")
+            .eq("id", leagueId)
+            .single();
+          
+          if (leagueData) {
+            setLeagueInfo(leagueData);
           }
         }
       }
@@ -403,10 +420,17 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                           <div className="space-y-2">
                             <h3 className="text-sm font-semibold text-muted-foreground">Giải Đấu</h3>
                             <div className="flex items-center gap-2">
-                              {(player.images as any)?.leagueImage && (
-                                <img src={(player.images as any).leagueImage} alt="League" className="w-8 h-8" />
+                              {leagueInfo?.image && (
+                                <img 
+                                  src={leagueInfo.image} 
+                                  alt={leagueInfo.name} 
+                                  className="w-8 h-8 object-contain"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = 'none';
+                                  }}
+                                />
                               )}
-                              <span className="font-medium">{(player.league as any).name}</span>
+                              <span className="font-medium">{leagueInfo?.name || (player.league as any).name}</span>
                             </div>
                           </div>
                         )}
