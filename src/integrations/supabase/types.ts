@@ -65,6 +65,36 @@ export type Database = {
         }
         Relationships: []
       }
+      leagues: {
+        Row: {
+          createdAt: string | null
+          id: number
+          image: string | null
+          name: string
+          rawData: Json
+          seasonId: number
+          updatedAt: string | null
+        }
+        Insert: {
+          createdAt?: string | null
+          id: number
+          image?: string | null
+          name: string
+          rawData: Json
+          seasonId: number
+          updatedAt?: string | null
+        }
+        Update: {
+          createdAt?: string | null
+          id?: number
+          image?: string | null
+          name?: string
+          rawData?: Json
+          seasonId?: number
+          updatedAt?: string | null
+        }
+        Relationships: []
+      }
       players: {
         Row: {
           added: string | null

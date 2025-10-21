@@ -3,12 +3,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Loader2, Users, Play } from "lucide-react";
+import { Loader2, Users, Play, Trophy } from "lucide-react";
 import Header from "@/components/Header";
 
 export default function Admin() {
   const [syncingPlayers, setSyncingPlayers] = useState(false);
   const [playersResult, setPlayersResult] = useState<any>(null);
+  const [syncingLeagues, setSyncingLeagues] = useState(false);
+  const [leaguesResult, setLeaguesResult] = useState<any>(null);
 
   const handleSyncPlayers = async (mode: 'test' | 'full' = 'test') => {
     try {
@@ -32,6 +34,31 @@ export default function Admin() {
       toast.error("Lỗi khi đồng bộ cầu thủ: " + (error as Error).message);
     } finally {
       setSyncingPlayers(false);
+    }
+  };
+
+  const handleSyncLeagues = async (mode: 'single' | 'all' = 'single') => {
+    try {
+      setSyncingLeagues(true);
+      setLeaguesResult(null);
+      toast.info(`Đang đồng bộ giải đấu (${mode === 'single' ? 'Season 24' : 'Tất cả seasons'})...`);
+
+      const { data, error } = await supabase.functions.invoke('sync-leagues', {
+        body: { 
+          seasonId: 24,
+          mode: mode
+        }
+      });
+
+      if (error) throw error;
+
+      setLeaguesResult(data);
+      toast.success("Đồng bộ giải đấu thành công!");
+    } catch (error) {
+      console.error("Error syncing leagues:", error);
+      toast.error("Lỗi khi đồng bộ giải đấu: " + (error as Error).message);
+    } finally {
+      setSyncingLeagues(false);
     }
   };
 
@@ -93,6 +120,67 @@ export default function Admin() {
                     <p>• Tổng cầu thủ: {playersResult.totalPlayers}</p>
                     <p>• Tổng trang: {playersResult.totalPages}</p>
                     <p>• Chế độ: {playersResult.mode}</p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Sync Leagues Card */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Trophy className="w-5 h-5" />
+                <CardTitle>Đồng Bộ Giải Đấu</CardTitle>
+              </div>
+              <CardDescription>
+                Đồng bộ dữ liệu giải đấu từ mùa 24, 25, 26 (Composite Key: id + seasonId)
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex gap-2">
+                <Button 
+                  onClick={() => handleSyncLeagues('single')}
+                  disabled={syncingLeagues}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  {syncingLeagues ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Play className="w-4 h-4 mr-2" />
+                  )}
+                  Season 24
+                </Button>
+                <Button 
+                  onClick={() => handleSyncLeagues('all')}
+                  disabled={syncingLeagues}
+                  className="flex-1"
+                >
+                  {syncingLeagues ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Play className="w-4 h-4 mr-2" />
+                  )}
+                  Tất Cả Seasons
+                </Button>
+              </div>
+
+              {leaguesResult && (
+                <div className="bg-muted p-4 rounded-lg space-y-2">
+                  <p className="text-sm font-semibold text-green-600">✅ {leaguesResult.message}</p>
+                  <div className="text-xs space-y-1">
+                    <p>• Tổng giải đấu: {leaguesResult.totalLeagues}</p>
+                    <p>• Chế độ: {leaguesResult.mode}</p>
+                    <p>• Seasons: {leaguesResult.seasons?.join(', ')}</p>
+                    {leaguesResult.leaguesPerSeason && (
+                      <div className="mt-2">
+                        <p className="font-semibold">Chi tiết:</p>
+                        {Object.entries(leaguesResult.leaguesPerSeason).map(([season, count]) => (
+                          <p key={season}>  - Season {season}: {count as number} giải đấu</p>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
