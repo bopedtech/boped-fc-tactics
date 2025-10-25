@@ -12,7 +12,8 @@ import { supabase } from "@/integrations/supabase/client";
 export interface FilterState {
   ratingRange: [number, number];
   positionFilter: string;
-  alternatePositions: string[];
+  positions: string[];
+  positionType: "all" | "primary" | "alternate"; // all: cả vị trí chính và phụ, primary: chỉ vị trí chính, alternate: chỉ vị trí phụ
   leagues: string[];
   clubs: string[];
   nations: string[];
@@ -75,7 +76,6 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     rating: true,
     position: true,
-    alternatePositions: false,
     league: false,
     clubs: false,
     nations: false,
@@ -220,47 +220,47 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
             <span className="font-medium text-sm">Vị trí</span>
             {openSections.position ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </CollapsibleTrigger>
-          <CollapsibleContent className="px-3 py-2">
-            <Select value={filters.positionFilter} onValueChange={(val) => updateFilter('positionFilter', val)}>
-              <SelectTrigger className="h-9 text-sm">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-popover z-50">
-                <SelectItem value="all">Tất cả</SelectItem>
-                {positions.map((pos) => (
-                  <SelectItem key={pos} value={pos}>
-                    {positionNames[pos]} ({pos})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </CollapsibleContent>
-        </Collapsible>
-
-        {/* Alternate Positions */}
-        <Collapsible open={openSections.alternatePositions} onOpenChange={() => toggleSection('alternatePositions')}>
-          <CollapsibleTrigger className="flex items-center justify-between w-full py-2.5 px-3 hover:bg-muted/50 rounded-md transition-colors">
-            <span className="font-medium text-sm">Vị trí phụ</span>
-            {openSections.alternatePositions ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-          </CollapsibleTrigger>
-          <CollapsibleContent className="px-3 py-2 space-y-2">
-            {positions.map((pos) => (
-              <div key={pos} className="flex items-center space-x-2">
-                <Checkbox
-                  id={`alt-${pos}`}
-                  checked={filters.alternatePositions.includes(pos)}
-                  onCheckedChange={(checked) => {
-                    const newAlt = checked
-                      ? [...filters.alternatePositions, pos]
-                      : filters.alternatePositions.filter(p => p !== pos);
-                    updateFilter('alternatePositions', newAlt);
-                  }}
-                />
-                <label htmlFor={`alt-${pos}`} className="text-xs cursor-pointer">
-                  {positionNames[pos]} ({pos})
-                </label>
-              </div>
-            ))}
+          <CollapsibleContent className="px-3 py-2 space-y-3">
+            {/* Position Type Selector */}
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground">Loại vị trí</Label>
+              <Select value={filters.positionType} onValueChange={(val: "all" | "primary" | "alternate") => updateFilter('positionType', val)}>
+                <SelectTrigger className="h-9 text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-popover z-50">
+                  <SelectItem value="all">Cả vị trí chính và phụ</SelectItem>
+                  <SelectItem value="primary">Chỉ vị trí chính</SelectItem>
+                  <SelectItem value="alternate">Chỉ vị trí phụ</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {/* Position Checkboxes */}
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground">Chọn vị trí</Label>
+              <ScrollArea className="h-[200px]">
+                <div className="space-y-2 pr-4">
+                  {positions.map((pos) => (
+                    <div key={pos} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`pos-${pos}`}
+                        checked={filters.positions.includes(pos)}
+                        onCheckedChange={(checked) => {
+                          const newPositions = checked
+                            ? [...filters.positions, pos]
+                            : filters.positions.filter(p => p !== pos);
+                          updateFilter('positions', newPositions);
+                        }}
+                      />
+                      <label htmlFor={`pos-${pos}`} className="text-xs cursor-pointer">
+                        {positionNames[pos]} ({pos})
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
           </CollapsibleContent>
         </Collapsible>
 

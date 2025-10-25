@@ -5,7 +5,8 @@ export const usePlayerFilters = (initialPosition?: string) => {
   const [filters, setFilters] = useState<FilterState>({
     ratingRange: [0, 125],
     positionFilter: initialPosition || "all",
-    alternatePositions: [],
+    positions: [],
+    positionType: "all",
     leagues: [],
     clubs: [],
     nations: [],
@@ -24,7 +25,8 @@ export const usePlayerFilters = (initialPosition?: string) => {
     setFilters({
       ratingRange: [0, 125],
       positionFilter: initialPosition || "all",
-      alternatePositions: [],
+      positions: [],
+      positionType: "all",
       leagues: [],
       clubs: [],
       nations: [],
@@ -48,7 +50,7 @@ export const usePlayerFilters = (initialPosition?: string) => {
       p.rating >= filters.ratingRange[0] && p.rating <= filters.ratingRange[1]
     );
 
-    // Position filter
+    // Position filter - old single position filter (kept for backward compatibility)
     if (filters.positionFilter !== "all") {
       filtered = filtered.filter(p => {
         if (p.position === filters.positionFilter) return true;
@@ -62,27 +64,35 @@ export const usePlayerFilters = (initialPosition?: string) => {
       });
     }
 
-    // Alternate positions filter
-    if (filters.alternatePositions.length > 0) {
+    // New positions filter with position type (primary/alternate/all)
+    if (filters.positions.length > 0) {
       filtered = filtered.filter(p => {
-        // Check both potentialPositions array and main position
-        const altPositions: string[] = [];
+        const primaryPosition = p.position;
+        const alternatePositions: string[] = [];
         
+        // Extract alternate positions
         if (p.potentialPositions) {
           if (Array.isArray(p.potentialPositions)) {
-            altPositions.push(...p.potentialPositions);
+            alternatePositions.push(...p.potentialPositions);
           } else if (typeof p.potentialPositions === 'object') {
-            // Handle if potentialPositions is an object with position properties
             Object.values(p.potentialPositions).forEach((val: any) => {
-              if (typeof val === 'string') altPositions.push(val);
+              if (typeof val === 'string') alternatePositions.push(val);
             });
           }
         }
         
-        // Also include main position
-        if (p.position) altPositions.push(p.position);
-        
-        return filters.alternatePositions.some(pos => altPositions.includes(pos));
+        // Filter based on position type
+        if (filters.positionType === "primary") {
+          // Only check primary position
+          return filters.positions.includes(primaryPosition);
+        } else if (filters.positionType === "alternate") {
+          // Only check alternate positions
+          return filters.positions.some(pos => alternatePositions.includes(pos));
+        } else {
+          // Check both primary and alternate positions
+          return filters.positions.includes(primaryPosition) || 
+                 filters.positions.some(pos => alternatePositions.includes(pos));
+        }
       });
     }
 
