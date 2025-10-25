@@ -81,7 +81,7 @@ export default function Database() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   
-  const { filters, setFilters, resetFilters: resetFilterState } = usePlayerFilters();
+  const { filters, setFilters, resetFilters: resetFilterState, applyFiltersToQuery } = usePlayerFilters();
 
   const handlePlayerClick = (assetId: number) => {
     setSelectedPlayerAssetId(assetId);
@@ -174,8 +174,9 @@ export default function Database() {
       query = query.lte("rating", filters.ratingRange[1]);
     }
 
-    // Apply position filter
-    if (filters.positionFilter !== "all") {
+    // Note: Position filter will be applied client-side because potentialPositions is JSONB
+    // We only filter by position in DB if using old positionFilter (for backward compatibility)
+    if (filters.positionFilter !== "all" && filters.positions.length === 0) {
       query = query.eq("position", filters.positionFilter);
     }
 
@@ -197,16 +198,31 @@ export default function Database() {
       query = query.or(leagueFilters);
     }
 
-    // Pagination
-    query = query.range(pageParam, pageParam + PAGE_SIZE - 1);
+    // Pagination - fetch more to compensate for client-side filtering
+    const fetchSize = filters.positions.length > 0 ? PAGE_SIZE * 3 : PAGE_SIZE;
+    query = query.range(pageParam, pageParam + fetchSize - 1);
 
     const { data, error, count } = await query;
 
     if (error) throw error;
 
+    // Apply client-side filters (especially for positions with potentialPositions)
+    let filteredPlayers = data || [];
+    if (filters.positions.length > 0 || filters.programs.length > 0 || 
+        filters.traits.length > 0 || filters.skillMovesLevel > 0 || 
+        filters.weakFoot > 0 || filters.strongFoot !== "all" ||
+        filters.workRateAtt > 0 || filters.workRateDef > 0 ||
+        filters.heightRange[0] > 150 || filters.heightRange[1] < 210 ||
+        filters.weightRange[0] > 50 || filters.weightRange[1] < 110) {
+      filteredPlayers = applyFiltersToQuery(filteredPlayers);
+    }
+
+    // Take only PAGE_SIZE results after filtering
+    const paginatedPlayers = filteredPlayers.slice(0, PAGE_SIZE);
+
     return {
-      players: data || [],
-      nextPage: data && data.length === PAGE_SIZE ? pageParam + PAGE_SIZE : undefined,
+      players: paginatedPlayers,
+      nextPage: paginatedPlayers.length === PAGE_SIZE ? pageParam + PAGE_SIZE : undefined,
       totalCount: count || 0,
     };
   };
