@@ -8,3 +8,12 @@ verify_jwt = false
 
 [functions.import-localization-dictionary]
 verify_jwt = false
+
+[functions.sync-renderz-nations]
+verify_jwt = false
+
+[functions.sync-renderz-teams]
+verify_jwt = false
+
+[functions.sync-renderz-traits]
+verify_jwt = false

@@ -116,6 +116,36 @@ export type Database = {
         }
         Relationships: []
       }
+      nations: {
+        Row: {
+          createdAt: string | null
+          displayName: string
+          id: number
+          image: string | null
+          localizationKey: string
+          rawData: Json
+          updatedAt: string | null
+        }
+        Insert: {
+          createdAt?: string | null
+          displayName: string
+          id: number
+          image?: string | null
+          localizationKey: string
+          rawData: Json
+          updatedAt?: string | null
+        }
+        Update: {
+          createdAt?: string | null
+          displayName?: string
+          id?: number
+          image?: string | null
+          localizationKey?: string
+          rawData?: Json
+          updatedAt?: string | null
+        }
+        Relationships: []
+      }
       players: {
         Row: {
           added: string | null
@@ -305,6 +335,80 @@ export type Database = {
           squadName?: string
           updatedAt?: string | null
           userId?: string
+        }
+        Relationships: []
+      }
+      teams: {
+        Row: {
+          createdAt: string | null
+          displayName: string
+          id: number
+          image: string | null
+          leagueId: number | null
+          localizationKey: string
+          rawData: Json
+          updatedAt: string | null
+        }
+        Insert: {
+          createdAt?: string | null
+          displayName: string
+          id: number
+          image?: string | null
+          leagueId?: number | null
+          localizationKey: string
+          rawData: Json
+          updatedAt?: string | null
+        }
+        Update: {
+          createdAt?: string | null
+          displayName?: string
+          id?: number
+          image?: string | null
+          leagueId?: number | null
+          localizationKey?: string
+          rawData?: Json
+          updatedAt?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_league"
+            columns: ["leagueId"]
+            isOneToOne: false
+            referencedRelation: "leagues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      traits: {
+        Row: {
+          createdAt: string | null
+          displayDescription: string | null
+          displayName: string
+          id: number
+          localizationKeyDescription: string | null
+          localizationKeyName: string
+          rawData: Json
+          updatedAt: string | null
+        }
+        Insert: {
+          createdAt?: string | null
+          displayDescription?: string | null
+          displayName: string
+          id: number
+          localizationKeyDescription?: string | null
+          localizationKeyName: string
+          rawData: Json
+          updatedAt?: string | null
+        }
+        Update: {
+          createdAt?: string | null
+          displayDescription?: string | null
+          displayName?: string
+          id?: number
+          localizationKeyDescription?: string | null
+          localizationKeyName?: string
+          rawData?: Json
+          updatedAt?: string | null
         }
         Relationships: []
       }
