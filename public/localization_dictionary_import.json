@@ -1598,5 +1598,385 @@
     "key": "_350",
     "value_en": "ROSHN Saudi League",
     "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "programname_CENTURIONS24",
+    "value_en": "Centurions",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_CL24",
+    "value_en": "CONMEBOL Libertadores Event",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_CL26",
+    "value_en": "CONMEBOL Libertadores",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_COPA24",
+    "value_en": "Copa América 2024",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_CS24",
+    "value_en": "CONMEBOL Sudamericana Event",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_DDLM24",
+    "value_en": "Día de Muertos",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_DL25",
+    "value_en": "Defining Legacies 25",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_EOE_LIVE",
+    "value_en": "End of An Era",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_EURO24",
+    "value_en": "UEFA EURO 2024™",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_FOUNDERS",
+    "value_en": "Founders",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_HOL24",
+    "value_en": "Hall of Legends",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_LNY24",
+    "value_en": "Lunar New Year 24",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_MLS24",
+    "value_en": "MLS",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_MLS25",
+    "value_en": "MLS 25",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_NV24",
+    "value_en": "National Valour",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_PB25",
+    "value_en": "Pitch Beats 25",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_POTM24",
+    "value_en": "POTM24",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_RAM24",
+    "value_en": "Ramadan",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_RIVALS24",
+    "value_en": "Rivals",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_RULE2BREAKERS4",
+    "value_en": "Rulebreakers",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_S8_UCL",
+    "value_en": "UCL Tournament",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_S8_UECL",
+    "value_en": "UECL Event",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_S8_UEL",
+    "value_en": "UEL Event",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_SS24",
+    "value_en": "Shapeshifters",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_TOTW24",
+    "value_en": "TOTW24",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_TOTY25",
+    "value_en": "TOTY 25",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_TS25",
+    "value_en": "Thunderstruck 25",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_TT25",
+    "value_en": "Trophy Titans 25",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_UCL25",
+    "value_en": "UCL 25",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_UCLRTF",
+    "value_en": "UCL Road to the Final",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_UNIVERSALRANK24",
+    "value_en": "Universal Rank Player",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_WF24",
+    "value_en": "Welcome to FC Mobile",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_WW24",
+    "value_en": "Winter Wildcards",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_ann26",
+    "value_en": "Anniversary 26",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_anniversary25",
+    "value_en": "Anniversary",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_aquavsinferno",
+    "value_en": "Aqua vs Inferno 25",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_ballondor25",
+    "value_en": "Ballon d'Or 25",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_base",
+    "value_en": "Base Items",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_bo26",
+    "value_en": "Ballon d'Or 26",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_bou25_uecl",
+    "value_en": "UECL 25",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_bou25_uel",
+    "value_en": "UEL 25",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_captain25",
+    "value_en": "Captains 25",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_captains24",
+    "value_en": "Captains",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_carnival25",
+    "value_en": "Carnival 25",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_conmebollibertadores25",
+    "value_en": "CONMEBOL Libertadores",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_ddlm25",
+    "value_en": "Día De Muertos 25",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_dynasties24",
+    "value_en": "Dynasties",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_fv26",
+    "value_en": "Footyverse 26",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_grassroot25",
+    "value_en": "Grassroot Greats 25",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_heros8",
+    "value_en": "Heroes",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_holi25",
+    "value_en": "Holi 25",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_icons",
+    "value_en": "Icons",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_laliga25",
+    "value_en": "LALIGA 25",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_moment25",
+    "value_en": "Moments 25",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_moments24",
+    "value_en": "Moments",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_neon25",
+    "value_en": "CODE: NEON 25",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_nf25",
+    "value_en": "National Stars 25",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_outstanding25",
+    "value_en": "Outstanding Player 25",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_potm25_bundesliga",
+    "value_en": "POTM 25 Bundesliga",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_potm25_laliga",
+    "value_en": "POTM 25 LALIGA",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_potm25_ligue1",
+    "value_en": "POTM 25 Ligue 1",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_potm25_premier",
+    "value_en": "POTM 25 Premier League",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_potm25_seriea",
+    "value_en": "POTM 25 Serie A",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_ragnarok25",
+    "value_en": "Ragnarok 25",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_rs24",
+    "value_en": "Retro Stars",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_sb24",
+    "value_en": "Sunshine Ballers",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_showdown25",
+    "value_en": "Showdown 25",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_songkran25",
+    "value_en": "Songkran 25",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_tots24",
+    "value_en": "Team of The Season",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_tots25",
+    "value_en": "TOTS 25",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_totw25",
+    "value_en": "Team of The Week 25",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_totw26",
+    "value_en": "TOTW 26",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_toty24_live",
+    "value_en": "TOTY",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_trickortreat25",
+    "value_en": "Trick or Treat 25",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_ucl25_RTTF",
+    "value_en": "UCL 25 Road to the Final",
+    "source": "Manual_Addition"
+  },
+  {
+    "key": "programname_winter25",
+    "value_en": "Winter Wonders 25",
+    "source": "Manual_Addition"
   }
 ]
