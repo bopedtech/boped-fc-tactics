@@ -45,8 +45,8 @@ export default function PlayerCard({ player, onClick }: PlayerCardProps) {
   const leagueImage = player.images?.leagueImage;
   const teamLogoUrl = player.images?.clubImage;
   
-  // Check if this is an icon card (no club image = icon card)
-  const isIconCard = !teamLogoUrl;
+  // Check if this is an icon card (has program = icon card)
+  const isIconCard = !!(player as any).images?.programImage || (player as any).source === 'icon';
 
   // Get card background from player images
   const cardBackground = player.images?.playerCardBackground;
@@ -141,11 +141,11 @@ export default function PlayerCard({ player, onClick }: PlayerCardProps) {
             )}
           </div>
 
-          {/* Bottom Section: Name + Icons - Fixed at bottom */}
-          <div className="absolute bottom-0 left-0 right-0 z-10 pb-3 px-3">
+          {/* Bottom Section: Name + Icons - Higher position, bigger text */}
+          <div className="absolute bottom-0 left-0 right-0 z-10 pb-6 px-3">
             {/* Player Name */}
-            <div className="text-center mb-2">
-              <h3 className="font-black text-base leading-none text-white drop-shadow-[0_3px_6px_rgba(0,0,0,1)] uppercase tracking-wider">
+            <div className="text-center mb-3">
+              <h3 className="font-black text-xl leading-none text-white drop-shadow-[0_3px_6px_rgba(0,0,0,1)] uppercase tracking-wider">
                 {player.cardName || player.commonName}
               </h3>
             </div>
