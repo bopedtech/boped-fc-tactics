@@ -2,10 +2,11 @@ import { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, X } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface FilterState {
@@ -180,12 +181,15 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
         <div className="p-4 space-y-1 pr-4">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-sm uppercase text-muted-foreground">Bộ lọc</h3>
-          <button
+          <Button
             onClick={onReset}
-            className="text-xs text-primary hover:underline"
+            variant="outline"
+            size="sm"
+            className="h-8 text-xs"
           >
-            Đặt lại
-          </button>
+            <X className="h-3 w-3 mr-1" />
+            Đặt lại tất cả
+          </Button>
         </div>
 
         {/* Ratings */}

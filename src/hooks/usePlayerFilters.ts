@@ -65,10 +65,23 @@ export const usePlayerFilters = (initialPosition?: string) => {
     // Alternate positions filter
     if (filters.alternatePositions.length > 0) {
       filtered = filtered.filter(p => {
-        if (!p.potentialPositions) return false;
-        const altPositions = Array.isArray(p.potentialPositions)
-          ? p.potentialPositions
-          : [];
+        // Check both potentialPositions array and main position
+        const altPositions: string[] = [];
+        
+        if (p.potentialPositions) {
+          if (Array.isArray(p.potentialPositions)) {
+            altPositions.push(...p.potentialPositions);
+          } else if (typeof p.potentialPositions === 'object') {
+            // Handle if potentialPositions is an object with position properties
+            Object.values(p.potentialPositions).forEach((val: any) => {
+              if (typeof val === 'string') altPositions.push(val);
+            });
+          }
+        }
+        
+        // Also include main position
+        if (p.position) altPositions.push(p.position);
+        
         return filters.alternatePositions.some(pos => altPositions.includes(pos));
       });
     }
@@ -147,8 +160,12 @@ export const usePlayerFilters = (initialPosition?: string) => {
     // Programs filter
     if (filters.programs.length > 0) {
       filtered = filtered.filter(p => {
-        const programId = p.program?.id;
-        return programId && filters.programs.includes(programId);
+        if (!p.program) return false;
+        // Handle both string and object structures
+        const programId = typeof p.program === 'string' 
+          ? p.program 
+          : (p.program?.id || p.program?.programId);
+        return programId && filters.programs.includes(programId.toString());
       });
     }
 
