@@ -122,8 +122,8 @@ export default function PlayerCard({ player, onClick, teamsData, nationsData, le
         )}
         
         <div className="relative h-full flex flex-col">
-          {/* Top: OVR + Position - No background, white text, smaller */}
-          <div className="absolute top-2 left-2 z-20">
+          {/* Top: OVR + Position - Inside and down a bit */}
+          <div className="absolute top-4 left-4 z-20">
             <div className="flex flex-col items-start">
               <div className="text-3xl font-black text-white leading-none drop-shadow-[0_3px_6px_rgba(0,0,0,1)]">
                 {player.rating}
@@ -134,19 +134,19 @@ export default function PlayerCard({ player, onClick, teamsData, nationsData, le
             </div>
           </div>
 
-          {/* Middle: Player Image - FULL SIZE from top to name */}
-          <div className="absolute inset-x-0 top-0 bottom-16 flex items-stretch justify-center">
+          {/* Middle: Player Image - FULL CARD SIZE */}
+          <div className="absolute inset-0 flex items-center justify-center">
             {player.images?.playerCardImage ? (
               <img
                 src={player.images.playerCardImage}
                 alt={player.cardName || player.commonName}
-                className="w-full h-full object-contain object-center drop-shadow-[0_10px_20px_rgba(0,0,0,0.9)]"
+                className="w-full h-full object-cover object-center drop-shadow-[0_10px_20px_rgba(0,0,0,0.9)]"
                 onError={(e) => {
                   e.currentTarget.src = `https://ui-avatars.com/api/?name=${player.commonName}&background=FFA500&color=fff&size=256`;
                 }}
               />
             ) : (
-              <div className="w-32 h-32 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-5xl font-bold text-white shadow-2xl self-center">
+              <div className="w-full h-full bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-5xl font-bold text-white shadow-2xl">
                 {player.commonName[0]}
               </div>
             )}
