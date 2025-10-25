@@ -74,6 +74,7 @@ export default function Database() {
   const [syncing, setSyncing] = useState(false);
   const [syncStatus, setSyncStatus] = useState<string>("");
   const [countriesData, setCountriesData] = useState<any[]>([]);
+  const [teamsData, setTeamsData] = useState<Array<{ id: number; displayName: string; image?: string }>>([]);
   const [leaguesData, setLeaguesData] = useState<Array<{ id: number; displayName: string; image?: string }>>([]);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [selectedPlayerAssetId, setSelectedPlayerAssetId] = useState<number | null>(null);
@@ -89,6 +90,7 @@ export default function Database() {
 
   useEffect(() => {
     fetchCountries();
+    fetchTeams();
     fetchLeagues();
     checkSuperAdminRole();
   }, []);
@@ -115,11 +117,27 @@ export default function Database() {
 
   const fetchCountries = async () => {
     try {
-      const { data, error } = await supabase.from("nations").select("*");
+      const { data, error } = await supabase
+        .from("nations")
+        .select("id, displayName, image")
+        .order("displayName", { ascending: true });
       if (error) throw error;
       if (data) setCountriesData(data);
     } catch (error) {
-      console.error("Error fetching countries:", error);
+      console.error("Error fetching nations:", error);
+    }
+  };
+
+  const fetchTeams = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("teams")
+        .select("id, displayName, image")
+        .order("displayName", { ascending: true });
+      if (error) throw error;
+      if (data) setTeamsData(data);
+    } catch (error) {
+      console.error("Error fetching teams:", error);
     }
   };
 
@@ -405,7 +423,7 @@ export default function Database() {
                     <PlayerCard 
                       key={player.assetId} 
                       player={player as any} 
-                      teamsData={[]}
+                      teamsData={teamsData}
                       nationsData={countriesData as any}
                       leaguesData={leaguesData}
                       onClick={() => handlePlayerClick(player.assetId)}
