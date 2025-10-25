@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Loader2, X } from "lucide-react";
+import PlayerCard from "@/components/PlayerCard";
 
 interface PlayerStats {
   pace?: number;
@@ -258,106 +259,11 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
             </DialogHeader>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-4">
-              {/* Left: Player Image & Basic Info */}
+              {/* Left: Player Card */}
               <div className="lg:col-span-1">
-                <Card className="p-4">
-                  <div className="space-y-4">
-                    <div className="relative aspect-[3/4] w-full overflow-hidden rounded-lg bg-gradient-to-b from-primary/20 to-background">
-                      <img
-                        src={imageUrl}
-                        alt={playerName}
-                        className="w-full h-full object-contain"
-                        onError={(e) => {
-                          e.currentTarget.src = "/placeholder.svg";
-                        }}
-                      />
-                    </div>
-                    
-                    <div className="text-center space-y-2">
-                      <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
-                        {player.height && <span>{player.height} cm</span>}
-                        {player.weight && <span>{player.weight} kg</span>}
-                      </div>
-                      
-                      <div className="flex items-center justify-center gap-3 flex-wrap">
-                        {/* Weak Foot & Skill Moves */}
-                        {(player.weakFoot || player.skillMovesLevel) && (
-                          <div className="flex items-center gap-2">
-                            {/* Strong Foot Icon */}
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-primary">
-                              <path d="M10 3C10 3 9 4 9 6C9 8 10 9 10 9M14 3C14 3 15 4 15 6C15 8 14 9 14 9M12 3V9M8 9C8 9 7 10 7 12C7 14 8 15 8 15M16 9C16 9 17 10 17 12C17 14 16 15 16 15M12 9V15M6 15C6 15 5 16 5 18C5 20 6 21 6 21M18 15C18 15 19 16 19 18C19 20 18 21 18 21M12 15V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                            </svg>
-                            {/* Weak Foot Stars */}
-                            {player.weakFoot && (
-                              <div className="flex items-center gap-0.5">
-                                <span className="font-semibold text-primary">{player.weakFoot}</span>
-                                {Array.from({ length: player.weakFoot }).map((_, i) => (
-                                  <span key={i} className="text-primary text-sm">★</span>
-                                ))}
-                              </div>
-                            )}
-                            {/* Weak Foot Icon (grey) */}
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-muted-foreground">
-                              <path d="M10 3C10 3 9 4 9 6C9 8 10 9 10 9M14 3C14 3 15 4 15 6C15 8 14 9 14 9M12 3V9M8 9C8 9 7 10 7 12C7 14 8 15 8 15M16 9C16 9 17 10 17 12C7 14 16 15 16 15M12 9V15M6 15C6 15 5 16 5 18C5 20 6 21 6 21M18 15C18 15 19 16 19 18C19 20 18 21 18 21M12 15V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                            </svg>
-                            {/* Skill Moves Stars */}
-                            {player.skillMovesLevel && (
-                              <div className="flex items-center gap-0.5">
-                                <span className="font-semibold text-primary">{player.skillMovesLevel}</span>
-                                {Array.from({ length: player.skillMovesLevel }).map((_, i) => (
-                                  <span key={i} className="text-primary text-sm">★</span>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        )}
-                        
-                        {nationInfo && (
-                          <div className="flex items-center gap-1">
-                            {nationInfo.image && (
-                              <img 
-                                src={nationInfo.image} 
-                                alt={nationInfo.displayName}
-                                className="w-6 h-4 object-cover rounded-sm"
-                                onError={(e) => {
-                                  e.currentTarget.style.display = 'none';
-                                }}
-                              />
-                            )}
-                            <span className="text-sm">{nationInfo.displayName}</span>
-                          </div>
-                        )}
-                        
-                        {player.club && (
-                          <div className="flex items-center gap-1">
-                            {(player.club as any).image && (
-                              <img src={(player.club as any).image} alt={(player.club as any).name} className="w-6 h-6" />
-                            )}
-                            <span className="text-sm">{(player.club as any).name}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Main Rating */}
-                    <div className="text-center py-4 border-t border-b">
-                      <div className="text-5xl font-bold gradient-primary bg-clip-text text-transparent">
-                        {player.rating}
-                      </div>
-                      <div className="text-sm text-muted-foreground">OVR</div>
-                    </div>
-
-                    {/* Main Stats Overview */}
-                    <div className="grid grid-cols-3 gap-2">
-                      {Object.entries(mainStats).map(([key, value]) => (
-                        <div key={key} className="text-center p-2 bg-muted/50 rounded">
-                          <div className="text-2xl font-bold text-primary">{value || 0}</div>
-                          <div className="text-xs text-muted-foreground">{statLabels[key]}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </Card>
+                <div className="max-w-[280px] mx-auto">
+                  <PlayerCard player={player as any} />
+                </div>
               </div>
 
               {/* Right: Detailed Stats */}
@@ -408,6 +314,57 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                     </TabsContent>
 
                     <TabsContent value="info" className="space-y-6 mt-6">
+                      {/* Player Details Card */}
+                      <Card className="p-6 bg-muted/20">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                          {/* Height */}
+                          {player.height && (
+                            <div className="space-y-1">
+                              <h3 className="text-xs font-semibold text-muted-foreground uppercase">Chiều Cao</h3>
+                              <div className="text-2xl font-bold">{player.height} <span className="text-sm text-muted-foreground">cm</span></div>
+                            </div>
+                          )}
+                          
+                          {/* Weight */}
+                          {player.weight && (
+                            <div className="space-y-1">
+                              <h3 className="text-xs font-semibold text-muted-foreground uppercase">Cân Nặng</h3>
+                              <div className="text-2xl font-bold">{player.weight} <span className="text-sm text-muted-foreground">kg</span></div>
+                            </div>
+                          )}
+                          
+                          {/* Weak Foot */}
+                          {player.weakFoot && (
+                            <div className="space-y-1">
+                              <h3 className="text-xs font-semibold text-muted-foreground uppercase">Chân Phụ</h3>
+                              <div className="flex items-center gap-1">
+                                <span className="text-2xl font-bold">{player.weakFoot}</span>
+                                <div className="flex">
+                                  {Array.from({ length: player.weakFoot }).map((_, i) => (
+                                    <span key={i} className="text-primary text-lg">★</span>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* Skill Moves */}
+                          {player.skillMovesLevel && (
+                            <div className="space-y-1">
+                              <h3 className="text-xs font-semibold text-muted-foreground uppercase">Kỹ Năng</h3>
+                              <div className="flex items-center gap-1">
+                                <span className="text-2xl font-bold">{player.skillMovesLevel}</span>
+                                <div className="flex">
+                                  {Array.from({ length: player.skillMovesLevel }).map((_, i) => (
+                                    <span key={i} className="text-primary text-lg">★</span>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </Card>
+
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Team */}
                         {player.club && (
