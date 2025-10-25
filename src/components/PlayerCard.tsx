@@ -151,7 +151,7 @@ export default function PlayerCard({ player, onClick }: PlayerCardProps) {
             </div>
 
             {/* Nation, League, Club Icons - Only flag + league for icon cards */}
-            <div className="flex justify-center items-center gap-2">
+            <div className="flex justify-center items-center gap-2 -ml-2">
               {flagImage && (
                 <div className="w-9 h-7 rounded overflow-hidden shadow-lg">
                   <img 
