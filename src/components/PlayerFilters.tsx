@@ -7,6 +7,7 @@ import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface FilterState {
@@ -73,6 +74,14 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
   const [teams, setTeams] = useState<Array<{ id: number; displayName: string; image?: string }>>([]);
   const [programs, setPrograms] = useState<Array<{ id: string; displayName: string; image?: string }>>([]);
   const [traits, setTraits] = useState<Array<{ id: number; displayName: string }>>([]);
+  
+  // Search states for each filter
+  const [leagueSearch, setLeagueSearch] = useState("");
+  const [clubSearch, setClubSearch] = useState("");
+  const [nationSearch, setNationSearch] = useState("");
+  const [programSearch, setProgramSearch] = useState("");
+  const [traitSearch, setTraitSearch] = useState("");
+  
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     rating: true,
     position: true,
@@ -175,6 +184,27 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
     onFilterChange({ ...filters, [key]: value });
   };
 
+  // Filter functions
+  const filteredLeagues = leagues.filter(league => 
+    league.displayName.toLowerCase().includes(leagueSearch.toLowerCase())
+  );
+  
+  const filteredTeams = teams.filter(team => 
+    team.displayName.toLowerCase().includes(clubSearch.toLowerCase())
+  );
+  
+  const filteredNations = nations.filter(nation => 
+    nation.displayName.toLowerCase().includes(nationSearch.toLowerCase())
+  );
+  
+  const filteredPrograms = programs.filter(program => 
+    program.displayName.toLowerCase().includes(programSearch.toLowerCase())
+  );
+  
+  const filteredTraits = traits.filter(trait => 
+    trait.displayName.toLowerCase().includes(traitSearch.toLowerCase())
+  );
+
   return (
     <div className="h-[calc(100vh-240px)]">
       <ScrollArea className="h-full">
@@ -270,10 +300,16 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
             <span className="font-medium text-sm">Giải đấu</span>
             {openSections.league ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </CollapsibleTrigger>
-          <CollapsibleContent className="px-3 py-2">
+          <CollapsibleContent className="px-3 py-2 space-y-2">
+            <Input
+              placeholder="Tìm giải đấu..."
+              value={leagueSearch}
+              onChange={(e) => setLeagueSearch(e.target.value)}
+              className="h-8 text-xs"
+            />
             <ScrollArea className="h-[200px]">
               <div className="space-y-2 pr-4">
-                {leagues.map((league) => (
+                {filteredLeagues.map((league) => (
                   <div key={league.id} className="flex items-center space-x-2">
                     <Checkbox
                       id={`league-${league.id}`}
@@ -304,10 +340,16 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
             <span className="font-medium text-sm">Câu lạc bộ</span>
             {openSections.clubs ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </CollapsibleTrigger>
-          <CollapsibleContent className="px-3 py-2">
+          <CollapsibleContent className="px-3 py-2 space-y-2">
+            <Input
+              placeholder="Tìm câu lạc bộ..."
+              value={clubSearch}
+              onChange={(e) => setClubSearch(e.target.value)}
+              className="h-8 text-xs"
+            />
             <ScrollArea className="h-[200px]">
               <div className="space-y-2 pr-4">
-                {teams.map((team) => (
+                {filteredTeams.map((team) => (
                   <div key={team.id} className="flex items-center space-x-2">
                     <Checkbox
                       id={`team-${team.id}`}
@@ -338,10 +380,16 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
             <span className="font-medium text-sm">Quốc tịch</span>
             {openSections.nations ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </CollapsibleTrigger>
-          <CollapsibleContent className="px-3 py-2">
+          <CollapsibleContent className="px-3 py-2 space-y-2">
+            <Input
+              placeholder="Tìm quốc tịch..."
+              value={nationSearch}
+              onChange={(e) => setNationSearch(e.target.value)}
+              className="h-8 text-xs"
+            />
             <ScrollArea className="h-[200px]">
               <div className="space-y-2 pr-4">
-                {nations.map((nation) => (
+                {filteredNations.map((nation) => (
                   <div key={nation.id} className="flex items-center space-x-2">
                     <Checkbox
                       id={`nation-${nation.id}`}
@@ -372,10 +420,16 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
             <span className="font-medium text-sm">Chương trình/Sự kiện</span>
             {openSections.program ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </CollapsibleTrigger>
-          <CollapsibleContent className="px-3 py-2">
+          <CollapsibleContent className="px-3 py-2 space-y-2">
+            <Input
+              placeholder="Tìm chương trình..."
+              value={programSearch}
+              onChange={(e) => setProgramSearch(e.target.value)}
+              className="h-8 text-xs"
+            />
             <ScrollArea className="h-[200px]">
               <div className="space-y-2 pr-4">
-                {programs.map((program) => (
+                {filteredPrograms.map((program) => (
                   <div key={program.id} className="flex items-center space-x-2">
                     <Checkbox
                       id={`program-${program.id}`}
@@ -406,10 +460,16 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
             <span className="font-medium text-sm">Đặc điểm</span>
             {openSections.traits ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </CollapsibleTrigger>
-          <CollapsibleContent className="px-3 py-2">
+          <CollapsibleContent className="px-3 py-2 space-y-2">
+            <Input
+              placeholder="Tìm đặc điểm..."
+              value={traitSearch}
+              onChange={(e) => setTraitSearch(e.target.value)}
+              className="h-8 text-xs"
+            />
             <ScrollArea className="h-[200px]">
               <div className="space-y-2 pr-4">
-                {traits.map((trait) => (
+                {filteredTraits.map((trait) => (
                   <div key={trait.id} className="flex items-center space-x-2">
                     <Checkbox
                       id={`trait-${trait.id}`}
