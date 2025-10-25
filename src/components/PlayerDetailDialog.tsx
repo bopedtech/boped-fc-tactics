@@ -157,19 +157,19 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
       if (error) throw error;
       setPlayer(data);
 
-      // Fetch country code if nation exists
-      if (data?.nation && typeof data.nation === 'object' && 'name' in data.nation) {
-        const nationName = (data.nation as Record<string, unknown>).name || (data.nation as Record<string, unknown>).label;
-        if (nationName && typeof nationName === 'string') {
-          const { data: countries } = await supabase
-            .from("countries_vi")
-            .select("countryCode, nameEn")
-            .ilike("nameEn", nationName)
-            .limit(1)
-            .single();
+      // Fetch nation data if exists
+      if (data?.nation && typeof data.nation === 'object' && 'id' in data.nation) {
+        const nationId = (data.nation as Record<string, unknown>).id;
+        if (nationId && typeof nationId === 'number') {
+          const { data: nationData } = await supabase
+            .from("nations")
+            .select("*")
+            .eq("id", nationId)
+            .maybeSingle();
           
-          if (countries?.countryCode) {
-            setCountryCode(countries.countryCode);
+          if (nationData) {
+            // Use displayName as country code fallback or extract from rawData if available
+            setCountryCode(nationData.displayName);
           }
         }
       }

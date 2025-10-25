@@ -14,30 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      countries_vi: {
-        Row: {
-          countryCode: string
-          createdAt: string | null
-          id: number
-          nameEn: string
-          nameVi: string
-        }
-        Insert: {
-          countryCode: string
-          createdAt?: string | null
-          id?: number
-          nameEn: string
-          nameVi: string
-        }
-        Update: {
-          countryCode?: string
-          createdAt?: string | null
-          id?: number
-          nameEn?: string
-          nameVi?: string
-        }
-        Relationships: []
-      }
       formations: {
         Row: {
           category: string

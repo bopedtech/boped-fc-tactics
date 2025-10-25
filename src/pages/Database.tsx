@@ -115,7 +115,7 @@ export default function Database() {
 
   const fetchCountries = async () => {
     try {
-      const { data, error } = await supabase.from("countries_vi").select("*");
+      const { data, error } = await supabase.from("nations").select("*");
       if (error) throw error;
       if (data) setCountriesData(data);
     } catch (error) {
@@ -405,8 +405,8 @@ export default function Database() {
                     <PlayerCard 
                       key={player.assetId} 
                       player={player as any} 
-                      clubsData={[]}
-                      countriesData={countriesData}
+                      teamsData={[]}
+                      nationsData={countriesData as any}
                       leaguesData={leaguesData}
                       onClick={() => handlePlayerClick(player.assetId)}
                     />

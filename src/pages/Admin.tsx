@@ -13,6 +13,12 @@ export default function Admin() {
   const [dictSyncResult, setDictSyncResult] = useState<any>(null);
   const [syncingLeagues, setSyncingLeagues] = useState(false);
   const [leaguesResult, setLeaguesResult] = useState<any>(null);
+  const [syncingNations, setSyncingNations] = useState(false);
+  const [nationsResult, setNationsResult] = useState<any>(null);
+  const [syncingTeams, setSyncingTeams] = useState(false);
+  const [teamsResult, setTeamsResult] = useState<any>(null);
+  const [syncingTraits, setSyncingTraits] = useState(false);
+  const [traitsResult, setTraitsResult] = useState<any>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 
   const handleSyncPlayers = async (mode: 'test' | 'full' = 'test') => {
@@ -115,6 +121,66 @@ export default function Admin() {
     }
   };
 
+  const handleSyncNations = async () => {
+    try {
+      setSyncingNations(true);
+      setNationsResult(null);
+      toast.info('Đang đồng bộ dữ liệu quốc gia...');
+
+      const { data, error } = await supabase.functions.invoke('sync-renderz-nations');
+
+      if (error) throw error;
+
+      setNationsResult(data);
+      toast.success("Đồng bộ quốc gia thành công!");
+    } catch (error) {
+      console.error("Error syncing nations:", error);
+      toast.error("Lỗi khi đồng bộ quốc gia: " + (error as Error).message);
+    } finally {
+      setSyncingNations(false);
+    }
+  };
+
+  const handleSyncTeams = async () => {
+    try {
+      setSyncingTeams(true);
+      setTeamsResult(null);
+      toast.info('Đang đồng bộ dữ liệu câu lạc bộ...');
+
+      const { data, error } = await supabase.functions.invoke('sync-renderz-teams');
+
+      if (error) throw error;
+
+      setTeamsResult(data);
+      toast.success("Đồng bộ câu lạc bộ thành công!");
+    } catch (error) {
+      console.error("Error syncing teams:", error);
+      toast.error("Lỗi khi đồng bộ câu lạc bộ: " + (error as Error).message);
+    } finally {
+      setSyncingTeams(false);
+    }
+  };
+
+  const handleSyncTraits = async () => {
+    try {
+      setSyncingTraits(true);
+      setTraitsResult(null);
+      toast.info('Đang đồng bộ dữ liệu chỉ số ẩn...');
+
+      const { data, error } = await supabase.functions.invoke('sync-renderz-traits');
+
+      if (error) throw error;
+
+      setTraitsResult(data);
+      toast.success("Đồng bộ chỉ số ẩn thành công!");
+    } catch (error) {
+      console.error("Error syncing traits:", error);
+      toast.error("Lỗi khi đồng bộ chỉ số ẩn: " + (error as Error).message);
+    } finally {
+      setSyncingTraits(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -214,59 +280,6 @@ export default function Admin() {
                 <CardTitle>2. Đồng Bộ Giải Đấu</CardTitle>
               </div>
               <CardDescription>
-                Đồng bộ dữ liệu cầu thủ từ mùa 24, 25, 26
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex gap-2">
-                <Button 
-                  onClick={() => handleSyncPlayers('test')}
-                  disabled={syncingPlayers}
-                  variant="outline"
-                  className="flex-1"
-                >
-                  {syncingPlayers ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <Play className="w-4 h-4 mr-2" />
-                  )}
-                  Test (5 trang)
-                </Button>
-                <Button 
-                  onClick={() => handleSyncPlayers('full')}
-                  disabled={syncingPlayers}
-                  className="flex-1"
-                >
-                  {syncingPlayers ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <Play className="w-4 h-4 mr-2" />
-                  )}
-                  Toàn Bộ
-                </Button>
-              </div>
-
-              {playersResult && (
-                <div className="bg-muted p-4 rounded-lg space-y-2">
-                  <p className="text-sm font-semibold text-green-600">✅ {playersResult.message}</p>
-                  <div className="text-xs space-y-1">
-                    <p>• Tổng cầu thủ: {playersResult.totalPlayers}</p>
-                    <p>• Tổng trang: {playersResult.totalPages}</p>
-                    <p>• Chế độ: {playersResult.mode}</p>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Sync Leagues Card */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Trophy className="w-5 h-5" />
-                <CardTitle>Đồng Bộ Giải Đấu</CardTitle>
-              </div>
-              <CardDescription>
                 Đồng bộ dữ liệu giải đấu toàn cục (sử dụng dictionary để dịch tên)
               </CardDescription>
             </CardHeader>
@@ -288,10 +301,119 @@ export default function Admin() {
                 <div className="bg-muted p-4 rounded-lg space-y-2">
                   <p className="text-sm font-semibold text-green-600">✅ {leaguesResult.message}</p>
                   <div className="text-xs space-y-1">
-                    <p>• Tổng giải đấu: {leaguesResult.totalLeagues}</p>
-                    {leaguesResult.reference && (
-                      <p className="text-muted-foreground italic">• {leaguesResult.reference}</p>
-                    )}
+                    <p>• Tổng giải đấu: {leaguesResult.synced || leaguesResult.totalLeagues}</p>
+                    <p>• Đã dịch: {leaguesResult.translated}</p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Sync Nations Card */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Trophy className="w-5 h-5" />
+                <CardTitle>3. Đồng Bộ Quốc Gia</CardTitle>
+              </div>
+              <CardDescription>
+                Đồng bộ dữ liệu quốc gia (sử dụng dictionary để dịch tên)
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Button 
+                onClick={handleSyncNations}
+                disabled={syncingNations}
+                className="w-full"
+              >
+                {syncingNations ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Play className="w-4 h-4 mr-2" />
+                )}
+                Đồng Bộ Nations
+              </Button>
+
+              {nationsResult && (
+                <div className="bg-muted p-4 rounded-lg space-y-2">
+                  <p className="text-sm font-semibold text-green-600">✅ {nationsResult.message}</p>
+                  <div className="text-xs space-y-1">
+                    <p>• Tổng quốc gia: {nationsResult.synced}</p>
+                    <p>• Đã dịch: {nationsResult.translated}</p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Sync Teams Card */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Trophy className="w-5 h-5" />
+                <CardTitle>4. Đồng Bộ Câu Lạc Bộ</CardTitle>
+              </div>
+              <CardDescription>
+                Đồng bộ dữ liệu câu lạc bộ (sử dụng dictionary để dịch tên)
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Button 
+                onClick={handleSyncTeams}
+                disabled={syncingTeams}
+                className="w-full"
+              >
+                {syncingTeams ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Play className="w-4 h-4 mr-2" />
+                )}
+                Đồng Bộ Teams
+              </Button>
+
+              {teamsResult && (
+                <div className="bg-muted p-4 rounded-lg space-y-2">
+                  <p className="text-sm font-semibold text-green-600">✅ {teamsResult.message}</p>
+                  <div className="text-xs space-y-1">
+                    <p>• Tổng câu lạc bộ: {teamsResult.synced}</p>
+                    <p>• Đã dịch: {teamsResult.translated}</p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Sync Traits Card */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Trophy className="w-5 h-5" />
+                <CardTitle>5. Đồng Bộ Chỉ Số Ẩn (Traits)</CardTitle>
+              </div>
+              <CardDescription>
+                Đồng bộ dữ liệu chỉ số ẩn của cầu thủ (sử dụng dictionary để dịch tên và mô tả)
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Button 
+                onClick={handleSyncTraits}
+                disabled={syncingTraits}
+                className="w-full"
+              >
+                {syncingTraits ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Play className="w-4 h-4 mr-2" />
+                )}
+                Đồng Bộ Traits
+              </Button>
+
+              {traitsResult && (
+                <div className="bg-muted p-4 rounded-lg space-y-2">
+                  <p className="text-sm font-semibold text-green-600">✅ {traitsResult.message}</p>
+                  <div className="text-xs space-y-1">
+                    <p>• Tổng chỉ số ẩn: {traitsResult.synced}</p>
+                    <p>• Đã dịch: {traitsResult.translated}</p>
                   </div>
                 </div>
               )}
@@ -303,7 +425,7 @@ export default function Admin() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Users className="w-5 h-5" />
-                <CardTitle>3. Đồng Bộ Cầu Thủ</CardTitle>
+                <CardTitle>6. Đồng Bộ Cầu Thủ</CardTitle>
               </div>
               <CardDescription>
                 Đồng bộ dữ liệu cầu thủ từ mùa 24, 25, 26
@@ -359,8 +481,8 @@ export default function Admin() {
           </CardHeader>
           <CardContent className="space-y-2 text-sm text-muted-foreground">
             <p><strong>Bước 1:</strong> Import Localization Dictionary trước (chỉ cần 1 lần).</p>
-            <p><strong>Bước 2:</strong> Đồng bộ Leagues để áp dụng dictionary và dịch tên.</p>
-            <p><strong>Bước 3:</strong> Test đồng bộ cầu thủ (5 trang ~50 cầu thủ), sau đó chạy full sync.</p>
+            <p><strong>Bước 2-5:</strong> Đồng bộ Leagues, Nations, Teams, và Traits để áp dụng dictionary và dịch tên.</p>
+            <p><strong>Bước 6:</strong> Test đồng bộ cầu thủ (5 trang ~50 cầu thủ), sau đó chạy full sync.</p>
             <p className="text-yellow-600 mt-4"><strong>⚠️ Lưu ý:</strong> Full sync có thể mất vài phút. Không tắt trình duyệt trong lúc đồng bộ.</p>
           </CardContent>
         </Card>

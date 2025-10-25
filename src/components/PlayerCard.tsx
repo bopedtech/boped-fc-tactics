@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { getCountryFlag, getCountryNameVi, getClubInfo, getNationCode } from "@/lib/countryUtils";
+import { getCountryFlag, getNationInfo, getTeamInfo } from "@/lib/countryUtils";
 
 interface PlayerStats {
   pace?: number;
@@ -34,27 +34,28 @@ interface Player {
 interface PlayerCardProps {
   player: Player;
   onClick?: () => void;
-  clubsData?: Array<{ clubId: number; nameVi: string; logoUrl: string }>;
-  countriesData?: Array<{ countryCode: string; nameVi: string; nameEn: string }>;
+  teamsData?: Array<{ id: number; displayName: string; image?: string }>;
+  nationsData?: Array<{ id: number; displayName: string; image?: string }>;
   leaguesData?: Array<{ id: number; displayName: string; image?: string }>;
 }
 
-export default function PlayerCard({ player, onClick, clubsData, countriesData, leaguesData }: PlayerCardProps) {
+export default function PlayerCard({ player, onClick, teamsData, nationsData, leaguesData }: PlayerCardProps) {
   const isGK = player.position === "GK";
   
-  // Lấy thông tin club
-  const clubInfo = player.club?.id ? getClubInfo(player.club.id, clubsData) : null;
-  const clubLogoUrl = clubInfo?.logoUrl;
-  const clubName = clubInfo?.nameVi || player.club?.name;
+  // Lấy thông tin team/club
+  const teamInfo = player.club?.id ? getTeamInfo(player.club.id, teamsData) : null;
+  const teamLogoUrl = teamInfo?.image || player.club?.image;
+  const teamName = teamInfo?.displayName || player.club?.name;
   
   // Lấy thông tin league
   const leagueInfo = leaguesData?.find(l => l.id === player.league?.id);
   const leagueName = leagueInfo?.displayName || player.league?.name;
   const leagueImage = leagueInfo?.image || player.league?.image;
   
-  // Lấy flag và tên từ player data
+  // Lấy thông tin nation
+  const nationInfo = player.nation?.id ? getNationInfo(player.nation.id, nationsData) : null;
+  const nationName = nationInfo?.displayName || player.nation?.name;
   const flagImage = player.images?.flagImage;
-  const countryNameVi = player.nation?.name;
 
   // Get avgStats object (avg1-avg6 for stats)
   const avgStatsObj = (player as any).avgStats || {};
@@ -148,19 +149,19 @@ export default function PlayerCard({ player, onClick, clubsData, countriesData, 
         {/* Club, League and Nation */}
         <div className="flex justify-center gap-3 mt-2 text-xs items-center flex-wrap">
           {/* Club */}
-          {clubName && (
+          {teamName && (
             <div className="flex items-center gap-1.5">
-              {clubLogoUrl && (
+              {teamLogoUrl && (
                 <img 
-                  src={clubLogoUrl} 
-                  alt={clubName}
+                  src={teamLogoUrl} 
+                  alt={teamName}
                   className="w-4 h-4 object-contain"
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
                   }}
                 />
               )}
-              <span className="text-muted-foreground">{clubName}</span>
+              <span className="text-muted-foreground">{teamName}</span>
             </div>
           )}
           
@@ -182,16 +183,16 @@ export default function PlayerCard({ player, onClick, clubsData, countriesData, 
           )}
           
           {/* Nation */}
-          {countryNameVi && (
+          {nationName && (
             <div className="flex items-center gap-1.5">
               {flagImage && (
                 <img 
                   src={flagImage} 
-                  alt={countryNameVi}
+                  alt={nationName}
                   className="w-5 h-4 object-cover rounded-sm"
                 />
               )}
-              <span className="text-muted-foreground">{countryNameVi}</span>
+              <span className="text-muted-foreground">{nationName}</span>
             </div>
           )}
         </div>

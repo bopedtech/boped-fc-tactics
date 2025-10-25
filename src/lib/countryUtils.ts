@@ -43,50 +43,35 @@ export function getCountryFlag(countryCode: string): string {
 }
 
 /**
- * Chuyển đổi tên quốc gia sang mã quốc gia từ database
+ * Chuyển đổi tên quốc gia sang mã quốc gia từ database nations
  */
-export function getNationCode(
-  nationName: string,
-  countriesData?: Array<{ countryCode: string; nameEn: string }>
-): string {
-  if (!nationName || !countriesData) return '';
+export function getNationInfo(
+  nationId: number,
+  nationsData?: Array<{ id: number; displayName: string; image?: string }>
+): { displayName: string; image?: string } | null {
+  if (!nationId || !nationsData) return null;
   
-  const country = countriesData.find(
-    c => c.nameEn.toLowerCase() === nationName.toLowerCase()
-  );
+  const nation = nationsData.find(n => n.id === nationId);
   
-  return country?.countryCode || '';
+  return nation ? {
+    displayName: nation.displayName,
+    image: nation.image
+  } : null;
 }
 
 /**
- * Lấy tên quốc gia bằng tiếng Việt từ database
+ * Lấy thông tin team/club từ database teams
  */
-export function getCountryNameVi(
-  countryCode: string, 
-  countriesData?: Array<{ countryCode: string; nameVi: string }>
-): string {
-  if (!countryCode || !countriesData) return '';
+export function getTeamInfo(
+  teamId: number,
+  teamsData?: Array<{ id: number; displayName: string; image?: string }>
+): { displayName: string; image?: string } | null {
+  if (!teamId || !teamsData) return null;
   
-  const country = countriesData.find(
-    c => c.countryCode.toUpperCase() === countryCode.toUpperCase()
-  );
+  const team = teamsData.find(t => t.id === teamId);
   
-  return country?.nameVi || '';
-}
-
-/**
- * Lấy thông tin club từ database
- */
-export function getClubInfo(
-  clubId: number,
-  clubsData?: Array<{ clubId: number; nameVi: string; logoUrl: string }>
-): { nameVi: string; logoUrl: string } | null {
-  if (!clubId || !clubsData) return null;
-  
-  const club = clubsData.find(c => c.clubId === clubId);
-  
-  return club ? {
-    nameVi: club.nameVi || '',
-    logoUrl: club.logoUrl || ''
+  return team ? {
+    displayName: team.displayName,
+    image: team.image
   } : null;
 }
