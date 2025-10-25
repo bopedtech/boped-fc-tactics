@@ -123,12 +123,12 @@ export default function PlayerCard({ player, onClick, teamsData, nationsData, le
         
         <div className="relative h-full flex flex-col">
           {/* Top: OVR + Position - Inside and down a bit */}
-          <div className="absolute top-4 left-4 z-20">
+          <div className="absolute top-6 left-6 z-20">
             <div className="flex flex-col items-start">
-              <div className="text-3xl font-black text-white leading-none drop-shadow-[0_3px_6px_rgba(0,0,0,1)]">
+              <div className="text-4xl font-black text-white leading-none drop-shadow-[0_3px_6px_rgba(0,0,0,1)]">
                 {player.rating}
               </div>
-              <div className="text-xs font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,1)] -mt-0.5">
+              <div className="text-sm font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,1)] -mt-0.5">
                 {player.position}
               </div>
             </div>
