@@ -83,8 +83,8 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
   const [traitSearch, setTraitSearch] = useState("");
   
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
-    rating: true,
-    position: true,
+    rating: false,
+    position: false,
     league: false,
     clubs: false,
     nations: false,
