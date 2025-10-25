@@ -38,10 +38,9 @@ interface PlayerCardProps {
   teamsData?: Array<{ id: number; displayName: string; image?: string }>;
   nationsData?: Array<{ id: number; displayName: string; image?: string }>;
   leaguesData?: Array<{ id: number; displayName: string; image?: string }>;
-  programsData?: Array<{ id: string; displayName: string; image?: string }>;
 }
 
-export default function PlayerCard({ player, onClick, teamsData, nationsData, leaguesData, programsData }: PlayerCardProps) {
+export default function PlayerCard({ player, onClick, teamsData, nationsData, leaguesData }: PlayerCardProps) {
   const isGK = player.position === "GK";
   
   // Lấy thông tin team/club
@@ -59,10 +58,8 @@ export default function PlayerCard({ player, onClick, teamsData, nationsData, le
   const nationName = nationInfo?.displayName || player.nation?.name;
   const flagImage = player.images?.flagImage;
 
-  // Get program/source info for background
-  const programId = player.source;
-  const programInfo = programsData?.find(p => p.id === programId);
-  const programImage = programInfo?.image;
+  // Get card background from player images
+  const cardBackground = player.images?.playerCardBackground;
 
   // Get avgStats object (avg1-avg6 for stats)
   const avgStatsObj = (player as any).avgStats || {};
@@ -104,12 +101,12 @@ export default function PlayerCard({ player, onClick, teamsData, nationsData, le
       className="card-hover overflow-hidden cursor-pointer relative group border-0 shadow-xl aspect-[3/4]"
       onClick={onClick}
     >
-      {/* Program Background Image */}
-      {programImage ? (
+      {/* Card Background Image */}
+      {cardBackground ? (
         <>
           <img 
-            src={programImage} 
-            alt="Program background"
+            src={cardBackground} 
+            alt="Card background"
             className="absolute inset-0 w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60" />
