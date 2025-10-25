@@ -135,7 +135,7 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
   const [player, setPlayer] = useState<Player | null>(null);
   const [loading, setLoading] = useState(false);
   const [countryCode, setCountryCode] = useState<string>("");
-  const [leagueInfo, setLeagueInfo] = useState<{ id: number; name: string; image?: string } | null>(null);
+  const [leagueInfo, setLeagueInfo] = useState<{ id: number; displayName: string; image?: string } | null>(null);
 
   useEffect(() => {
     if (open && assetId) {
@@ -180,7 +180,7 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
         if (leagueId && typeof leagueId === 'number') {
           const { data: leagueData } = await supabase
             .from("leagues")
-            .select("id, name, image")
+            .select("id, displayName, image")
             .eq("id", leagueId)
             .single();
           
@@ -423,14 +423,14 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                               {leagueInfo?.image && (
                                 <img 
                                   src={leagueInfo.image} 
-                                  alt={leagueInfo.name} 
+                                  alt={leagueInfo.displayName} 
                                   className="w-8 h-8 object-contain"
                                   onError={(e) => {
                                     e.currentTarget.style.display = 'none';
                                   }}
                                 />
                               )}
-                              <span className="font-medium">{leagueInfo?.name || (player.league as any).name}</span>
+                              <span className="font-medium">{leagueInfo?.displayName || (player.league as any).name}</span>
                             </div>
                           </div>
                         )}

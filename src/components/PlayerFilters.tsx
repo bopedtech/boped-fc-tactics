@@ -66,7 +66,7 @@ const footNames: Record<string, string> = {
 };
 
 export default function PlayerFilters({ filters, onFilterChange, onReset }: PlayerFiltersProps) {
-  const [leagues, setLeagues] = useState<Array<{ id: number; name: string }>>([]);
+  const [leagues, setLeagues] = useState<Array<{ id: number; displayName: string }>>([]);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     rating: true,
     position: true,
@@ -92,8 +92,8 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
     try {
       const { data, error } = await supabase
         .from('leagues')
-        .select('id, name')
-        .order('name', { ascending: true });
+        .select('id, displayName')
+        .order('displayName', { ascending: true });
       
       if (error) throw error;
       setLeagues(data || []);
@@ -217,7 +217,7 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
                       }}
                     />
                     <label htmlFor={`league-${league.id}`} className="text-xs cursor-pointer">
-                      {league.name}
+                      {league.displayName}
                     </label>
                   </div>
                 ))}

@@ -36,7 +36,7 @@ interface PlayerCardProps {
   onClick?: () => void;
   clubsData?: Array<{ clubId: number; nameVi: string; logoUrl: string }>;
   countriesData?: Array<{ countryCode: string; nameVi: string; nameEn: string }>;
-  leaguesData?: Array<{ id: number; name: string; image?: string }>;
+  leaguesData?: Array<{ id: number; displayName: string; image?: string }>;
 }
 
 export default function PlayerCard({ player, onClick, clubsData, countriesData, leaguesData }: PlayerCardProps) {
@@ -49,7 +49,7 @@ export default function PlayerCard({ player, onClick, clubsData, countriesData, 
   
   // Lấy thông tin league
   const leagueInfo = leaguesData?.find(l => l.id === player.league?.id);
-  const leagueName = leagueInfo?.name || player.league?.name;
+  const leagueName = leagueInfo?.displayName || player.league?.name;
   const leagueImage = leagueInfo?.image || player.league?.image;
   
   // Lấy flag và tên từ player data

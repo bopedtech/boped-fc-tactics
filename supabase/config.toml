@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.sync-leagues]
 verify_jwt = false
+
+[functions.import-localization-dictionary]
+verify_jwt = false

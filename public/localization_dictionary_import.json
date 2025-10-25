@@ -1,0 +1,1602 @@
+[
+  {
+    "key": "ANN26_USERLOGO",
+    "value_en": "2nd Anniversary",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "ANN26_USERLOGO_ANI",
+    "value_en": "2nd Anniversary (Premium)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Advanced Training_level_abbr",
+    "value_en": "LVL",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "BD25_USER_LOGO",
+    "value_en": "Ballon d'Or User Logo",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "BD25_USER_LOGO_ANI",
+    "value_en": "Ballon d'Or Master User Logo",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "CAM",
+    "value_en": "CAM",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "CAP25_CHIELLINI_ABD",
+    "value_en": "Captain Chiellini Armband",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "CAP25_CHIELLINI_USERLOGO",
+    "value_en": "Captain Chiellini",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "CAP25_DUNGA_ABD",
+    "value_en": "Captain Dunga Armband",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "CAP25_DUNGA_USERLOGO",
+    "value_en": "Captain Dunga",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "CAP25_INIESTA_ABD",
+    "value_en": "Captain Iniesta Armband",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "CAP25_INIESTA_USERLOGO",
+    "value_en": "Captain Iniesta",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "CAP25_TOTTI_ABD",
+    "value_en": "Captain Totti Armband",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "CAP25_TOTTI_USERLOGO",
+    "value_en": "Captain Totti",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "CAP25_USERLOGO",
+    "value_en": "Captains",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "CAP25_USERLOGO_ANI",
+    "value_en": "Ultimate Captains",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "CB",
+    "value_en": "CB",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "CDM",
+    "value_en": "CDM",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "CF",
+    "value_en": "CF",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "CM",
+    "value_en": "CM",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Common_League",
+    "value_en": "LEAGUE",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Common_Left",
+    "value_en": "LEFT",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Common_Overall",
+    "value_en": "OVR",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Common_Position",
+    "value_en": "POSITION",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Common_Program",
+    "value_en": "PROGRAM",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Common_Ratings",
+    "value_en": "RATINGS",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Common_Right",
+    "value_en": "RIGHT",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Common_Team",
+    "value_en": "TEAM",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DEFINING_LEGACIES",
+    "value_en": "Defining Legacies",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DEFINING_LEGACIES_ANI",
+    "value_en": "Premium Defining Legacies",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR2_Division_Amateur",
+    "value_en": "AMATEUR",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR2_Division_Amateur_I",
+    "value_en": "AMATEUR I",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR2_Division_Amateur_II",
+    "value_en": "AMATEUR II",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR2_Division_Amateur_III",
+    "value_en": "AMATEUR III",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR2_Division_FIFAChamp",
+    "value_en": "FC CHAMPION",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR2_Division_Legendary",
+    "value_en": "LEGENDARY",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR2_Division_Legendary_I",
+    "value_en": "LEGENDARY I",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR2_Division_Legendary_II",
+    "value_en": "LEGENDARY II",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR2_Division_Legendary_III",
+    "value_en": "LEGENDARY III",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR2_Division_Legendary_IV",
+    "value_en": "LEGENDARY IV",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR2_Division_Legendary_V",
+    "value_en": "LEGENDARY V",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR2_Division_Pro",
+    "value_en": "PRO",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR2_Division_Pro_I",
+    "value_en": "PRO I",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR2_Division_Pro_II",
+    "value_en": "PRO II",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR2_Division_Pro_III",
+    "value_en": "PRO III",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR2_Division_Pro_IV",
+    "value_en": "PRO IV",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR2_Division_Pro_V",
+    "value_en": "PRO V",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR2_Division_SemiPro",
+    "value_en": "SEMI PRO",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR2_Division_SemiPro_I",
+    "value_en": "SEMI PRO I",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR2_Division_SemiPro_II",
+    "value_en": "SEMI PRO II",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR2_Division_SemiPro_III",
+    "value_en": "SEMI PRO III",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR2_Division_WorldClass",
+    "value_en": "WORLD CLASS",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR2_Division_WorldClass_I",
+    "value_en": "WORLD CLASS I",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR2_Division_WorldClass_II",
+    "value_en": "WORLD CLASS II",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR2_Division_WorldClass_III",
+    "value_en": "WORLD CLASS III",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR2_Division_WorldClass_IV",
+    "value_en": "WORLD CLASS IV",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR2_Division_WorldClass_V",
+    "value_en": "WORLD CLASS V",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR_ANNIVERSARY_H2H",
+    "value_en": "Novice (Anniversary)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR_ANNIVERSARY_H2H_PRO",
+    "value_en": "Expert (Anniversary)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR_ANNIVERSARY_H2H_PROMAX",
+    "value_en": "Master (Anniversary)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR_ANNIVERSARY_MMPVP",
+    "value_en": "Novice (Anniversary)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR_ANNIVERSARY_MMPVP_PRO",
+    "value_en": "Expert (Anniversary)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR_ANNIVERSARY_MMPVP_PROMAX",
+    "value_en": "Master (Anniversary)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR_ANNIVERSARY_VSA",
+    "value_en": "Novice (Anniversary)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR_ANNIVERSARY_VSA_PRO",
+    "value_en": "Expert (Anniversary)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR_ANNIVERSARY_VSA_PROMAX",
+    "value_en": "Master (Anniversary)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR_AQUA_H2H",
+    "value_en": "Expert (Aqua vs Inferno)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR_AQUA_H2H_PRO",
+    "value_en": "Novice (Aqua vs Inferno)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR_AQUA_H2H_PROMAX",
+    "value_en": "Master (Aqua vs Inferno)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR_AQUA_MMPVP",
+    "value_en": "Expert (Aqua vs Inferno)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR_AQUA_MMPVP_PRO",
+    "value_en": "Novice (Aqua vs Inferno)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR_AQUA_MMPVP_PROMAX",
+    "value_en": "Master (Aqua vs Inferno)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR_AQUA_VSA",
+    "value_en": "Expert (Aqua vs Inferno)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR_AQUA_VSA_PRO",
+    "value_en": "Novice (Aqua vs Inferno)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR_AQUA_VSA_PROMAX",
+    "value_en": "Master (Aqua vs Inferno)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR_CAPTAIN_H2H",
+    "value_en": "Novice (Captains)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR_CAPTAIN_H2H_PRO",
+    "value_en": "Expert (Captains)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR_CAPTAIN_H2H_PROMAX",
+    "value_en": "Master (Captains)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR_CAPTAIN_MMPVP",
+    "value_en": "Novice (Captains)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR_CAPTAIN_MMPVP_PRO",
+    "value_en": "Expert (Captains)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR_CAPTAIN_MMPVP_PROMAX",
+    "value_en": "Master (Captains)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR_CAPTAIN_VSA",
+    "value_en": "Novice (Captains)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR_CAPTAIN_VSA_PRO",
+    "value_en": "Expert (Captains)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR_CAPTAIN_VSA_PROMAX",
+    "value_en": "Master (Captains)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR_RAGNAROK_H2H",
+    "value_en": "Novice (Ragnarok)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR_RAGNAROK_H2H_PRO",
+    "value_en": "Expert (Ragnarok)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR_RAGNAROK_H2H_PROMAX",
+    "value_en": "Master (Ragnarok)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR_RAGNAROK_MMPVP",
+    "value_en": "Expert (Ragnarok)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR_RAGNAROK_MMPVP_PRO",
+    "value_en": "Novice (Ragnarok)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR_RAGNAROK_MMPVP_PROMAX",
+    "value_en": "Master (Ragnarok)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR_RAGNAROK_VSA",
+    "value_en": "Novice (Ragnarok)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR_RAGNAROK_VSA_PRO",
+    "value_en": "Expert (Ragnarok)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "ETOO_USERLOGO",
+    "value_en": "Eto'o",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Easter25_USERLOGO",
+    "value_en": "Easter",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_25BOT000_USER_LOGO",
+    "value_en": "BOT-000",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_AF25_USER_LOGO",
+    "value_en": "April Fool's 25",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_AF25_USER_LOGO_ANI",
+    "value_en": "Premium April Fool's 25",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_BK25_3LION_USER_LOGO",
+    "value_en": "Three Lions (Deluxe)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_BK25_COOL_USER_LOGO_ANI",
+    "value_en": "Premium Mohawk",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_BK25_CROWN_USER_LOGO_ANI",
+    "value_en": "Real Madrid (Deluxe)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_BK25_DEVIL_USER_LOGO_ANI",
+    "value_en": "Devil (Deluxe)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_BK25_NAT_USER_LOGO_ANI",
+    "value_en": "Premium Three Lions (Deluxe)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_BLD24_BALL_USER_LOGO_ANI",
+    "value_en": "Golden Glory",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_BLD24_USER_LOGO",
+    "value_en": "Ballon d'Or",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_BLD24_USER_LOGO_ANI",
+    "value_en": "Premium Ballon d'Or",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_CA25_USER_LOGO",
+    "value_en": "Carnival",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_CA25_USER_LOGO_ANI",
+    "value_en": "Premium Carnival",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_CA25_USER_LOGO_COMMUNITY_1",
+    "value_en": "Mask",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_CA25_USER_LOGO_COMMUNITY_2",
+    "value_en": "Samba",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_CA25_USER_LOGO_COMMUNITY_3",
+    "value_en": "Confetti",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_CROWN_USER_LOGO",
+    "value_en": "Crown",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_DDLM_USER_LOGO_1031",
+    "value_en": "Cempasúchil",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_DETECTIVE_USER_LOGO",
+    "value_en": "Ah, you!",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_DEVIL_USER_LOGO",
+    "value_en": "Devil",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_FB25_USER_LOGO_ANI",
+    "value_en": "Premium Flash Ball",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_HERO25_USER_LOGO_1",
+    "value_en": "Eden Hazard",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": ",\n\nFCMG_HERO25_USER_LOGO_3",
+    "value_en": "Jaap Stam",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_HERO25_USER_LOGO_4",
+    "value_en": "Jamie Carragher",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_HERO25_USER_LOGO_5",
+    "value_en": "Tim Howard",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_HERO25_USER_LOGO_6",
+    "value_en": "Maicon",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_HERO_PART2_USERLOGO_1",
+    "value_en": "Guti I",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_HERO_PART2_USERLOGO_2",
+    "value_en": "Mohammed Noor I",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_HERO_PART2_USERLOGO_3",
+    "value_en": "Zé Roberto I",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_HERO_PART2_USERLOGO_4",
+    "value_en": "Marek Hamšík I",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_HERO_PART2_USERLOGO_5",
+    "value_en": "Blaise Matuidi I",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_LALIGA25_USERLOGO_1008",
+    "value_en": "Leganés",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": ",\n\nFCMG_LALIGA25_USERLOGO_1860",
+    "value_en": "Getafe CF",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_LALIGA25_USERLOGO_240",
+    "value_en": "Atletico Madrid",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_LALIGA25_USERLOGO_241",
+    "value_en": "FC Barcelona",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_LALIGA25_USERLOGO_243",
+    "value_en": "Real Madrid",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_LALIGA25_USERLOGO_448",
+    "value_en": "Athletic Club",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_LALIGA25_USERLOGO_449",
+    "value_en": "Real Betis",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_LALIGA25_USERLOGO_450",
+    "value_en": "RC Celta de Vigo",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_LALIGA25_USERLOGO_452",
+    "value_en": "RCD Espanyol",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_LALIGA25_USERLOGO_453",
+    "value_en": "RCD Mallorca",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_LALIGA25_USERLOGO_457",
+    "value_en": "Real Sociedad",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_LALIGA25_USERLOGO_461",
+    "value_en": "Valencia CF",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_LALIGA25_USERLOGO_462",
+    "value_en": "Valladolid",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_LALIGA25_USERLOGO_463",
+    "value_en": "Deportivo Alavés",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_LALIGA25_USERLOGO_472",
+    "value_en": "UD Las Palmas",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_LALIGA25_USERLOGO_479",
+    "value_en": "Osasuna",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_LALIGA25_USERLOGO_480",
+    "value_en": "Rayo Vallecano",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_LALIGA25_USERLOGO_481",
+    "value_en": "Sevilla FC",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_LALIGA25_USERLOGO_483",
+    "value_en": "Villarreal CF",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_LIONS_USER_LOGO",
+    "value_en": "Lions",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_NEON25_USER_LOGO",
+    "value_en": "NEON",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_NEON25_USER_LOGO_ANI",
+    "value_en": "Premium NEON",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_PB25_CLASSIC_USER_LOGO",
+    "value_en": "Virtuoso",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_PB25_HIPHOP_USER_LOGO",
+    "value_en": "Hip Hop Boogie",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_PB25_JAZZ_USER_LOGO",
+    "value_en": "Jazz Master",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_PB25_ROCK_USER_LOGO",
+    "value_en": "Rock Star",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_PB25_USER_LOGO",
+    "value_en": "Pitch Beats",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_PB25_USER_LOGO_ANI",
+    "value_en": "Premium Pitch Beats",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_RMD25_KAREEM_USER_LOGO_ANI",
+    "value_en": "Premium Ramadan",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_RMD25_USER_LOGO",
+    "value_en": "Ramadan",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_RTTF25_USERLOGO_1",
+    "value_en": "Road to the Final 25",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_RTTF25_USERLOGO_1_ANI",
+    "value_en": "Road to the Final 25 Premium",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_SONGKRAN25_USERLOGO",
+    "value_en": "Songkran",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_SONGKRAN25_USERLOGO_ANI",
+    "value_en": "Premium Songkran",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_TDT25_USER_LOGO",
+    "value_en": "Thunderstruck",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_TDT25_USER_LOGO_ANI",
+    "value_en": "Premium Thunderstruck",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_TOTY25_USER_LOGO",
+    "value_en": "Team of The Year",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_TOTY25_USER_LOGO_ANI",
+    "value_en": "Premium Team of The Year",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_TOTY25_UTOTY_USER_LOGO",
+    "value_en": "UTOTY",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_TOTY25_UTOTY_USER_LOGO_ANI",
+    "value_en": "Premium UTOTY",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_TT24_USER_LOGO",
+    "value_en": "Trophy Titans",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_TT24_USER_LOGO_ANI",
+    "value_en": "Premium Trophy Titans",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_WW25_SNOWMAN_USER_LOGO",
+    "value_en": "Snowman",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_WW25_SNOWMAN_USER_LOGO_ANI",
+    "value_en": "Premium Snowman",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_WW25_USER_LOGO",
+    "value_en": "Winter Wonders",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_WW25_USER_LOGO_ANI",
+    "value_en": "Premium Winter Wonders",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FMG_TOT1_USER_LOGO_1024",
+    "value_en": "Evil Pumpkin",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FMG_TOT2_CHAPTER_USER_LOGO_1024",
+    "value_en": "Bat",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FMG_TOT3_CHAPTER_USER_LOGO_1024",
+    "value_en": "Pumpkin Lantern",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FMG_TOT4_CHAPTER_USER_LOGO_1024",
+    "value_en": "Hat",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FMG_TOT5_CHAPTER_USER_LOGO_1024",
+    "value_en": "Ghost",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FMG_TOT6_USER_LOGO_1024",
+    "value_en": "Black Cat",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FMG_TOT7_USER_LOGO_1024",
+    "value_en": "Trick or Treat",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FS25_USERLOGO_FC_PRO",
+    "value_en": "Mobile Festival",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FS25_USERLOGO_SHANGHAI",
+    "value_en": "FC Pro",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "GG25_USERLOGO",
+    "value_en": "Grassroot Greats",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "GG25_USERLOGO_ANI",
+    "value_en": "Premium Grassroot Greats",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "GK",
+    "value_en": "GK",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Gameplan_formationName_1",
+    "value_en": "3-4-2-1",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Gameplan_formationName_10",
+    "value_en": "3-5-2",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Gameplan_formationName_11",
+    "value_en": "3-5-2",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Gameplan_formationName_12",
+    "value_en": "3-5-2",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Gameplan_formationName_13",
+    "value_en": "4-1-2-1-2 WIDE",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Gameplan_formationName_14",
+    "value_en": "4-1-2-1-2",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Gameplan_formationName_15",
+    "value_en": "4-1-2-1-2",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Gameplan_formationName_16",
+    "value_en": "4-2-2-2",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Gameplan_formationName_17",
+    "value_en": "4-2-2-2",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Gameplan_formationName_18",
+    "value_en": "4-2-2-2",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Gameplan_formationName_19",
+    "value_en": "4-2-3-1 NARROW",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Gameplan_formationName_2",
+    "value_en": "3-4-2-1",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Gameplan_formationName_20",
+    "value_en": "4-2-3-1",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Gameplan_formationName_21",
+    "value_en": "4-2-3-1",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Gameplan_formationName_23",
+    "value_en": "4-3-2-1",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Gameplan_formationName_24",
+    "value_en": "4-3-2-1",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Gameplan_formationName_25",
+    "value_en": "4-3-3",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Gameplan_formationName_26",
+    "value_en": "4-3-3",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Gameplan_formationName_27",
+    "value_en": "4-3-3",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Gameplan_formationName_28",
+    "value_en": "4-4-1-1 ATTACK",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Gameplan_formationName_29",
+    "value_en": "4-4-1-1",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Gameplan_formationName_3",
+    "value_en": "3-4-2-1",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Gameplan_formationName_30",
+    "value_en": "4-4-1-1",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Gameplan_formationName_31",
+    "value_en": "4-4-2 FLAT",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Gameplan_formationName_32",
+    "value_en": "4-4-2",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Gameplan_formationName_33",
+    "value_en": "4-4-2",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Gameplan_formationName_36",
+    "value_en": "4-5-1",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Gameplan_formationName_4",
+    "value_en": "3-4-3 FLAT",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Gameplan_formationName_5",
+    "value_en": "3-4-3",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Gameplan_formationName_6",
+    "value_en": "3-4-3",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Gameplan_formationName_7",
+    "value_en": "3-4-1-2",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Gameplan_formationName_8",
+    "value_en": "3-4-1-2",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "Gameplan_formationName_9",
+    "value_en": "3-4-1-2",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "HERO25_MASTER_USERLOGO",
+    "value_en": "Hero Master",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "HERO25_MASTER_USERLOGO_ANI",
+    "value_en": "Premium Hero Master",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "HERO25_USERLOGO",
+    "value_en": "Heroes 25",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "HERO25_USERLOGO_ANI",
+    "value_en": "Premium Heroes 25",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "LB",
+    "value_en": "LB",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "LM",
+    "value_en": "LM",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "LW",
+    "value_en": "LW",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "LWB",
+    "value_en": "LWB",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "LeagueName_1",
+    "value_en": "3F Superliga",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "LeagueName_10",
+    "value_en": "Eredivisie",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "LeagueName_1003",
+    "value_en": "CONMEBOL Libertadores",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "LeagueName_1014",
+    "value_en": "CONMEBOL Sudamericana",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "LeagueName_13",
+    "value_en": "Premier League",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "LeagueName_14",
+    "value_en": "EFL Championship",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "LeagueName_16",
+    "value_en": "Ligue 1 Uber Eats",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "LeagueName_17",
+    "value_en": "Ligue 2 BKT",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "LeagueName_189",
+    "value_en": "Credit Suisse Super League",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "LeagueName_19",
+    "value_en": "Bundesliga",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "LeagueName_20",
+    "value_en": "Bundesliga 2",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "LeagueName_2012",
+    "value_en": "Chinese Football Association Super League",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "LeagueName_2076",
+    "value_en": "3. Liga",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "LeagueName_2118",
+    "value_en": "Icons",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "LeagueName_2149",
+    "value_en": "Indian Super League",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "LeagueName_2150",
+    "value_en": "REWARDS",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "LeagueName_2172",
+    "value_en": "United Emirates League",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "LeagueName_2209",
+    "value_en": "Liga Colombia",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "LeagueName_2210",
+    "value_en": "Liga Cyprus",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "LeagueName_2211",
+    "value_en": "Magyar Liga",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "LeagueName_2244",
+    "value_en": "Liga Azerbaijan",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "LeagueName_2249",
+    "value_en": "Liga Chile",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "LeagueName_308",
+    "value_en": "Liga Portugal",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "LeagueName_31",
+    "value_en": "Serie A TIM",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "LeagueName_317",
+    "value_en": "Liga Hrvatska",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "LeagueName_319",
+    "value_en": "Česká Liga",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "LeagueName_32",
+    "value_en": "Serie BKT",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "LeagueName_322",
+    "value_en": "Finnliiga",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "LeagueName_330",
+    "value_en": "SUPERLIGA",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "LeagueName_332",
+    "value_en": "Ukrayina Liha",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "LeagueName_350",
+    "value_en": "ROSHN Saudi League",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_I",
+    "value_en": "WORLD CLASS I",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_II",
+    "value_en": "WORLD CLASS II",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_III",
+    "value_en": "WORLD CLASS III",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_IV",
+    "value_en": "WORLD CLASS IV",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_V",
+    "value_en": "WORLD CLASS V",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "DR_RAGNAROK_VSA_PROMAX",
+    "value_en": "Master (Ragnarok)",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "25 USERLOGO",
+    "value_en": "Easter",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_HERO25_USER_LOGO_2",
+    "value_en": "Yaya Touré",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_HERO25_USER_LOGO_3",
+    "value_en": "Jaap Stam",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_LALIGA25_USERLOGO_110062",
+    "value_en": "Girona FC",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "FCMG_LALIGA25_USERLOGO_1860",
+    "value_en": "Getafe CF",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_1",
+    "value_en": "3F Superliga",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_10",
+    "value_en": "Eredivisie",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_11",
+    "value_en": "3-5-2",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_12",
+    "value_en": "3-5-2",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_13",
+    "value_en": "Premier League",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_14",
+    "value_en": "EFL Championship",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_15",
+    "value_en": "4-1-2-1-2",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_16",
+    "value_en": "Ligue 1 Uber Eats",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_17",
+    "value_en": "Ligue 2 BKT",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_18",
+    "value_en": "4-2-2-2",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_19",
+    "value_en": "Bundesliga",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_2",
+    "value_en": "3-4-2-1",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_20",
+    "value_en": "Bundesliga 2",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_21",
+    "value_en": "4-2-3-1",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_23",
+    "value_en": "4-3-2-1",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_24",
+    "value_en": "4-3-2-1",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_25",
+    "value_en": "4-3-3",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_26",
+    "value_en": "4-3-3",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_27",
+    "value_en": "4-3-3",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_28",
+    "value_en": "4-4-1-1 ATTACK",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_29",
+    "value_en": "4-4-1-1",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_3",
+    "value_en": "3-4-2-1",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_30",
+    "value_en": "4-4-1-1",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_31",
+    "value_en": "Serie A TIM",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_32",
+    "value_en": "Serie BKT",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_33",
+    "value_en": "4-4-2",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_36",
+    "value_en": "4-5-1",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_4",
+    "value_en": "3-4-3 FLAT",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_5",
+    "value_en": "3-4-3",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_6",
+    "value_en": "3-4-3",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_7",
+    "value_en": "3-4-1-2",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_8",
+    "value_en": "3-4-1-2",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_9",
+    "value_en": "3-4-1-2",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_1003",
+    "value_en": "CONMEBOL Libertadores",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_1014",
+    "value_en": "CONMEBOL Sudamericana",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_189",
+    "value_en": "Credit Suisse Super League",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_2012",
+    "value_en": "Chinese Football Association Super League",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_2076",
+    "value_en": "3. Liga",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_2118",
+    "value_en": "Icons",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_2149",
+    "value_en": "Indian Super League",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_2150",
+    "value_en": "REWARDS",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_2172",
+    "value_en": "United Emirates League",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_2209",
+    "value_en": "Liga Colombia",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_2210",
+    "value_en": "Liga Cyprus",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_2211",
+    "value_en": "Magyar Liga",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_2244",
+    "value_en": "Liga Azerbaijan",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_2249",
+    "value_en": "Liga Chile",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_308",
+    "value_en": "Liga Portugal",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_317",
+    "value_en": "Liga Hrvatska",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_319",
+    "value_en": "Česká Liga",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_322",
+    "value_en": "Finnliiga",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_330",
+    "value_en": "SUPERLIGA",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_332",
+    "value_en": "Ukrayina Liha",
+    "source": "Renderz_Runtime_Extraction"
+  },
+  {
+    "key": "_350",
+    "value_en": "ROSHN Saudi League",
+    "source": "Renderz_Runtime_Extraction"
+  }
+]

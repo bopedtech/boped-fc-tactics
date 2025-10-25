@@ -68,27 +68,51 @@ export type Database = {
       leagues: {
         Row: {
           createdAt: string | null
+          displayName: string | null
           id: number
           image: string | null
-          name: string
+          localizationKey: string
           rawData: Json
           updatedAt: string | null
         }
         Insert: {
           createdAt?: string | null
+          displayName?: string | null
           id: number
           image?: string | null
-          name: string
+          localizationKey: string
           rawData: Json
           updatedAt?: string | null
         }
         Update: {
           createdAt?: string | null
+          displayName?: string | null
           id?: number
           image?: string | null
-          name?: string
+          localizationKey?: string
           rawData?: Json
           updatedAt?: string | null
+        }
+        Relationships: []
+      }
+      localization_dictionary: {
+        Row: {
+          key: string
+          source: string | null
+          updatedAt: string | null
+          value_en: string
+        }
+        Insert: {
+          key: string
+          source?: string | null
+          updatedAt?: string | null
+          value_en: string
+        }
+        Update: {
+          key?: string
+          source?: string | null
+          updatedAt?: string | null
+          value_en?: string
         }
         Relationships: []
       }
@@ -317,10 +341,7 @@ export type Database = {
         }
         Returns: boolean
       }
-      set_super_admin_by_email: {
-        Args: { _email: string }
-        Returns: undefined
-      }
+      set_super_admin_by_email: { Args: { _email: string }; Returns: undefined }
     }
     Enums: {
       app_role: "super_admin" | "admin" | "user"

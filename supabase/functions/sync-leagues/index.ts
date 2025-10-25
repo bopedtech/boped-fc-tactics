@@ -87,14 +87,48 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Transform data với Explicit Mapping (NO seasonId)
-    const transformedLeagues: TransformedLeague[] = data.map((league: LeagueData) => ({
-      id: league.id,
-      name: league.name,
-      image: league.image || null,
-      rawData: league,
-      updatedAt: new Date().toISOString()
-    }));
+    // Step 2: Query internal localization dictionary
+    console.log('Querying internal localization dictionary...');
+    
+    const localizationKeys = [...new Set(data.map((league: LeagueData) => league.name))];
+    console.log(`Found ${localizationKeys.length} unique localization keys to translate`);
+    
+    const { data: dictionaryData, error: dictError } = await supabase
+      .from('localization_dictionary')
+      .select('key, value_en')
+      .in('key', localizationKeys);
+    
+    if (dictError) {
+      console.error('Error querying localization dictionary:', dictError);
+      throw new Error(`Failed to query dictionary: ${dictError.message}`);
+    }
+    
+    // Create a Map for O(1) lookup
+    const localizationMap = new Map(
+      (dictionaryData || []).map((entry: any) => [entry.key, entry.value_en])
+    );
+    
+    console.log(`Successfully loaded ${localizationMap.size} translations from DB`);
+
+    // Step 3: Transform data with internal lookup (Explicit Mapping)
+    const transformedLeagues = data.map((league: LeagueData) => {
+      const localizationKey = league.name;
+      const displayName = localizationMap.get(localizationKey);
+      
+      // Fallback mechanism with warning
+      if (!displayName) {
+        console.warn(`Warning: Translation missing for key: ${localizationKey}`);
+      }
+      
+      return {
+        id: league.id,
+        localizationKey: localizationKey,
+        displayName: displayName || localizationKey, // Fallback to key if translation missing
+        image: league.image || null,
+        rawData: league,
+        updatedAt: new Date().toISOString()
+      };
+    });
 
     console.log(`\n=== Total leagues to upsert: ${transformedLeagues.length} ===`);
 

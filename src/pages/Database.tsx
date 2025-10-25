@@ -74,7 +74,7 @@ export default function Database() {
   const [syncing, setSyncing] = useState(false);
   const [syncStatus, setSyncStatus] = useState<string>("");
   const [countriesData, setCountriesData] = useState<any[]>([]);
-  const [leaguesData, setLeaguesData] = useState<Array<{ id: number; name: string; image?: string }>>([]);
+  const [leaguesData, setLeaguesData] = useState<Array<{ id: number; displayName: string; image?: string }>>([]);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [selectedPlayerAssetId, setSelectedPlayerAssetId] = useState<number | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -127,8 +127,8 @@ export default function Database() {
     try {
       const { data, error } = await supabase
         .from("leagues")
-        .select("id, name, image")
-        .order("name", { ascending: true });
+        .select("id, displayName, image")
+        .order("displayName", { ascending: true });
       if (error) throw error;
       if (data) setLeaguesData(data);
     } catch (error) {

@@ -3,12 +3,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Loader2, Users, Play, Trophy } from "lucide-react";
+import { Loader2, Users, Play, Trophy, Database } from "lucide-react";
 import Header from "@/components/Header";
 
 export default function Admin() {
   const [syncingPlayers, setSyncingPlayers] = useState(false);
   const [playersResult, setPlayersResult] = useState<any>(null);
+  const [syncingDict, setSyncingDict] = useState(false);
+  const [dictSyncResult, setDictSyncResult] = useState<any>(null);
   const [syncingLeagues, setSyncingLeagues] = useState(false);
   const [leaguesResult, setLeaguesResult] = useState<any>(null);
 
@@ -34,6 +36,26 @@ export default function Admin() {
       toast.error("Lỗi khi đồng bộ cầu thủ: " + (error as Error).message);
     } finally {
       setSyncingPlayers(false);
+    }
+  };
+
+  const handleImportDictionary = async () => {
+    try {
+      setSyncingDict(true);
+      setDictSyncResult(null);
+      
+      const { data, error } = await supabase.functions.invoke('import-localization-dictionary');
+      
+      if (error) throw error;
+      
+      setDictSyncResult(data);
+      toast.success(`✓ Đã import ${data.totalImported} mục từ điển`);
+    } catch (error: any) {
+      console.error('Dictionary import error:', error);
+      setDictSyncResult({ success: false, error: error.message });
+      toast.error('Lỗi khi import từ điển bản địa hóa');
+    } finally {
+      setSyncingDict(false);
     }
   };
 
@@ -68,12 +90,60 @@ export default function Admin() {
         </div>
 
         <div className="space-y-6">
-          {/* Sync Players Card */}
+          {/* Import Dictionary Card */}
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
-                <Users className="w-5 h-5" />
-                <CardTitle>Đồng Bộ Cầu Thủ</CardTitle>
+                <Database className="w-5 h-5" />
+                <CardTitle>1. Import Localization Dictionary</CardTitle>
+              </div>
+              <CardDescription>
+                Import từ điển bản địa hóa để dịch tên Leagues, Clubs, Nations, Programs
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Button
+                onClick={handleImportDictionary}
+                disabled={syncingDict}
+                className="w-full"
+              >
+                {syncingDict ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Đang import...
+                  </>
+                ) : (
+                  <>
+                    <Database className="mr-2 h-4 w-4" />
+                    Import Dictionary
+                  </>
+                )}
+              </Button>
+              
+              {dictSyncResult && (
+                <div className={`p-4 rounded-lg ${dictSyncResult.success ? 'bg-green-50 dark:bg-green-950' : 'bg-red-50 dark:bg-red-950'}`}>
+                  <p className="text-sm font-medium">
+                    {dictSyncResult.success ? '✓ Thành công' : '✗ Lỗi'}
+                  </p>
+                  <p className="text-xs mt-1">
+                    {dictSyncResult.message}
+                  </p>
+                  {dictSyncResult.totalImported && (
+                    <p className="text-xs mt-1">
+                      Đã import: {dictSyncResult.totalImported} / {dictSyncResult.totalEntries} mục
+                    </p>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Sync Leagues Card */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Trophy className="w-5 h-5" />
+                <CardTitle>2. Đồng Bộ Giải Đấu</CardTitle>
               </div>
               <CardDescription>
                 Đồng bộ dữ liệu cầu thủ từ mùa 24, 25, 26
@@ -129,7 +199,7 @@ export default function Admin() {
                 <CardTitle>Đồng Bộ Giải Đấu</CardTitle>
               </div>
               <CardDescription>
-                Đồng bộ dữ liệu giải đấu toàn cục (Universal Data - không phụ thuộc mùa)
+                Đồng bộ dữ liệu giải đấu toàn cục (sử dụng dictionary để dịch tên)
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -159,6 +229,59 @@ export default function Admin() {
               )}
             </CardContent>
           </Card>
+
+          {/* Sync Players Card */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Users className="w-5 h-5" />
+                <CardTitle>3. Đồng Bộ Cầu Thủ</CardTitle>
+              </div>
+              <CardDescription>
+                Đồng bộ dữ liệu cầu thủ từ mùa 24, 25, 26
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex gap-2">
+                <Button 
+                  onClick={() => handleSyncPlayers('test')}
+                  disabled={syncingPlayers}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  {syncingPlayers ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Play className="w-4 h-4 mr-2" />
+                  )}
+                  Test (5 trang)
+                </Button>
+                <Button 
+                  onClick={() => handleSyncPlayers('full')}
+                  disabled={syncingPlayers}
+                  className="flex-1"
+                >
+                  {syncingPlayers ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Play className="w-4 h-4 mr-2" />
+                  )}
+                  Toàn Bộ
+                </Button>
+              </div>
+
+              {playersResult && (
+                <div className="bg-muted p-4 rounded-lg space-y-2">
+                  <p className="text-sm font-semibold text-green-600">✅ {playersResult.message}</p>
+                  <div className="text-xs space-y-1">
+                    <p>• Tổng cầu thủ: {playersResult.totalPlayers}</p>
+                    <p>• Tổng trang: {playersResult.totalPages}</p>
+                    <p>• Chế độ: {playersResult.mode}</p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
 
         {/* Info Card */}
@@ -167,8 +290,9 @@ export default function Admin() {
             <CardTitle>Hướng Dẫn</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-sm text-muted-foreground">
-            <p><strong>1. Test đồng bộ cầu thủ:</strong> Chạy test mode (5 trang ~50 cầu thủ) để kiểm tra.</p>
-            <p><strong>2. Đồng bộ toàn bộ:</strong> Sau khi test thành công, chạy full sync để lấy toàn bộ dữ liệu.</p>
+            <p><strong>Bước 1:</strong> Import Localization Dictionary trước (chỉ cần 1 lần).</p>
+            <p><strong>Bước 2:</strong> Đồng bộ Leagues để áp dụng dictionary và dịch tên.</p>
+            <p><strong>Bước 3:</strong> Test đồng bộ cầu thủ (5 trang ~50 cầu thủ), sau đó chạy full sync.</p>
             <p className="text-yellow-600 mt-4"><strong>⚠️ Lưu ý:</strong> Full sync có thể mất vài phút. Không tắt trình duyệt trong lúc đồng bộ.</p>
           </CardContent>
         </Card>
