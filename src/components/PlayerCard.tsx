@@ -128,7 +128,7 @@ export default function PlayerCard({ player, onClick, teamsData, nationsData, le
               <div className="text-4xl font-black text-white leading-none drop-shadow-[0_3px_6px_rgba(0,0,0,1)]">
                 {player.rating}
               </div>
-              <div className="text-sm font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,1)] -mt-0.5">
+              <div className="text-base font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,1)] mt-0.5 ml-0.5">
                 {player.position}
               </div>
             </div>
