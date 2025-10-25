@@ -29,6 +29,7 @@ interface Player {
   images?: any;
   stats: PlayerStats;
   traits?: any[];
+  source?: string;
 }
 
 interface PlayerCardProps {
@@ -57,6 +58,9 @@ export default function PlayerCard({ player, onClick, teamsData, nationsData, le
   const nationName = nationInfo?.displayName || player.nation?.name;
   const flagImage = player.images?.flagImage;
 
+  // Get program/source info for background
+  const programId = player.source;
+
   // Get avgStats object (avg1-avg6 for stats)
   const avgStatsObj = (player as any).avgStats || {};
   const avgGkStatsObj = (player as any).avgGkStats || {};
@@ -82,25 +86,10 @@ export default function PlayerCard({ player, onClick, teamsData, nationsData, le
   
   // Map avgStats to Vietnamese stat labels
   const statLabels = isGK 
-    ? ["Bắt Bóng", "Xử Lý", "Sút", "Phản Xạ", "Tốc Độ", "Vị Trí"]
-    : ["Tốc Độ", "Sút", "Chuyền", "Rê Dắt", "Phòng Ngự", "Thể Lực"];
+    ? ["BẮT", "XỬ LÝ", "SÚT", "PHẢN XẠ", "TỐC ĐỘ", "VỊ TRÍ"]
+    : ["TỐC ĐỘ", "SÚT", "CHUYỀN", "RÊ DẮT", "PHÒNG NGỰ", "THỂ LỰC"];
   
   const statsToShow = isGK ? avgGkStats : avgStats;
-
-  const statColors: Record<string, string> = {
-    pace: "text-stat-pace",
-    shooting: "text-stat-shooting",
-    passing: "text-stat-passing",
-    dribbling: "text-stat-dribbling",
-    defense: "text-stat-defense",
-    physicality: "text-stat-physical",
-    diving: "text-stat-pace",
-    handling: "text-stat-shooting",
-    kicking: "text-stat-passing",
-    reflexes: "text-stat-dribbling",
-    speed: "text-stat-defense",
-    positioning: "text-stat-physical",
-  };
 
   const displayStats = statLabels.map((label, index) => ({
     name: label,
@@ -109,114 +98,107 @@ export default function PlayerCard({ player, onClick, teamsData, nationsData, le
 
   return (
     <Card
-      className="card-hover overflow-hidden cursor-pointer bg-card border-border/50"
+      className="card-hover overflow-hidden cursor-pointer relative group"
       onClick={onClick}
     >
-      <div className="relative p-4">
-        {/* OVR and Position */}
-        <div className="absolute top-2 left-2 z-10">
-          <div className="text-3xl font-bold gradient-primary bg-clip-text text-transparent">
-            {player.rating}
+      {/* FC24-Style Card Background with gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-yellow-600/20 via-amber-500/10 to-orange-600/20 opacity-80" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-yellow-500/5 via-transparent to-transparent" />
+      
+      <div className="relative px-3 py-4">
+        {/* Top Row: OVR, Position, Nation Flag */}
+        <div className="flex items-start justify-between mb-2">
+          {/* OVR and Position */}
+          <div className="flex flex-col items-center">
+            <div className="text-4xl font-black text-amber-400 leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+              {player.rating}
+            </div>
+            <div className="text-xs font-bold text-amber-300/90 mt-0.5">
+              {player.position}
+            </div>
           </div>
-          <div className="text-xs font-semibold text-muted-foreground">
-            {player.position}
+
+          {/* Nation Flag */}
+          <div className="flex flex-col items-center gap-1">
+            {flagImage && (
+              <img 
+                src={flagImage} 
+                alt={nationName}
+                className="w-8 h-6 object-cover rounded-sm shadow-lg border border-white/20"
+              />
+            )}
+            {/* League Logo */}
+            {leagueImage && (
+              <img 
+                src={leagueImage} 
+                alt={leagueName}
+                className="w-6 h-6 object-contain opacity-90"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+            )}
+            {/* Club Logo */}
+            {teamLogoUrl && (
+              <img 
+                src={teamLogoUrl} 
+                alt={teamName}
+                className="w-6 h-6 object-contain opacity-90"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+            )}
           </div>
         </div>
 
-        {/* Player Image */}
-        <div className="flex justify-center items-center h-32 mt-4">
+        {/* Player Image - Larger and centered */}
+        <div className="flex justify-center items-end h-36 -mt-2">
           {player.images?.playerCardImage ? (
             <img
               src={player.images.playerCardImage}
               alt={player.commonName}
-              className="h-full object-contain"
+              className="h-full object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]"
               onError={(e) => {
-                e.currentTarget.src = `https://ui-avatars.com/api/?name=${player.commonName}&background=38B2AC&color=fff&size=128`;
+                e.currentTarget.src = `https://ui-avatars.com/api/?name=${player.commonName}&background=F59E0B&color=fff&size=160`;
               }}
             />
           ) : (
-            <div className="w-24 h-24 rounded-full gradient-primary flex items-center justify-center text-3xl font-bold text-white">
+            <div className="w-28 h-28 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-4xl font-bold text-white shadow-xl">
               {player.commonName[0]}
             </div>
           )}
         </div>
 
         {/* Player Name */}
-        <h3 className="text-center font-bold text-lg mt-2 truncate">
-          {player.commonName}
-        </h3>
-
-        {/* Club, League and Nation */}
-        <div className="flex justify-center gap-3 mt-2 text-xs items-center flex-wrap">
-          {/* Club */}
-          {teamName && (
-            <div className="flex items-center gap-1.5">
-              {teamLogoUrl && (
-                <img 
-                  src={teamLogoUrl} 
-                  alt={teamName}
-                  className="w-4 h-4 object-contain"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-              )}
-              <span className="text-muted-foreground">{teamName}</span>
-            </div>
-          )}
-          
-          {/* League */}
-          {leagueName && (
-            <div className="flex items-center gap-1.5">
-              {leagueImage && (
-                <img 
-                  src={leagueImage} 
-                  alt={leagueName}
-                  className="w-4 h-4 object-contain"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-              )}
-              <span className="text-muted-foreground text-[10px]">{leagueName}</span>
-            </div>
-          )}
-          
-          {/* Nation */}
-          {nationName && (
-            <div className="flex items-center gap-1.5">
-              {flagImage && (
-                <img 
-                  src={flagImage} 
-                  alt={nationName}
-                  className="w-5 h-4 object-cover rounded-sm"
-                />
-              )}
-              <span className="text-muted-foreground">{nationName}</span>
-            </div>
-          )}
+        <div className="text-center mt-2 mb-3">
+          <h3 className="font-black text-base leading-tight truncate text-foreground drop-shadow-sm">
+            {player.commonName}
+          </h3>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-3 gap-1.5 mt-4">
+        {/* Stats Grid - 6 stats in 2 rows */}
+        <div className="grid grid-cols-3 gap-1 mb-2">
           {displayStats.map((stat, idx) => (
-            <div key={idx} className="text-center bg-muted/30 rounded p-1.5">
-              <div className="text-sm font-bold text-primary">
+            <div key={idx} className="flex flex-col items-center bg-gradient-to-b from-black/40 to-black/20 backdrop-blur-sm rounded py-1.5 border border-amber-500/20">
+              <div className="text-lg font-bold text-amber-300 leading-none">
                 {stat.value || 0}
               </div>
-              <div className="text-[9px] text-muted-foreground leading-tight">{stat.name}</div>
+              <div className="text-[8px] font-semibold text-amber-200/70 uppercase tracking-wide mt-0.5">
+                {stat.name}
+              </div>
             </div>
           ))}
         </div>
 
         {/* Traits */}
         {player.traits && player.traits.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-1 justify-center">
+          <div className="flex flex-wrap gap-1 justify-center">
             {player.traits.slice(0, 2).map((trait, idx) => (
               <Badge
                 key={idx}
                 variant="secondary"
-                className="text-xs"
+                className="text-[9px] px-1.5 py-0.5 bg-amber-900/30 text-amber-200 border-amber-500/30"
               >
                 {trait.title || trait.name || 'Trait'}
               </Badge>
@@ -224,6 +206,9 @@ export default function PlayerCard({ player, onClick, teamsData, nationsData, le
           </div>
         )}
       </div>
+
+      {/* Hover Effect */}
+      <div className="absolute inset-0 bg-gradient-to-t from-amber-500/0 to-amber-500/0 group-hover:from-amber-500/10 group-hover:to-yellow-500/5 transition-all duration-300 pointer-events-none" />
     </Card>
   );
 }
