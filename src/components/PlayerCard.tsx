@@ -111,8 +111,8 @@ export default function PlayerCard({ player, onClick }: PlayerCardProps) {
         )}
         
         <div className="relative h-full flex flex-col">
-          {/* Top: OVR + Position - Inside and down a bit */}
-          <div className="absolute top-6 left-6 z-20">
+          {/* Top: OVR + Position - Moved right and down a bit */}
+          <div className="absolute top-8 left-8 z-20">
             <div className="flex flex-col items-start">
               <div className="text-4xl font-black text-white leading-none drop-shadow-[0_3px_6px_rgba(0,0,0,1)]">
                 {player.rating}
@@ -151,7 +151,7 @@ export default function PlayerCard({ player, onClick }: PlayerCardProps) {
             </div>
 
             {/* Nation, League, Club Icons - Only flag + league for icon cards */}
-            <div className="flex justify-center items-center gap-2 -ml-2">
+            <div className={`flex justify-center items-center -ml-2 ${shouldHideClub ? 'gap-4' : 'gap-2'}`}>
               {flagImage && (
                 <div className="w-9 h-7 rounded overflow-hidden shadow-lg">
                   <img 
@@ -163,7 +163,7 @@ export default function PlayerCard({ player, onClick }: PlayerCardProps) {
               )}
               
               {leagueImage && (
-                <div className="w-7 h-7 rounded-full bg-white/95 p-1 shadow-lg border border-white/40 flex items-center justify-center flex-shrink-0">
+                <div className="w-7 h-7 rounded-full p-1 shadow-lg flex items-center justify-center flex-shrink-0">
                   <img 
                     src={leagueImage} 
                     alt="League"
@@ -177,7 +177,7 @@ export default function PlayerCard({ player, onClick }: PlayerCardProps) {
               
               {/* Only show club for non-icon cards */}
               {!shouldHideClub && teamLogoUrl && (
-                <div className="w-7 h-7 rounded-full bg-white/95 p-1 shadow-lg border border-white/40 flex items-center justify-center flex-shrink-0">
+                <div className="w-7 h-7 rounded-full p-1 shadow-lg flex items-center justify-center flex-shrink-0">
                   <img 
                     src={teamLogoUrl} 
                     alt="Club"
