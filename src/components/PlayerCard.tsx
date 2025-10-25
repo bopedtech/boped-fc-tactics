@@ -150,45 +150,57 @@ export default function PlayerCard({ player, onClick }: PlayerCardProps) {
               </h3>
             </div>
 
-            {/* Nation, League, Club Icons - Spread across card */}
-            <div className="flex justify-between items-center px-4">
-              {flagImage && (
-                <div className="w-12 h-9 rounded overflow-hidden shadow-lg">
-                  <img 
-                    src={flagImage} 
-                    alt="Nation"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              )}
+            {/* Nation, League, Club Icons - Spread across card or centered */}
+            {(() => {
+              const visibleIcons = [
+                flagImage,
+                leagueImage,
+                !shouldHideClub && teamLogoUrl
+              ].filter(Boolean).length;
               
-              {leagueImage && (
-                <div className="w-10 h-10 rounded-full p-1 shadow-lg">
-                  <img 
-                    src={leagueImage} 
-                    alt="League"
-                    className="w-full h-full object-contain"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                </div>
-              )}
+              const layoutClass = visibleIcons === 3 ? "justify-between" : "justify-center gap-6";
               
-              {/* Only show club for non-icon cards */}
-              {!shouldHideClub && teamLogoUrl && (
-                <div className="w-10 h-10 rounded-full p-1 shadow-lg">
-                  <img 
-                    src={teamLogoUrl} 
-                    alt="Club"
-                    className="w-full h-full object-contain"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
+              return (
+                <div className={`flex ${layoutClass} items-center px-4`}>
+                  {flagImage && (
+                    <div className="w-12 h-9 rounded overflow-hidden shadow-lg">
+                      <img 
+                        src={flagImage} 
+                        alt="Nation"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+                  
+                  {leagueImage && (
+                    <div className="w-10 h-10 rounded-full p-1 shadow-lg">
+                      <img 
+                        src={leagueImage} 
+                        alt="League"
+                        className="w-full h-full object-contain"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  )}
+                  
+                  {/* Only show club for non-icon cards */}
+                  {!shouldHideClub && teamLogoUrl && (
+                    <div className="w-10 h-10 rounded-full p-1 shadow-lg">
+                      <img 
+                        src={teamLogoUrl} 
+                        alt="Club"
+                        className="w-full h-full object-contain"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+              );
+            })()}
           </div>
         </div>
       </Card>
