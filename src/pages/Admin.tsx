@@ -13,6 +13,7 @@ export default function Admin() {
   const [dictSyncResult, setDictSyncResult] = useState<any>(null);
   const [syncingLeagues, setSyncingLeagues] = useState(false);
   const [leaguesResult, setLeaguesResult] = useState<any>(null);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 
   const handleSyncPlayers = async (mode: 'test' | 'full' = 'test') => {
     try {
@@ -39,19 +40,40 @@ export default function Admin() {
     }
   };
 
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.type === 'application/json') {
+        setUploadedFile(file);
+        toast.success(`Đã chọn file: ${file.name}`);
+      } else {
+        toast.error('Vui lòng chọn file JSON');
+      }
+    }
+  };
+
   const handleImportDictionary = async () => {
     try {
       setSyncingDict(true);
       setDictSyncResult(null);
       
-      // Fetch the JSON file from public folder
-      toast.info('Đang tải tệp từ điển...');
-      const response = await fetch('/localization_dictionary_import.json');
-      if (!response.ok) {
-        throw new Error('Không thể tải tệp từ điển');
+      let dictionaryData;
+      
+      if (uploadedFile) {
+        // Read uploaded file
+        toast.info('Đang đọc file tải lên...');
+        const text = await uploadedFile.text();
+        dictionaryData = JSON.parse(text);
+      } else {
+        // Fallback: Fetch the JSON file from public folder
+        toast.info('Đang tải tệp từ điển mặc định...');
+        const response = await fetch('/localization_dictionary_import.json');
+        if (!response.ok) {
+          throw new Error('Không thể tải tệp từ điển');
+        }
+        dictionaryData = await response.json();
       }
       
-      const dictionaryData = await response.json();
       toast.info(`Đang import ${Object.keys(dictionaryData).length} mục...`);
       
       // Send the dictionary data to the edge function
@@ -63,10 +85,11 @@ export default function Admin() {
       
       setDictSyncResult(data);
       toast.success(`✓ Đã import ${data.totalImported} mục từ điển`);
+      setUploadedFile(null);
     } catch (error: any) {
       console.error('Dictionary import error:', error);
       setDictSyncResult({ success: false, error: error.message });
-      toast.error('Lỗi khi import từ điển bản địa hóa');
+      toast.error('Lỗi khi import từ điển bản địa hóa: ' + error.message);
     } finally {
       setSyncingDict(false);
     }
@@ -115,23 +138,55 @@ export default function Admin() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Button
-                onClick={handleImportDictionary}
-                disabled={syncingDict}
-                className="w-full"
-              >
-                {syncingDict ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Đang import...
-                  </>
-                ) : (
-                  <>
-                    <Database className="mr-2 h-4 w-4" />
-                    Import Dictionary
-                  </>
-                )}
-              </Button>
+              <div className="space-y-3">
+                <div className="border-2 border-dashed border-border rounded-lg p-4 text-center">
+                  <input
+                    type="file"
+                    accept=".json"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                    id="json-upload"
+                  />
+                  <label
+                    htmlFor="json-upload"
+                    className="cursor-pointer flex flex-col items-center gap-2"
+                  >
+                    <Database className="w-8 h-8 text-muted-foreground" />
+                    <div className="text-sm">
+                      {uploadedFile ? (
+                        <span className="text-green-600 font-medium">
+                          ✓ {uploadedFile.name}
+                        </span>
+                      ) : (
+                        <>
+                          <span className="text-primary font-medium">Chọn file JSON</span>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Format: {`{"LeagueName_1": "3F Superliga", ...}`}
+                          </p>
+                        </>
+                      )}
+                    </div>
+                  </label>
+                </div>
+                
+                <Button
+                  onClick={handleImportDictionary}
+                  disabled={syncingDict}
+                  className="w-full"
+                >
+                  {syncingDict ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Đang import...
+                    </>
+                  ) : (
+                    <>
+                      <Database className="mr-2 h-4 w-4" />
+                      {uploadedFile ? 'Import File Đã Chọn' : 'Import Từ Public Folder'}
+                    </>
+                  )}
+                </Button>
+              </div>
               
               {dictSyncResult && (
                 <div className={`p-4 rounded-lg ${dictSyncResult.success ? 'bg-green-50 dark:bg-green-950' : 'bg-red-50 dark:bg-red-950'}`}>
