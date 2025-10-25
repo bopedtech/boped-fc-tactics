@@ -169,10 +169,13 @@ export const usePlayerFilters = (initialPosition?: string) => {
 
     // Programs filter (using source field which links to programs.id)
     if (filters.programs.length > 0) {
+      console.log('Program filter active:', filters.programs);
       filtered = filtered.filter(p => {
         const programId = p.source;
-        return programId && filters.programs.includes(programId.toString());
+        console.log('Player source:', programId, 'matches:', programId && filters.programs.includes(programId));
+        return programId && filters.programs.includes(programId);
       });
+      console.log('Filtered results count:', filtered.length);
     }
 
     // Traits filter
