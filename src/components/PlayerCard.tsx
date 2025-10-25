@@ -142,7 +142,7 @@ export default function PlayerCard({ player, onClick }: PlayerCardProps) {
           </div>
 
           {/* Bottom Section: Name + Icons - Close to player image */}
-          <div className="absolute bottom-14 left-0 right-0 z-10 px-3">
+          <div className="absolute bottom-16 left-0 right-0 z-10 px-3">
             {/* Player Name */}
             <div className="text-center mb-2">
               <h3 className="font-black text-xl leading-none text-white drop-shadow-[0_3px_6px_rgba(0,0,0,1)] uppercase tracking-wider">
@@ -151,7 +151,7 @@ export default function PlayerCard({ player, onClick }: PlayerCardProps) {
             </div>
 
             {/* Nation, League, Club Icons - Only flag + league for icon cards */}
-            <div className={`flex justify-center items-center -ml-2 ${shouldHideClub ? 'gap-4' : 'gap-2'}`}>
+            <div className={`flex justify-end items-center mr-4 ${shouldHideClub ? 'gap-4' : 'gap-2'}`}>
               {flagImage && (
                 <div className="w-9 h-7 rounded overflow-hidden shadow-lg">
                   <img 
