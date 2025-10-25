@@ -98,117 +98,131 @@ export default function PlayerCard({ player, onClick, teamsData, nationsData, le
 
   return (
     <Card
-      className="card-hover overflow-hidden cursor-pointer relative group"
+      className="card-hover overflow-hidden cursor-pointer relative group border-0 shadow-lg"
       onClick={onClick}
     >
-      {/* FC24-Style Card Background with gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-yellow-600/20 via-amber-500/10 to-orange-600/20 opacity-80" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-yellow-500/5 via-transparent to-transparent" />
+      {/* FC Mobile Style Background - gradient based on rating/program */}
+      <div className="absolute inset-0 bg-gradient-to-br from-amber-600 via-yellow-500 to-amber-700" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-yellow-300/20 via-transparent to-black/40" />
       
-      <div className="relative px-3 py-4">
-        {/* Top Row: OVR, Position, Nation Flag */}
-        <div className="flex items-start justify-between mb-2">
-          {/* OVR and Position */}
-          <div className="flex flex-col items-center">
-            <div className="text-4xl font-black text-amber-400 leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+      {/* Decorative pattern overlay */}
+      <div className="absolute inset-0 opacity-10" style={{
+        backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,.05) 10px, rgba(255,255,255,.05) 20px)'
+      }} />
+      
+      <div className="relative h-full flex flex-col">
+        {/* Top Section: OVR + Position | Flags */}
+        <div className="flex justify-between items-start p-3 pb-0">
+          {/* Left: OVR and Position */}
+          <div className="flex flex-col items-start -mt-1">
+            <div className="text-5xl font-black text-white leading-none drop-shadow-[0_3px_6px_rgba(0,0,0,0.9)] tracking-tight">
               {player.rating}
             </div>
-            <div className="text-xs font-bold text-amber-300/90 mt-0.5">
+            <div className="text-sm font-black text-white/95 -mt-1 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
               {player.position}
             </div>
           </div>
 
-          {/* Nation Flag */}
-          <div className="flex flex-col items-center gap-1">
+          {/* Right: Nation, League, Club - stacked vertically */}
+          <div className="flex flex-col items-end gap-1.5">
+            {/* Nation Flag */}
             {flagImage && (
-              <img 
-                src={flagImage} 
-                alt={nationName}
-                className="w-8 h-6 object-cover rounded-sm shadow-lg border border-white/20"
-              />
+              <div className="w-9 h-7 rounded-sm overflow-hidden shadow-md border border-white/30 bg-white/10">
+                <img 
+                  src={flagImage} 
+                  alt={nationName}
+                  className="w-full h-full object-cover"
+                />
+              </div>
             )}
             {/* League Logo */}
             {leagueImage && (
-              <img 
-                src={leagueImage} 
-                alt={leagueName}
-                className="w-6 h-6 object-contain opacity-90"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                }}
-              />
+              <div className="w-7 h-7 rounded-full bg-white/90 p-1 shadow-md flex items-center justify-center">
+                <img 
+                  src={leagueImage} 
+                  alt={leagueName}
+                  className="w-full h-full object-contain"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              </div>
             )}
             {/* Club Logo */}
             {teamLogoUrl && (
-              <img 
-                src={teamLogoUrl} 
-                alt={teamName}
-                className="w-6 h-6 object-contain opacity-90"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                }}
-              />
+              <div className="w-7 h-7 rounded-full bg-white/90 p-1 shadow-md flex items-center justify-center">
+                <img 
+                  src={teamLogoUrl} 
+                  alt={teamName}
+                  className="w-full h-full object-contain"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              </div>
             )}
           </div>
         </div>
 
-        {/* Player Image - Larger and centered */}
-        <div className="flex justify-center items-end h-36 -mt-2">
+        {/* Middle: Player Image */}
+        <div className="flex-1 flex justify-center items-center px-2 -mt-2">
           {player.images?.playerCardImage ? (
             <img
               src={player.images.playerCardImage}
               alt={player.commonName}
-              className="h-full object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]"
+              className="h-40 object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.6)]"
               onError={(e) => {
-                e.currentTarget.src = `https://ui-avatars.com/api/?name=${player.commonName}&background=F59E0B&color=fff&size=160`;
+                e.currentTarget.src = `https://ui-avatars.com/api/?name=${player.commonName}&background=FFA500&color=fff&size=200`;
               }}
             />
           ) : (
-            <div className="w-28 h-28 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-4xl font-bold text-white shadow-xl">
+            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-5xl font-bold text-white shadow-2xl">
               {player.commonName[0]}
             </div>
           )}
         </div>
 
         {/* Player Name */}
-        <div className="text-center mt-2 mb-3">
-          <h3 className="font-black text-base leading-tight truncate text-foreground drop-shadow-sm">
+        <div className="text-center px-3 -mt-2 mb-2">
+          <h3 className="font-black text-base leading-tight text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] uppercase tracking-wide">
             {player.commonName}
           </h3>
         </div>
 
-        {/* Stats Grid - 6 stats in 2 rows */}
-        <div className="grid grid-cols-3 gap-1 mb-2">
-          {displayStats.map((stat, idx) => (
-            <div key={idx} className="flex flex-col items-center bg-gradient-to-b from-black/40 to-black/20 backdrop-blur-sm rounded py-1.5 border border-amber-500/20">
-              <div className="text-lg font-bold text-amber-300 leading-none">
-                {stat.value || 0}
+        {/* Bottom: Stats - 6 stats in one row */}
+        <div className="px-3 pb-3">
+          <div className="grid grid-cols-6 gap-1">
+            {displayStats.map((stat, idx) => (
+              <div key={idx} className="flex flex-col items-center bg-black/40 backdrop-blur-sm rounded py-1 border border-white/10">
+                <div className="text-base font-black text-white leading-none">
+                  {stat.value || 0}
+                </div>
+                <div className="text-[7px] font-bold text-white/80 uppercase tracking-wider mt-0.5">
+                  {stat.name}
+                </div>
               </div>
-              <div className="text-[8px] font-semibold text-amber-200/70 uppercase tracking-wide mt-0.5">
-                {stat.name}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Traits */}
-        {player.traits && player.traits.length > 0 && (
-          <div className="flex flex-wrap gap-1 justify-center">
-            {player.traits.slice(0, 2).map((trait, idx) => (
-              <Badge
-                key={idx}
-                variant="secondary"
-                className="text-[9px] px-1.5 py-0.5 bg-amber-900/30 text-amber-200 border-amber-500/30"
-              >
-                {trait.title || trait.name || 'Trait'}
-              </Badge>
             ))}
           </div>
-        )}
+          
+          {/* Traits below stats */}
+          {player.traits && player.traits.length > 0 && (
+            <div className="flex flex-wrap gap-1 justify-center mt-2">
+              {player.traits.slice(0, 2).map((trait, idx) => (
+                <Badge
+                  key={idx}
+                  variant="secondary"
+                  className="text-[8px] px-1.5 py-0 bg-black/50 text-white border-white/20 font-bold"
+                >
+                  {trait.title || trait.name || 'Trait'}
+                </Badge>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Hover Effect */}
-      <div className="absolute inset-0 bg-gradient-to-t from-amber-500/0 to-amber-500/0 group-hover:from-amber-500/10 group-hover:to-yellow-500/5 transition-all duration-300 pointer-events-none" />
+      {/* Hover glow effect */}
+      <div className="absolute inset-0 bg-gradient-to-t from-yellow-400/0 to-yellow-400/0 group-hover:from-yellow-400/20 group-hover:to-transparent transition-all duration-300 pointer-events-none rounded-lg" />
     </Card>
   );
 }
