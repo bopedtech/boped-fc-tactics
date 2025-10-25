@@ -198,6 +198,11 @@ export default function Database() {
       query = query.or(leagueFilters);
     }
 
+    // Apply program filter (source column)
+    if (filters.programs.length > 0) {
+      query = query.in("source", filters.programs);
+    }
+
     // Pagination - fetch more to compensate for client-side filtering
     const fetchSize = filters.positions.length > 0 ? PAGE_SIZE * 3 : PAGE_SIZE;
     query = query.range(pageParam, pageParam + fetchSize - 1);

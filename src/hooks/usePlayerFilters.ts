@@ -168,14 +168,12 @@ export const usePlayerFilters = (initialPosition?: string) => {
     }
 
     // Programs filter (using source field which links to programs.id)
+    // Note: This is now also filtered at database level, but kept for consistency
     if (filters.programs.length > 0) {
-      console.log('Program filter active:', filters.programs);
       filtered = filtered.filter(p => {
         const programId = p.source;
-        console.log('Player source:', programId, 'matches:', programId && filters.programs.includes(programId));
         return programId && filters.programs.includes(programId);
       });
-      console.log('Filtered results count:', filtered.length);
     }
 
     // Traits filter
