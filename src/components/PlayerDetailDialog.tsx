@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Loader2, X } from "lucide-react";
-import { getCountryFlag } from "@/lib/countryUtils";
 
 interface PlayerStats {
   pace?: number;
@@ -134,7 +133,7 @@ interface PlayerDetailDialogProps {
 export default function PlayerDetailDialog({ assetId, open, onOpenChange }: PlayerDetailDialogProps) {
   const [player, setPlayer] = useState<Player | null>(null);
   const [loading, setLoading] = useState(false);
-  const [countryCode, setCountryCode] = useState<string>("");
+  const [nationInfo, setNationInfo] = useState<{ displayName: string; image?: string } | null>(null);
   const [leagueInfo, setLeagueInfo] = useState<{ id: number; displayName: string; image?: string } | null>(null);
 
   useEffect(() => {
@@ -163,13 +162,12 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
         if (nationId && typeof nationId === 'number') {
           const { data: nationData } = await supabase
             .from("nations")
-            .select("*")
+            .select("displayName, image")
             .eq("id", nationId)
             .maybeSingle();
           
           if (nationData) {
-            // Use displayName as country code fallback or extract from rawData if available
-            setCountryCode(nationData.displayName);
+            setNationInfo(nationData);
           }
         }
       }
@@ -314,10 +312,19 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                           </div>
                         )}
                         
-                        {countryCode && (
+                        {nationInfo && (
                           <div className="flex items-center gap-1">
-                            <span className="text-2xl">{getCountryFlag(countryCode)}</span>
-                            <span className="text-sm">{(player.nation as any).name || (player.nation as any).label}</span>
+                            {nationInfo.image && (
+                              <img 
+                                src={nationInfo.image} 
+                                alt={nationInfo.displayName}
+                                className="w-6 h-4 object-cover rounded-sm"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                }}
+                              />
+                            )}
+                            <span className="text-sm">{nationInfo.displayName}</span>
                           </div>
                         )}
                         
@@ -436,14 +443,21 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                         )}
 
                         {/* Nation */}
-                        {player.nation && (
+                        {nationInfo && (
                           <div className="space-y-2">
                             <h3 className="text-sm font-semibold text-muted-foreground">Quốc Tịch</h3>
                             <div className="flex items-center gap-2">
-                              {countryCode && (
-                                <span className="text-2xl">{getCountryFlag(countryCode)}</span>
+                              {nationInfo.image && (
+                                <img 
+                                  src={nationInfo.image} 
+                                  alt={nationInfo.displayName}
+                                  className="w-8 h-6 object-cover rounded-sm"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = 'none';
+                                  }}
+                                />
                               )}
-                              <span className="font-medium">{(player.nation as any).name || (player.nation as any).label}</span>
+                              <span className="font-medium">{nationInfo.displayName}</span>
                             </div>
                           </div>
                         )}
