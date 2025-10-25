@@ -36,6 +36,7 @@ interface RawPlayerData {
   club?: any;
   league?: any;
   nation?: any;
+  program?: any;
   potentialPositions?: any[];
   avgStats?: any;
   avgGkStats?: any;
