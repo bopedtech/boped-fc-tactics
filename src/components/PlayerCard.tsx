@@ -46,7 +46,7 @@ export default function PlayerCard({ player, onClick }: PlayerCardProps) {
   const teamLogoUrl = player.images?.clubImage;
   
   // Check if this is an icon card - hide club if league name is leaguename_2118
-  const isIconLeague = player.league?.name === 'leaguename_2118';
+  const isIconLeague = player.league?.name === 'Leaguename_2118';
   const shouldHideClub = isIconLeague;
 
   // Get card background from player images
