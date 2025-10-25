@@ -1,6 +1,5 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { getCountryFlag, getNationInfo, getTeamInfo } from "@/lib/countryUtils";
 
 interface PlayerStats {
   pace?: number;
@@ -36,28 +35,15 @@ interface Player {
 interface PlayerCardProps {
   player: Player;
   onClick?: () => void;
-  teamsData?: Array<{ id: number; displayName: string; image?: string }>;
-  nationsData?: Array<{ id: number; displayName: string; image?: string }>;
-  leaguesData?: Array<{ id: number; displayName: string; image?: string }>;
 }
 
-export default function PlayerCard({ player, onClick, teamsData, nationsData, leaguesData }: PlayerCardProps) {
+export default function PlayerCard({ player, onClick }: PlayerCardProps) {
   const isGK = player.position === "GK";
   
-  // Lấy thông tin team/club
-  const teamInfo = player.club?.id ? getTeamInfo(player.club.id, teamsData) : null;
-  const teamLogoUrl = teamInfo?.image || player.club?.image;
-  const teamName = teamInfo?.displayName || player.club?.name;
-  
-  // Lấy thông tin league
-  const leagueInfo = leaguesData?.find(l => l.id === player.league?.id);
-  const leagueName = leagueInfo?.displayName || player.league?.name;
-  const leagueImage = leagueInfo?.image || player.league?.image;
-  
-  // Lấy thông tin nation
-  const nationInfo = player.nation?.id ? getNationInfo(player.nation.id, nationsData) : null;
-  const nationName = nationInfo?.displayName || player.nation?.name;
+  // Lấy tất cả từ player.images
   const flagImage = player.images?.flagImage;
+  const leagueImage = player.images?.leagueImage;
+  const teamLogoUrl = player.images?.clubImage;
 
   // Get card background from player images
   const cardBackground = player.images?.playerCardBackground;
@@ -167,7 +153,7 @@ export default function PlayerCard({ player, onClick, teamsData, nationsData, le
                 <div className="w-9 h-7 rounded overflow-hidden shadow-lg">
                   <img 
                     src={flagImage} 
-                    alt={nationName}
+                    alt="Nation"
                     className="w-full h-full object-cover"
                   />
                 </div>
@@ -177,7 +163,7 @@ export default function PlayerCard({ player, onClick, teamsData, nationsData, le
                 <div className="w-7 h-7 rounded-full bg-white/95 p-1 shadow-lg border border-white/40 flex items-center justify-center flex-shrink-0">
                   <img 
                     src={leagueImage} 
-                    alt={leagueName}
+                    alt="League"
                     className="w-full h-full object-contain"
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';
@@ -190,7 +176,7 @@ export default function PlayerCard({ player, onClick, teamsData, nationsData, le
                 <div className="w-7 h-7 rounded-full bg-white/95 p-1 shadow-lg border border-white/40 flex items-center justify-center flex-shrink-0">
                   <img 
                     src={teamLogoUrl} 
-                    alt={teamName}
+                    alt="Club"
                     className="w-full h-full object-contain"
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';

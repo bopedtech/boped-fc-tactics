@@ -442,9 +442,6 @@ export default function Database() {
                     <PlayerCard 
                       key={player.assetId} 
                       player={player as any} 
-                      teamsData={teamsData}
-                      nationsData={countriesData as any}
-                      leaguesData={leaguesData}
                       onClick={() => handlePlayerClick(player.assetId)}
                     />
                   ))}
