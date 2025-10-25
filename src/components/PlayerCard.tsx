@@ -98,12 +98,12 @@ export default function PlayerCard({ player, onClick, teamsData, nationsData, le
   }));
 
   return (
-    <div className="flex flex-col gap-3">
-      {/* Card Container */}
-      <Card
-        className="card-hover overflow-hidden cursor-pointer relative group border-0 shadow-2xl aspect-[3/4.2]"
-        onClick={onClick}
-      >
+    <div className="group cursor-pointer" onClick={onClick}>
+      <div className="flex flex-col gap-3">
+        {/* Card Container */}
+        <Card
+          className="overflow-hidden relative border-0 shadow-2xl aspect-[3/4.2] transition-all duration-300 group-hover:shadow-[0_0_30px_rgba(250,204,21,0.5)] group-hover:scale-[1.02]"
+        >
         {/* Card Background Image */}
         {cardBackground ? (
           <>
@@ -201,9 +201,6 @@ export default function PlayerCard({ player, onClick, teamsData, nationsData, le
             </div>
           </div>
         </div>
-
-        {/* Hover effect */}
-        <div className="absolute inset-0 bg-gradient-to-t from-yellow-400/0 to-yellow-400/0 group-hover:from-yellow-400/20 group-hover:to-transparent transition-all duration-300 pointer-events-none rounded-lg" />
       </Card>
 
       {/* Stats Section - Below Card */}
@@ -211,7 +208,7 @@ export default function PlayerCard({ player, onClick, teamsData, nationsData, le
         {displayStats.slice(0, 6).map((stat, idx) => (
           <div 
             key={idx} 
-            className="bg-gradient-to-br from-card to-card/60 backdrop-blur-sm rounded-lg p-2.5 border border-border/50 shadow-sm hover:shadow-md hover:border-primary/30 transition-all"
+            className="bg-gradient-to-br from-card to-card/60 backdrop-blur-sm rounded-lg p-2.5 border border-border/50 shadow-sm transition-all duration-300 group-hover:border-primary/50 group-hover:shadow-lg group-hover:bg-primary/5"
           >
             <div className="text-center">
               <div className="text-2xl font-black text-primary leading-none mb-1">
@@ -232,13 +229,14 @@ export default function PlayerCard({ player, onClick, teamsData, nationsData, le
             <Badge
               key={idx}
               variant="outline"
-              className="text-[10px] px-2.5 py-0.5 font-semibold border-primary/40 bg-primary/10 hover:bg-primary/20 transition-colors"
+              className="text-[10px] px-2.5 py-0.5 font-semibold border-primary/40 bg-primary/10 transition-all duration-300 group-hover:bg-primary/30 group-hover:border-primary/60"
             >
               {trait.title || trait.name || 'Trait'}
             </Badge>
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 }
