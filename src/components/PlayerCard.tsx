@@ -77,7 +77,7 @@ export default function PlayerCard({ player, onClick }: PlayerCardProps) {
   // Map avgStats to Vietnamese stat labels
   const statLabels = isGK 
     ? ["BẮT", "XỬ LÝ", "SÚT", "PHẢN XẠ", "TỐC ĐỘ", "VỊ TRÍ"]
-    : ["TỐC ĐỘ", "SÚT", "CHUYỀN", "RÊ DẮT", "PHÒNG NGỰ", "THỂ LỰC"];
+    : ["TỐC ĐỘ", "SÚT", "CHUYỀN", "RÊ DẮT", "THỦ", "THỂ LỰC"];
   
   const statsToShow = isGK ? avgGkStats : avgStats;
 
@@ -224,20 +224,6 @@ export default function PlayerCard({ player, onClick }: PlayerCardProps) {
         ))}
       </div>
 
-      {/* Traits - Below Stats */}
-      {player.traits && player.traits.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 justify-center">
-          {player.traits.slice(0, 2).map((trait, idx) => (
-            <Badge
-              key={idx}
-              variant="outline"
-              className="text-[10px] px-2.5 py-0.5 font-semibold border-primary/40 bg-primary/10 transition-all duration-300 group-hover:bg-primary/30 group-hover:border-primary/60"
-            >
-              {trait.title || trait.name || 'Trait'}
-            </Badge>
-          ))}
-        </div>
-      )}
       </div>
     </div>
   );
