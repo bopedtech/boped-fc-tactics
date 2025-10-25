@@ -21,6 +21,7 @@ interface PlayerStats {
 interface Player {
   assetId: number;
   commonName: string;
+  cardName?: string;
   rating: number;
   position: string;
   nation?: any;
@@ -121,25 +122,25 @@ export default function PlayerCard({ player, onClick, teamsData, nationsData, le
         )}
         
         <div className="relative h-full flex flex-col">
-          {/* Top: OVR + Position - Fixed at top left */}
+          {/* Top: OVR + Position - Black background, smaller */}
           <div className="absolute top-2 left-2 z-20">
-            <div className="flex flex-col items-start">
-              <div className="text-5xl font-black text-white leading-none drop-shadow-[0_4px_8px_rgba(0,0,0,1)]">
+            <div className="flex flex-col items-center bg-black/70 backdrop-blur-sm px-2 py-1 rounded">
+              <div className="text-3xl font-black text-white leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
                 {player.rating}
               </div>
-              <div className="text-sm font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,1)] -mt-1">
+              <div className="text-[10px] font-black text-white/90 -mt-0.5">
                 {player.position}
               </div>
             </div>
           </div>
 
-          {/* Middle: Player Image - Takes most space */}
-          <div className="flex-1 flex items-end justify-center pt-16 pb-2 px-2">
+          {/* Middle: Player Image - BIGGER, takes almost all space */}
+          <div className="absolute inset-0 flex items-center justify-center pt-8 pb-20">
             {player.images?.playerCardImage ? (
               <img
                 src={player.images.playerCardImage}
-                alt={player.commonName}
-                className="w-full h-full object-contain object-bottom drop-shadow-[0_10px_20px_rgba(0,0,0,0.9)]"
+                alt={player.cardName || player.commonName}
+                className="w-full h-full object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.9)]"
                 onError={(e) => {
                   e.currentTarget.src = `https://ui-avatars.com/api/?name=${player.commonName}&background=FFA500&color=fff&size=256`;
                 }}
@@ -151,19 +152,19 @@ export default function PlayerCard({ player, onClick, teamsData, nationsData, le
             )}
           </div>
 
-          {/* Bottom Section: Name + Icons */}
-          <div className="relative z-10 pb-3 px-3">
-            {/* Player Name */}
+          {/* Bottom Section: Name + Icons - Fixed at bottom */}
+          <div className="absolute bottom-0 left-0 right-0 z-10 pb-3 px-3">
+            {/* Player Name - Use cardName if available */}
             <div className="text-center mb-2">
               <h3 className="font-black text-base leading-none text-white drop-shadow-[0_3px_6px_rgba(0,0,0,1)] uppercase tracking-wider">
-                {player.commonName}
+                {player.cardName || player.commonName}
               </h3>
             </div>
 
-            {/* Nation, League, Club Icons - Horizontal */}
+            {/* Nation, League, Club Icons - No white border on flag */}
             <div className="flex justify-center items-center gap-2">
               {flagImage && (
-                <div className="w-9 h-7 rounded overflow-hidden shadow-lg border-2 border-white/50 bg-white/10 flex-shrink-0">
+                <div className="w-9 h-7 rounded overflow-hidden shadow-lg">
                   <img 
                     src={flagImage} 
                     alt={nationName}
@@ -173,7 +174,7 @@ export default function PlayerCard({ player, onClick, teamsData, nationsData, le
               )}
               
               {leagueImage && (
-                <div className="w-7 h-7 rounded-full bg-white/95 p-1 shadow-lg border border-white/60 flex items-center justify-center flex-shrink-0">
+                <div className="w-7 h-7 rounded-full bg-white/95 p-1 shadow-lg border border-white/40 flex items-center justify-center flex-shrink-0">
                   <img 
                     src={leagueImage} 
                     alt={leagueName}
@@ -186,7 +187,7 @@ export default function PlayerCard({ player, onClick, teamsData, nationsData, le
               )}
               
               {teamLogoUrl && (
-                <div className="w-7 h-7 rounded-full bg-white/95 p-1 shadow-lg border border-white/60 flex items-center justify-center flex-shrink-0">
+                <div className="w-7 h-7 rounded-full bg-white/95 p-1 shadow-lg border border-white/40 flex items-center justify-center flex-shrink-0">
                   <img 
                     src={teamLogoUrl} 
                     alt={teamName}
