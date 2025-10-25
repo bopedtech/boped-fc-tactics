@@ -26,24 +26,27 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Fetch the JSON file from the public folder
-    console.log('Fetching localization dictionary JSON file...');
+    // Parse request body to get dictionary data
+    console.log('Parsing dictionary data from request body...');
     
-    // The JSON file is in the public folder, accessible via the app URL
-    const appUrl = req.headers.get('origin') || req.headers.get('referer')?.split('/admin')[0];
-    if (!appUrl) {
-      throw new Error('Unable to determine application URL');
+    const requestBody = await req.json();
+    
+    // Support both array format and object format
+    let dictionaryData: DictionaryEntry[];
+    
+    if (Array.isArray(requestBody)) {
+      // Already in array format
+      dictionaryData = requestBody;
+    } else if (typeof requestBody === 'object' && requestBody !== null) {
+      // Convert object format {"key": "value"} to array format
+      dictionaryData = Object.keys(requestBody).map(key => ({
+        key: key,
+        value_en: requestBody[key],
+        source: 'Renderz_Runtime_Extraction'
+      }));
+    } else {
+      throw new Error('Invalid request body format. Expected array or object.');
     }
-    
-    const jsonUrl = `${appUrl}/localization_dictionary_import.json`;
-    console.log(`Fetching from: ${jsonUrl}`);
-    
-    const response = await fetch(jsonUrl);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch JSON file: ${response.statusText}`);
-    }
-
-    const dictionaryData: DictionaryEntry[] = await response.json();
     console.log(`✓ Loaded ${dictionaryData.length} dictionary entries from JSON`);
 
     if (dictionaryData.length === 0) {

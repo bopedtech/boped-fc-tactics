@@ -44,7 +44,20 @@ export default function Admin() {
       setSyncingDict(true);
       setDictSyncResult(null);
       
-      const { data, error } = await supabase.functions.invoke('import-localization-dictionary');
+      // Fetch the JSON file from public folder
+      toast.info('Đang tải tệp từ điển...');
+      const response = await fetch('/localization_dictionary_import.json');
+      if (!response.ok) {
+        throw new Error('Không thể tải tệp từ điển');
+      }
+      
+      const dictionaryData = await response.json();
+      toast.info(`Đang import ${Object.keys(dictionaryData).length} mục...`);
+      
+      // Send the dictionary data to the edge function
+      const { data, error } = await supabase.functions.invoke('import-localization-dictionary', {
+        body: dictionaryData
+      });
       
       if (error) throw error;
       
