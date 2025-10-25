@@ -128,6 +128,40 @@ export const usePlayerFilters = (initialPosition?: string) => {
       });
     }
 
+    // Clubs filter
+    if (filters.clubs.length > 0) {
+      filtered = filtered.filter(p => {
+        const clubId = p.club?.id?.toString();
+        return clubId && filters.clubs.includes(clubId);
+      });
+    }
+
+    // Nations filter
+    if (filters.nations.length > 0) {
+      filtered = filtered.filter(p => {
+        const nationId = p.nation?.id?.toString();
+        return nationId && filters.nations.includes(nationId);
+      });
+    }
+
+    // Programs filter
+    if (filters.programs.length > 0) {
+      filtered = filtered.filter(p => {
+        const programId = p.program?.id;
+        return programId && filters.programs.includes(programId);
+      });
+    }
+
+    // Traits filter
+    if (filters.traits.length > 0) {
+      filtered = filtered.filter(p => {
+        if (!p.traits || !Array.isArray(p.traits)) return false;
+        return filters.traits.some(traitId => 
+          p.traits.some((t: any) => t.id?.toString() === traitId)
+        );
+      });
+    }
+
     return filtered;
   };
 

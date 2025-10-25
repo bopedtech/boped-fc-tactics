@@ -66,7 +66,11 @@ const footNames: Record<string, string> = {
 };
 
 export default function PlayerFilters({ filters, onFilterChange, onReset }: PlayerFiltersProps) {
-  const [leagues, setLeagues] = useState<Array<{ id: number; displayName: string }>>([]);
+  const [leagues, setLeagues] = useState<Array<{ id: number; displayName: string; image?: string }>>([]);
+  const [nations, setNations] = useState<Array<{ id: number; displayName: string; image?: string }>>([]);
+  const [teams, setTeams] = useState<Array<{ id: number; displayName: string; image?: string }>>([]);
+  const [programs, setPrograms] = useState<Array<{ id: string; displayName: string; image?: string }>>([]);
+  const [traits, setTraits] = useState<Array<{ id: number; displayName: string }>>([]);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     rating: true,
     position: true,
@@ -86,19 +90,79 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
 
   useEffect(() => {
     fetchLeagues();
+    fetchNations();
+    fetchTeams();
+    fetchPrograms();
+    fetchTraits();
   }, []);
 
   const fetchLeagues = async () => {
     try {
       const { data, error } = await supabase
         .from('leagues')
-        .select('id, displayName')
+        .select('id, displayName, image')
         .order('displayName', { ascending: true });
       
       if (error) throw error;
       setLeagues(data || []);
     } catch (error) {
       console.error('Error fetching leagues:', error);
+    }
+  };
+
+  const fetchNations = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('nations')
+        .select('id, displayName, image')
+        .order('displayName', { ascending: true });
+      
+      if (error) throw error;
+      setNations(data || []);
+    } catch (error) {
+      console.error('Error fetching nations:', error);
+    }
+  };
+
+  const fetchTeams = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('teams')
+        .select('id, displayName, image')
+        .order('displayName', { ascending: true });
+      
+      if (error) throw error;
+      setTeams(data || []);
+    } catch (error) {
+      console.error('Error fetching teams:', error);
+    }
+  };
+
+  const fetchPrograms = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('programs')
+        .select('id, displayName, image')
+        .order('displayName', { ascending: true });
+      
+      if (error) throw error;
+      setPrograms(data || []);
+    } catch (error) {
+      console.error('Error fetching programs:', error);
+    }
+  };
+
+  const fetchTraits = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('traits')
+        .select('id, displayName')
+        .order('displayName', { ascending: true });
+      
+      if (error) throw error;
+      setTraits(data || []);
+    } catch (error) {
+      console.error('Error fetching traits:', error);
     }
   };
 
@@ -217,8 +281,144 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
                         updateFilter('leagues', newLeagues);
                       }}
                     />
-                    <label htmlFor={`league-${league.id}`} className="text-xs cursor-pointer">
+                    {league.image && (
+                      <img src={league.image} alt="" className="w-5 h-5 object-contain" />
+                    )}
+                    <label htmlFor={`league-${league.id}`} className="text-xs cursor-pointer flex-1">
                       {league.displayName}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          </CollapsibleContent>
+        </Collapsible>
+
+        {/* Clubs Filter */}
+        <Collapsible open={openSections.clubs} onOpenChange={() => toggleSection('clubs')}>
+          <CollapsibleTrigger className="flex items-center justify-between w-full py-2.5 px-3 hover:bg-muted/50 rounded-md transition-colors">
+            <span className="font-medium text-sm">Câu lạc bộ</span>
+            {openSections.clubs ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </CollapsibleTrigger>
+          <CollapsibleContent className="px-3 py-2">
+            <ScrollArea className="h-[200px]">
+              <div className="space-y-2 pr-4">
+                {teams.map((team) => (
+                  <div key={team.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`team-${team.id}`}
+                      checked={filters.clubs.includes(team.id.toString())}
+                      onCheckedChange={(checked) => {
+                        const newClubs = checked
+                          ? [...filters.clubs, team.id.toString()]
+                          : filters.clubs.filter(c => c !== team.id.toString());
+                        updateFilter('clubs', newClubs);
+                      }}
+                    />
+                    {team.image && (
+                      <img src={team.image} alt="" className="w-5 h-5 object-contain" />
+                    )}
+                    <label htmlFor={`team-${team.id}`} className="text-xs cursor-pointer flex-1">
+                      {team.displayName}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          </CollapsibleContent>
+        </Collapsible>
+
+        {/* Nations Filter */}
+        <Collapsible open={openSections.nations} onOpenChange={() => toggleSection('nations')}>
+          <CollapsibleTrigger className="flex items-center justify-between w-full py-2.5 px-3 hover:bg-muted/50 rounded-md transition-colors">
+            <span className="font-medium text-sm">Quốc tịch</span>
+            {openSections.nations ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </CollapsibleTrigger>
+          <CollapsibleContent className="px-3 py-2">
+            <ScrollArea className="h-[200px]">
+              <div className="space-y-2 pr-4">
+                {nations.map((nation) => (
+                  <div key={nation.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`nation-${nation.id}`}
+                      checked={filters.nations.includes(nation.id.toString())}
+                      onCheckedChange={(checked) => {
+                        const newNations = checked
+                          ? [...filters.nations, nation.id.toString()]
+                          : filters.nations.filter(n => n !== nation.id.toString());
+                        updateFilter('nations', newNations);
+                      }}
+                    />
+                    {nation.image && (
+                      <img src={nation.image} alt="" className="w-5 h-5 object-contain" />
+                    )}
+                    <label htmlFor={`nation-${nation.id}`} className="text-xs cursor-pointer flex-1">
+                      {nation.displayName}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          </CollapsibleContent>
+        </Collapsible>
+
+        {/* Programs Filter */}
+        <Collapsible open={openSections.program} onOpenChange={() => toggleSection('program')}>
+          <CollapsibleTrigger className="flex items-center justify-between w-full py-2.5 px-3 hover:bg-muted/50 rounded-md transition-colors">
+            <span className="font-medium text-sm">Chương trình/Sự kiện</span>
+            {openSections.program ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </CollapsibleTrigger>
+          <CollapsibleContent className="px-3 py-2">
+            <ScrollArea className="h-[200px]">
+              <div className="space-y-2 pr-4">
+                {programs.map((program) => (
+                  <div key={program.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`program-${program.id}`}
+                      checked={filters.programs.includes(program.id)}
+                      onCheckedChange={(checked) => {
+                        const newPrograms = checked
+                          ? [...filters.programs, program.id]
+                          : filters.programs.filter(p => p !== program.id);
+                        updateFilter('programs', newPrograms);
+                      }}
+                    />
+                    {program.image && (
+                      <img src={program.image} alt="" className="w-5 h-5 object-contain" />
+                    )}
+                    <label htmlFor={`program-${program.id}`} className="text-xs cursor-pointer flex-1">
+                      {program.displayName}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          </CollapsibleContent>
+        </Collapsible>
+
+        {/* Traits Filter */}
+        <Collapsible open={openSections.traits} onOpenChange={() => toggleSection('traits')}>
+          <CollapsibleTrigger className="flex items-center justify-between w-full py-2.5 px-3 hover:bg-muted/50 rounded-md transition-colors">
+            <span className="font-medium text-sm">Đặc điểm</span>
+            {openSections.traits ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </CollapsibleTrigger>
+          <CollapsibleContent className="px-3 py-2">
+            <ScrollArea className="h-[200px]">
+              <div className="space-y-2 pr-4">
+                {traits.map((trait) => (
+                  <div key={trait.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`trait-${trait.id}`}
+                      checked={filters.traits.includes(trait.id.toString())}
+                      onCheckedChange={(checked) => {
+                        const newTraits = checked
+                          ? [...filters.traits, trait.id.toString()]
+                          : filters.traits.filter(t => t !== trait.id.toString());
+                        updateFilter('traits', newTraits);
+                      }}
+                    />
+                    <label htmlFor={`trait-${trait.id}`} className="text-xs cursor-pointer flex-1">
+                      {trait.displayName}
                     </label>
                   </div>
                 ))}
