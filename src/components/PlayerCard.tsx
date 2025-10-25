@@ -142,8 +142,8 @@ export default function PlayerCard({ player, onClick }: PlayerCardProps) {
             )}
           </div>
 
-          {/* Bottom Section: Name + Icons - Very close to player */}
-          <div className="absolute bottom-0 left-0 right-0 z-10 pb-2 px-3">
+          {/* Bottom Section: Name + Icons - Higher up, close to player */}
+          <div className="absolute bottom-8 left-0 right-0 z-10 px-3">
             {/* Player Name */}
             <div className="text-center mb-2">
               <h3 className="font-black text-xl leading-none text-white drop-shadow-[0_3px_6px_rgba(0,0,0,1)] uppercase tracking-wider">
