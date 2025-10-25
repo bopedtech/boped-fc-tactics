@@ -111,8 +111,9 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
   };
 
   return (
-    <ScrollArea className="h-full">
-      <div className="p-4 space-y-1">
+    <div className="h-[calc(100vh-240px)]">
+      <ScrollArea className="h-full">
+        <div className="p-4 space-y-1 pr-4">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-sm uppercase text-muted-foreground">Bộ lọc</h3>
           <button
@@ -377,7 +378,8 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
             </div>
           </CollapsibleContent>
         </Collapsible>
-      </div>
-    </ScrollArea>
+        </div>
+      </ScrollArea>
+    </div>
   );
 }

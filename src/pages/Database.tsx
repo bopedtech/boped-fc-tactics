@@ -372,13 +372,11 @@ export default function Database() {
                 </div>
               </div>
 
-              <div className="max-h-[calc(100vh-300px)]">
-                <PlayerFilters
-                  filters={filters}
-                  onFilterChange={setFilters}
-                  onReset={resetFilters}
-                />
-              </div>
+              <PlayerFilters
+                filters={filters}
+                onFilterChange={setFilters}
+                onReset={resetFilters}
+              />
             </div>
           </div>
 
