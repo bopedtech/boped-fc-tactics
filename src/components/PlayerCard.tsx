@@ -46,7 +46,8 @@ export default function PlayerCard({ player, onClick }: PlayerCardProps) {
   const teamLogoUrl = player.images?.clubImage;
   
   // Check if this is an icon card (has program = icon card)
-  const isIconCard = !!(player as any).images?.programImage || (player as any).source === 'icon';
+  const programImage = (player as any).images?.programImage;
+  const isIconCard = !!programImage;
 
   // Get card background from player images
   const cardBackground = player.images?.playerCardBackground;
@@ -141,16 +142,16 @@ export default function PlayerCard({ player, onClick }: PlayerCardProps) {
             )}
           </div>
 
-          {/* Bottom Section: Name + Icons - Higher position, bigger text */}
-          <div className="absolute bottom-0 left-0 right-0 z-10 pb-6 px-3">
+          {/* Bottom Section: Name + Icons - Very close to player */}
+          <div className="absolute bottom-0 left-0 right-0 z-10 pb-2 px-3">
             {/* Player Name */}
-            <div className="text-center mb-3">
+            <div className="text-center mb-2">
               <h3 className="font-black text-xl leading-none text-white drop-shadow-[0_3px_6px_rgba(0,0,0,1)] uppercase tracking-wider">
                 {player.cardName || player.commonName}
               </h3>
             </div>
 
-            {/* Nation, League, Club Icons */}
+            {/* Nation, League, Club Icons - Only flag + league for icon cards */}
             <div className="flex justify-center items-center gap-2">
               {flagImage && (
                 <div className="w-9 h-7 rounded overflow-hidden shadow-lg">
