@@ -19,6 +19,8 @@ export default function Admin() {
   const [teamsResult, setTeamsResult] = useState<any>(null);
   const [syncingTraits, setSyncingTraits] = useState(false);
   const [traitsResult, setTraitsResult] = useState<any>(null);
+  const [syncingPrograms, setSyncingPrograms] = useState(false);
+  const [programsResult, setProgramsResult] = useState<any>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 
   const handleSyncPlayers = async (mode: 'test' | 'full' = 'test') => {
@@ -178,6 +180,26 @@ export default function Admin() {
       toast.error("Lỗi khi đồng bộ chỉ số ẩn: " + (error as Error).message);
     } finally {
       setSyncingTraits(false);
+    }
+  };
+
+  const handleSyncPrograms = async () => {
+    try {
+      setSyncingPrograms(true);
+      setProgramsResult(null);
+      toast.info('Đang đồng bộ dữ liệu chương trình/sự kiện...');
+
+      const { data, error } = await supabase.functions.invoke('sync-renderz-programs');
+
+      if (error) throw error;
+
+      setProgramsResult(data);
+      toast.success("Đồng bộ chương trình thành công!");
+    } catch (error) {
+      console.error("Error syncing programs:", error);
+      toast.error("Lỗi khi đồng bộ chương trình: " + (error as Error).message);
+    } finally {
+      setSyncingPrograms(false);
     }
   };
 
@@ -420,12 +442,49 @@ export default function Admin() {
             </CardContent>
           </Card>
 
+          {/* Sync Programs Card */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Trophy className="w-5 h-5" />
+                <CardTitle>6. Đồng Bộ Chương Trình/Sự Kiện</CardTitle>
+              </div>
+              <CardDescription>
+                Đồng bộ dữ liệu các chương trình và sự kiện (TOTY, UCL, etc.)
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Button 
+                onClick={handleSyncPrograms}
+                disabled={syncingPrograms}
+                className="w-full"
+              >
+                {syncingPrograms ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Play className="w-4 h-4 mr-2" />
+                )}
+                Đồng Bộ Programs
+              </Button>
+
+              {programsResult && (
+                <div className="bg-muted p-4 rounded-lg space-y-2">
+                  <p className="text-sm font-semibold text-green-600">✅ {programsResult.message}</p>
+                  <div className="text-xs space-y-1">
+                    <p>• Tổng chương trình: {programsResult.synced}</p>
+                    <p>• Đã dịch: {programsResult.translated}</p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Sync Players Card */}
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Users className="w-5 h-5" />
-                <CardTitle>6. Đồng Bộ Cầu Thủ</CardTitle>
+                <CardTitle>7. Đồng Bộ Cầu Thủ</CardTitle>
               </div>
               <CardDescription>
                 Đồng bộ dữ liệu cầu thủ từ mùa 24, 25, 26
@@ -481,8 +540,8 @@ export default function Admin() {
           </CardHeader>
           <CardContent className="space-y-2 text-sm text-muted-foreground">
             <p><strong>Bước 1:</strong> Import Localization Dictionary trước (chỉ cần 1 lần).</p>
-            <p><strong>Bước 2-5:</strong> Đồng bộ Leagues, Nations, Teams, và Traits để áp dụng dictionary và dịch tên.</p>
-            <p><strong>Bước 6:</strong> Test đồng bộ cầu thủ (5 trang ~50 cầu thủ), sau đó chạy full sync.</p>
+            <p><strong>Bước 2-6:</strong> Đồng bộ Leagues, Nations, Teams, Traits và Programs để áp dụng dictionary và dịch tên.</p>
+            <p><strong>Bước 7:</strong> Test đồng bộ cầu thủ (5 trang ~50 cầu thủ), sau đó chạy full sync.</p>
             <p className="text-yellow-600 mt-4"><strong>⚠️ Lưu ý:</strong> Full sync có thể mất vài phút. Không tắt trình duyệt trong lúc đồng bộ.</p>
           </CardContent>
         </Card>

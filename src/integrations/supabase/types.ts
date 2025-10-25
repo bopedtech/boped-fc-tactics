@@ -281,6 +281,36 @@ export type Database = {
         }
         Relationships: []
       }
+      programs: {
+        Row: {
+          createdAt: string | null
+          displayName: string
+          id: number
+          image: string | null
+          localizationKey: string
+          rawData: Json
+          updatedAt: string | null
+        }
+        Insert: {
+          createdAt?: string | null
+          displayName: string
+          id: number
+          image?: string | null
+          localizationKey: string
+          rawData: Json
+          updatedAt?: string | null
+        }
+        Update: {
+          createdAt?: string | null
+          displayName?: string
+          id?: number
+          image?: string | null
+          localizationKey?: string
+          rawData?: Json
+          updatedAt?: string | null
+        }
+        Relationships: []
+      }
       squads: {
         Row: {
           createdAt: string | null

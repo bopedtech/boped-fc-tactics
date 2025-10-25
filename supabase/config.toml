@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.sync-renderz-traits]
 verify_jwt = false
+
+[functions.sync-renderz-programs]
+verify_jwt = false
