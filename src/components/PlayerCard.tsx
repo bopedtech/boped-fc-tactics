@@ -151,9 +151,9 @@ export default function PlayerCard({ player, onClick }: PlayerCardProps) {
             </div>
 
             {/* Nation, League, Club Icons - Only flag + league for icon cards */}
-            <div className={`flex justify-end items-center mr-4 ${shouldHideClub ? 'gap-4' : 'gap-2'}`}>
+            <div className={`flex justify-start items-center ml-4 ${shouldHideClub ? 'gap-4' : 'gap-2'}`}>
               {flagImage && (
-                <div className="w-9 h-7 rounded overflow-hidden shadow-lg border-2 border-white/30">
+                <div className="w-9 h-7 rounded overflow-hidden shadow-lg">
                   <img 
                     src={flagImage} 
                     alt="Nation"
@@ -163,7 +163,7 @@ export default function PlayerCard({ player, onClick }: PlayerCardProps) {
               )}
               
               {leagueImage && (
-                <div className="w-7 h-7 rounded-full p-1 shadow-lg border-2 border-white/30 bg-white/10">
+                <div className="w-7 h-7 rounded-full p-1 shadow-lg">
                   <img 
                     src={leagueImage} 
                     alt="League"
@@ -177,7 +177,7 @@ export default function PlayerCard({ player, onClick }: PlayerCardProps) {
               
               {/* Only show club for non-icon cards */}
               {!shouldHideClub && teamLogoUrl && (
-                <div className="w-7 h-7 rounded-full p-1 shadow-lg border-2 border-white/30 bg-white/10">
+                <div className="w-7 h-7 rounded-full p-1 shadow-lg">
                   <img 
                     src={teamLogoUrl} 
                     alt="Club"
