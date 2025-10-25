@@ -45,9 +45,10 @@ export default function PlayerCard({ player, onClick }: PlayerCardProps) {
   const leagueImage = player.images?.leagueImage;
   const teamLogoUrl = player.images?.clubImage;
   
-  // Check if this is an icon card (programs with programImage)
+  // Check if this is an icon card (programs with programImage or no club data)
   const programImage = (player as any).images?.programImage;
-  const isIconCard = !!programImage || player.source === 'icon';
+  const hasClubData = player.club && player.club.id;
+  const isIconCard = !!programImage || player.source === 'icon' || !hasClubData;
 
   // Get card background from player images
   const cardBackground = player.images?.playerCardBackground;
