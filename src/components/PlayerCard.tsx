@@ -44,6 +44,9 @@ export default function PlayerCard({ player, onClick }: PlayerCardProps) {
   const flagImage = player.images?.flagImage;
   const leagueImage = player.images?.leagueImage;
   const teamLogoUrl = player.images?.clubImage;
+  
+  // Check if this is an icon card (no club image = icon card)
+  const isIconCard = !teamLogoUrl;
 
   // Get card background from player images
   const cardBackground = player.images?.playerCardBackground;
@@ -172,7 +175,8 @@ export default function PlayerCard({ player, onClick }: PlayerCardProps) {
                 </div>
               )}
               
-              {teamLogoUrl && (
+              {/* Only show club for non-icon cards */}
+              {!isIconCard && teamLogoUrl && (
                 <div className="w-7 h-7 rounded-full bg-white/95 p-1 shadow-lg border border-white/40 flex items-center justify-center flex-shrink-0">
                   <img 
                     src={teamLogoUrl} 
