@@ -122,31 +122,31 @@ export default function PlayerCard({ player, onClick, teamsData, nationsData, le
         )}
         
         <div className="relative h-full flex flex-col">
-          {/* Top: OVR + Position - Black background, smaller */}
+          {/* Top: OVR + Position - No background, white text, smaller */}
           <div className="absolute top-2 left-2 z-20">
-            <div className="flex flex-col items-center bg-black/70 backdrop-blur-sm px-2 py-1 rounded">
-              <div className="text-3xl font-black text-white leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+            <div className="flex flex-col items-start">
+              <div className="text-3xl font-black text-white leading-none drop-shadow-[0_3px_6px_rgba(0,0,0,1)]">
                 {player.rating}
               </div>
-              <div className="text-[10px] font-black text-white/90 -mt-0.5">
+              <div className="text-xs font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,1)] -mt-0.5">
                 {player.position}
               </div>
             </div>
           </div>
 
-          {/* Middle: Player Image - BIGGER, takes almost all space */}
-          <div className="absolute inset-0 flex items-center justify-center pt-8 pb-20">
+          {/* Middle: Player Image - FULL SIZE from top to name */}
+          <div className="absolute inset-x-0 top-0 bottom-16 flex items-stretch justify-center">
             {player.images?.playerCardImage ? (
               <img
                 src={player.images.playerCardImage}
                 alt={player.cardName || player.commonName}
-                className="w-full h-full object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.9)]"
+                className="w-full h-full object-contain object-center drop-shadow-[0_10px_20px_rgba(0,0,0,0.9)]"
                 onError={(e) => {
                   e.currentTarget.src = `https://ui-avatars.com/api/?name=${player.commonName}&background=FFA500&color=fff&size=256`;
                 }}
               />
             ) : (
-              <div className="w-32 h-32 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-5xl font-bold text-white shadow-2xl">
+              <div className="w-32 h-32 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-5xl font-bold text-white shadow-2xl self-center">
                 {player.commonName[0]}
               </div>
             )}
@@ -154,14 +154,14 @@ export default function PlayerCard({ player, onClick, teamsData, nationsData, le
 
           {/* Bottom Section: Name + Icons - Fixed at bottom */}
           <div className="absolute bottom-0 left-0 right-0 z-10 pb-3 px-3">
-            {/* Player Name - Use cardName if available */}
+            {/* Player Name */}
             <div className="text-center mb-2">
               <h3 className="font-black text-base leading-none text-white drop-shadow-[0_3px_6px_rgba(0,0,0,1)] uppercase tracking-wider">
                 {player.cardName || player.commonName}
               </h3>
             </div>
 
-            {/* Nation, League, Club Icons - No white border on flag */}
+            {/* Nation, League, Club Icons */}
             <div className="flex justify-center items-center gap-2">
               {flagImage && (
                 <div className="w-9 h-7 rounded overflow-hidden shadow-lg">
