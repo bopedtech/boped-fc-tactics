@@ -76,6 +76,7 @@ export default function Database() {
   const [countriesData, setCountriesData] = useState<any[]>([]);
   const [teamsData, setTeamsData] = useState<Array<{ id: number; displayName: string; image?: string }>>([]);
   const [leaguesData, setLeaguesData] = useState<Array<{ id: number; displayName: string; image?: string }>>([]);
+  const [programsData, setProgramsData] = useState<Array<{ id: string; displayName: string; image?: string }>>([]);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [selectedPlayerAssetId, setSelectedPlayerAssetId] = useState<number | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -92,6 +93,7 @@ export default function Database() {
     fetchCountries();
     fetchTeams();
     fetchLeagues();
+    fetchPrograms();
     checkSuperAdminRole();
   }, []);
 
@@ -151,6 +153,19 @@ export default function Database() {
       if (data) setLeaguesData(data);
     } catch (error) {
       console.error("Error fetching leagues:", error);
+    }
+  };
+
+  const fetchPrograms = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("programs")
+        .select("id, displayName, image")
+        .order("displayName", { ascending: true });
+      if (error) throw error;
+      if (data) setProgramsData(data);
+    } catch (error) {
+      console.error("Error fetching programs:", error);
     }
   };
 
@@ -445,6 +460,7 @@ export default function Database() {
                       teamsData={teamsData}
                       nationsData={countriesData as any}
                       leaguesData={leaguesData}
+                      programsData={programsData}
                       onClick={() => handlePlayerClick(player.assetId)}
                     />
                   ))}
