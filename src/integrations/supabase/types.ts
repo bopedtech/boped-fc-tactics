@@ -285,7 +285,7 @@ export type Database = {
         Row: {
           createdAt: string | null
           displayName: string
-          id: number
+          id: string
           image: string | null
           localizationKey: string
           rawData: Json
@@ -294,7 +294,7 @@ export type Database = {
         Insert: {
           createdAt?: string | null
           displayName: string
-          id: number
+          id: string
           image?: string | null
           localizationKey: string
           rawData: Json
@@ -303,7 +303,7 @@ export type Database = {
         Update: {
           createdAt?: string | null
           displayName?: string
-          id?: number
+          id?: string
           image?: string | null
           localizationKey?: string
           rawData?: Json

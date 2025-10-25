@@ -15,14 +15,14 @@ const RENDERZ_HEADERS = {
 };
 
 interface ProgramData {
-  id: number;
+  id: string;
   name: string;
   image?: string;
   [key: string]: any;
 }
 
 interface TransformedProgram {
-  id: number;
+  id: string;
   displayName: string;
   localizationKey: string;
   image: string | null;
@@ -87,34 +87,24 @@ Deno.serve(async (req) => {
     console.log(`Found ${translationMap.size} translations`);
 
     // 4. Enrich and map data explicitly
-    const transformedPrograms: TransformedProgram[] = programsData
-      .filter(program => {
-        // Skip programs with invalid IDs (non-numeric)
-        const isValidId = typeof program.id === 'number' || !isNaN(Number(program.id));
-        if (!isValidId) {
-          console.warn(`Skipping program with invalid ID: ${program.id}`);
-          return false;
-        }
-        return true;
-      })
-      .map(program => {
-        const localizationKey = program.name;
-        const displayName = translationMap.get(localizationKey);
+    const transformedPrograms: TransformedProgram[] = programsData.map(program => {
+      const localizationKey = program.name;
+      const displayName = translationMap.get(localizationKey);
 
-        // Fallback mechanism with warning
-        if (!displayName) {
-          console.warn(`No translation found for key: ${localizationKey}`);
-        }
+      // Fallback mechanism with warning
+      if (!displayName) {
+        console.warn(`No translation found for key: ${localizationKey}`);
+      }
 
-        return {
-          id: Number(program.id),
-          displayName: displayName || localizationKey,
-          localizationKey,
-          image: program.image || null,
-          rawData: program,
-          updatedAt: new Date().toISOString(),
-        };
-      });
+      return {
+        id: program.id,
+        displayName: displayName || localizationKey,
+        localizationKey,
+        image: program.image || null,
+        rawData: program,
+        updatedAt: new Date().toISOString(),
+      };
+    });
 
     console.log(`Transformed ${transformedPrograms.length} programs`);
 
