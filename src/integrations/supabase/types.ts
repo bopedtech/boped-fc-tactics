@@ -155,7 +155,6 @@ export type Database = {
           position: string | null
           potentialPositions: Json | null
           priceData: Json | null
-          program: Json | null
           rank: number | null
           rating: number
           rawData: Json
@@ -207,7 +206,6 @@ export type Database = {
           position?: string | null
           potentialPositions?: Json | null
           priceData?: Json | null
-          program?: Json | null
           rank?: number | null
           rating: number
           rawData: Json
@@ -259,7 +257,6 @@ export type Database = {
           position?: string | null
           potentialPositions?: Json | null
           priceData?: Json | null
-          program?: Json | null
           rank?: number | null
           rating?: number
           rawData?: Json
@@ -279,7 +276,15 @@ export type Database = {
           workRateDef?: number | null
           workRates?: Json | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_players_source_programs"
+            columns: ["source"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       programs: {
         Row: {

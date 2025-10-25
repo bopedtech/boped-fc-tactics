@@ -167,14 +167,10 @@ export const usePlayerFilters = (initialPosition?: string) => {
       });
     }
 
-    // Programs filter
+    // Programs filter (using source field which links to programs.id)
     if (filters.programs.length > 0) {
       filtered = filtered.filter(p => {
-        if (!p.program) return false;
-        // Handle both string and object structures
-        const programId = typeof p.program === 'string' 
-          ? p.program 
-          : (p.program?.id || p.program?.programId);
+        const programId = p.source;
         return programId && filters.programs.includes(programId.toString());
       });
     }
