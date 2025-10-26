@@ -136,6 +136,8 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
   const [loading, setLoading] = useState(false);
   const [nationInfo, setNationInfo] = useState<{ displayName: string; image?: string } | null>(null);
   const [leagueInfo, setLeagueInfo] = useState<{ id: number; displayName: string; image?: string } | null>(null);
+  const [clubInfo, setClubInfo] = useState<{ displayName: string; image?: string } | null>(null);
+  const [traitsData, setTraitsData] = useState<Array<{ name: string; image: string; category: string }>>([]);
 
   useEffect(() => {
     if (open && assetId) {
@@ -186,6 +188,52 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
           if (leagueData) {
             setLeagueInfo(leagueData);
           }
+        }
+      }
+
+      // Fetch club info from teams table
+      if (data?.club && typeof data.club === 'object' && 'id' in data.club) {
+        const clubId = (data.club as Record<string, unknown>).id;
+        if (clubId && typeof clubId === 'number') {
+          const { data: clubData } = await supabase
+            .from("teams")
+            .select("displayName, image")
+            .eq("id", clubId)
+            .maybeSingle();
+          
+          if (clubData) {
+            setClubInfo(clubData);
+          }
+        }
+      }
+
+      // Fetch traits data
+      const traitIds: number[] = [];
+      Object.keys(data || {}).forEach(key => {
+        if (key.startsWith('trait_name_')) {
+          const id = parseInt(key.replace('trait_name_', ''));
+          if (!isNaN(id)) {
+            traitIds.push(id);
+          }
+        }
+      });
+
+      if (traitIds.length > 0) {
+        const { data: traitsDbData } = await supabase
+          .from("traits")
+          .select("id, displayName, localizationKeyName, rawData")
+          .in("id", traitIds);
+
+        if (traitsDbData) {
+          const traitsWithImages = traitsDbData.map(trait => {
+            const rawData = trait.rawData as any;
+            return {
+              name: trait.displayName,
+              image: rawData?.traitIconUrl || '',
+              category: 'Chỉ Số Ẩn'
+            };
+          });
+          setTraitsData(traitsWithImages);
         }
       }
     } catch (error) {
@@ -367,14 +415,14 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Team */}
-                        {player.club && (
+                        {clubInfo && (
                           <div className="space-y-2">
-                            <h3 className="text-sm font-semibold text-muted-foreground">Đội Bóng</h3>
+                            <h3 className="text-sm font-semibold text-muted-foreground">Câu Lạc Bộ</h3>
                             <div className="flex items-center gap-2">
-                              {(player.club as any).image && (
-                                <img src={(player.club as any).image} alt={(player.club as any).name} className="w-8 h-8" />
+                              {clubInfo.image && (
+                                <img src={clubInfo.image} alt={clubInfo.displayName} className="w-8 h-8 object-contain" />
                               )}
-                              <span className="font-medium">{(player.club as any).name}</span>
+                              <span className="font-medium">{clubInfo.displayName}</span>
                             </div>
                           </div>
                         )}
@@ -419,19 +467,67 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                           </div>
                         )}
 
-                        {/* Added Date */}
-                        {player.added && (
-                          <div className="space-y-2">
-                            <h3 className="text-sm font-semibold text-muted-foreground">Ngày Thêm</h3>
-                            <div className="font-medium">
-                              {new Date(player.added).toLocaleDateString('vi-VN', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
-                              })}
+                      </div>
+
+                      {/* Đặc Điểm Section */}
+                      <div className="space-y-4 pt-4 border-t">
+                        <h3 className="text-lg font-semibold">Đặc Điểm</h3>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                          {/* Skill Moves */}
+                          {(player as any).skillMoves?.skillMoves && (
+                            <div className="flex flex-col items-center gap-2 p-4 bg-card rounded-lg border hover:border-primary/50 transition-colors">
+                              <div className="w-16 h-16 flex items-center justify-center">
+                                <img 
+                                  src={(player as any).skillMoves.skillMoves} 
+                                  alt="Skill Move"
+                                  className="w-full h-full object-contain"
+                                />
+                              </div>
+                              <div className="text-center">
+                                <div className="text-sm font-semibold">
+                                  {(player as any).skillMoves?.skillMovesName || 'Skill Move'}
+                                </div>
+                                <div className="text-xs text-muted-foreground">Động Tác Kỹ Thuật</div>
+                              </div>
                             </div>
-                          </div>
-                        )}
+                          )}
+
+                          {/* Celebration */}
+                          {(player as any).celebration?.celebrationIconUrl && (
+                            <div className="flex flex-col items-center gap-2 p-4 bg-card rounded-lg border hover:border-primary/50 transition-colors">
+                              <div className="w-16 h-16 flex items-center justify-center">
+                                <img 
+                                  src={(player as any).celebration.celebrationIconUrl} 
+                                  alt="Celebration"
+                                  className="w-full h-full object-contain"
+                                />
+                              </div>
+                              <div className="text-center">
+                                <div className="text-sm font-semibold">
+                                  {(player as any).celebration?.celebrationName || 'Celebration'}
+                                </div>
+                                <div className="text-xs text-muted-foreground">Ăn Mừng</div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Traits */}
+                          {traitsData.map((trait, idx) => (
+                            <div key={idx} className="flex flex-col items-center gap-2 p-4 bg-card rounded-lg border hover:border-primary/50 transition-colors">
+                              <div className="w-16 h-16 flex items-center justify-center">
+                                <img 
+                                  src={trait.image} 
+                                  alt={trait.name}
+                                  className="w-full h-full object-contain"
+                                />
+                              </div>
+                              <div className="text-center">
+                                <div className="text-sm font-semibold">{trait.name}</div>
+                                <div className="text-xs text-muted-foreground">{trait.category}</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
 
                       {/* Work Rates */}
