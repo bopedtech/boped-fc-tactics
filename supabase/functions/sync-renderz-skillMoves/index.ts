@@ -54,7 +54,7 @@ Deno.serve(async (req) => {
     // Fetch skillMoves data from Renderz API
     console.log('Fetching skillMoves data from Renderz API...');
     const renderzResponse = await fetch(
-      'https://renderz.app/api/filter/filter-data/skillMoves?seasonId=24',
+      'https://renderz.app/api/filter/filter-data/skillmoves?seasonId=24',
       { headers: RENDERZ_HEADERS }
     );
 
