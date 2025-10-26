@@ -115,10 +115,10 @@ export default function PlayerCard({ player, onClick, variant = 'list' }: Player
           {/* Top: OVR + Position - Moved right and down a bit */}
           <div className="absolute top-8 left-8 z-20">
             <div className="flex flex-col items-start">
-              <div className="text-5xl font-black text-white leading-none drop-shadow-[0_3px_6px_rgba(0,0,0,1)]">
+              <div className={`${variant === 'detail' ? 'text-5xl' : 'text-4xl'} font-black text-white leading-none drop-shadow-[0_3px_6px_rgba(0,0,0,1)]`}>
                 {player.rating}
               </div>
-              <div className="text-lg font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,1)] mt-0.5 ml-0.5">
+              <div className={`${variant === 'detail' ? 'text-lg' : 'text-base'} font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,1)] mt-0.5 ml-0.5`}>
                 {player.position}
               </div>
             </div>
@@ -146,7 +146,7 @@ export default function PlayerCard({ player, onClick, variant = 'list' }: Player
           <div className={`absolute left-0 right-0 z-10 px-3 ${variant === 'detail' ? 'bottom-16' : 'bottom-12'}`}>
             {/* Player Name */}
             <div className="text-center mb-2 mt-8">
-              <h3 className="font-black text-2xl leading-none text-white drop-shadow-[0_3px_6px_rgba(0,0,0,1)] uppercase tracking-wider">
+              <h3 className={`font-black ${variant === 'detail' ? 'text-2xl' : 'text-xl'} leading-none text-white drop-shadow-[0_3px_6px_rgba(0,0,0,1)] uppercase tracking-wider`}>
                 {player.cardName || player.commonName}
               </h3>
             </div>
