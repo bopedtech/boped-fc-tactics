@@ -138,6 +138,8 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
   const [leagueInfo, setLeagueInfo] = useState<{ id: number; displayName: string; image?: string } | null>(null);
   const [clubInfo, setClubInfo] = useState<{ displayName: string; image?: string } | null>(null);
   const [traitsData, setTraitsData] = useState<Array<{ name: string; image: string; category: string }>>([]);
+  const [skillMoveInfo, setSkillMoveInfo] = useState<{ displayName: string; image?: string } | null>(null);
+  const [celebrationInfo, setCelebrationInfo] = useState<{ displayName: string; image?: string } | null>(null);
 
   useEffect(() => {
     if (open && assetId) {
@@ -218,6 +220,44 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
           
           if (clubData) {
             setClubInfo(clubData);
+          }
+        }
+      }
+
+      // Fetch skill move info from skillmoves table
+      if (data?.skillMoves && typeof data.skillMoves === 'object' && 'id' in data.skillMoves) {
+        const skillMoveId = (data.skillMoves as Record<string, unknown>).id;
+        if (skillMoveId && typeof skillMoveId === 'number') {
+          const { data: skillMoveData } = await supabase
+            .from("skillmoves")
+            .select("displayName, mediaUrl")
+            .eq("id", skillMoveId)
+            .maybeSingle();
+          
+          if (skillMoveData) {
+            setSkillMoveInfo({
+              displayName: skillMoveData.displayName,
+              image: skillMoveData.mediaUrl || (data.skillMoves as any).image
+            });
+          }
+        }
+      }
+
+      // Fetch celebration info from celebrations table
+      if (data?.celebration && typeof data.celebration === 'object' && 'id' in data.celebration) {
+        const celebrationId = (data.celebration as Record<string, unknown>).id;
+        if (celebrationId && typeof celebrationId === 'number') {
+          const { data: celebrationData } = await supabase
+            .from("celebrations")
+            .select("displayName, mediaUrl")
+            .eq("id", celebrationId)
+            .maybeSingle();
+          
+          if (celebrationData) {
+            setCelebrationInfo({
+              displayName: celebrationData.displayName,
+              image: celebrationData.mediaUrl || (data.celebration as any).image
+            });
           }
         }
       }
@@ -492,21 +532,21 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                       {/* Đặc Điểm */}
                       <div className="space-y-4 pt-4 border-t">
                         <h3 className="text-sm font-semibold text-muted-foreground">Đặc Điểm</h3>
-                        {((player as any).skillMoves?.image || (player as any).celebration?.image || traitsData.length > 0) ? (
+                        {(skillMoveInfo || celebrationInfo || (player as any).skillMoves?.image || (player as any).celebration?.image || traitsData.length > 0) ? (
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             {/* Skill Moves */}
-                            {(player as any).skillMoves?.image && (
+                            {(skillMoveInfo || (player as any).skillMoves?.image) && (
                               <div className="flex flex-col items-center gap-2 p-4 bg-card rounded-lg border hover:border-primary/50 transition-colors">
                                 <div className="w-16 h-16 flex items-center justify-center">
                                   <img 
-                                    src={(player as any).skillMoves.image} 
+                                    src={skillMoveInfo?.image || (player as any).skillMoves.image} 
                                     alt="Skill Move"
                                     className="w-full h-full object-contain"
                                   />
                                 </div>
                                 <div className="text-center">
                                   <div className="text-sm font-semibold">
-                                    {(player as any).skillMoves?.title || 'Skill Move'}
+                                    {skillMoveInfo?.displayName || (player as any).skillMoves?.title || 'Skill Move'}
                                   </div>
                                   <div className="text-xs text-muted-foreground">Động Tác Kỹ Thuật</div>
                                 </div>
@@ -514,18 +554,18 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                             )}
 
                             {/* Celebration */}
-                            {(player as any).celebration?.image && (
+                            {(celebrationInfo || (player as any).celebration?.image) && (
                               <div className="flex flex-col items-center gap-2 p-4 bg-card rounded-lg border hover:border-primary/50 transition-colors">
                                 <div className="w-16 h-16 flex items-center justify-center">
                                   <img 
-                                    src={(player as any).celebration.image} 
+                                    src={celebrationInfo?.image || (player as any).celebration.image} 
                                     alt="Celebration"
                                     className="w-full h-full object-contain"
                                   />
                                 </div>
                                 <div className="text-center">
                                   <div className="text-sm font-semibold">
-                                    {(player as any).celebration?.title || 'Celebration'}
+                                    {celebrationInfo?.displayName || (player as any).celebration?.title || 'Celebration'}
                                   </div>
                                   <div className="text-xs text-muted-foreground">Ăn Mừng</div>
                                 </div>
