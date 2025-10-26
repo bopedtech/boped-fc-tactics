@@ -505,9 +505,9 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                       )}
 
                       {/* Đặc Điểm */}
-                      {((player as any).skillMoves?.skillMoves || (player as any).celebration?.celebrationIconUrl || traitsData.length > 0) && (
-                        <div className="space-y-4 pt-4 border-t">
-                          <h3 className="text-sm font-semibold text-muted-foreground">Đặc Điểm</h3>
+                      <div className="space-y-4 pt-4 border-t">
+                        <h3 className="text-sm font-semibold text-muted-foreground">Đặc Điểm</h3>
+                        {((player as any).skillMoves?.skillMoves || (player as any).celebration?.celebrationIconUrl || traitsData.length > 0) ? (
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             {/* Skill Moves */}
                             {(player as any).skillMoves?.skillMoves && (
@@ -564,8 +564,10 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                               </div>
                             ))}
                           </div>
-                        </div>
-                      )}
+                        ) : (
+                          <div className="text-sm text-muted-foreground">Không có dữ liệu</div>
+                        )}
+                      </div>
                     </TabsContent>
                   </Tabs>
                 </Card>
