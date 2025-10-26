@@ -269,13 +269,13 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
               {/* Right: Detailed Stats */}
               <div className="lg:col-span-2">
                 <Card className="p-4">
-                  <Tabs defaultValue="stats" className="w-full">
+                  <Tabs defaultValue="info" className="w-full">
                     <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="stats">Chỉ Số</TabsTrigger>
                       <TabsTrigger value="info">Thông Tin</TabsTrigger>
+                      <TabsTrigger value="stats">Chỉ Số</TabsTrigger>
                     </TabsList>
 
-                    <TabsContent value="stats" className="space-y-6 mt-6 overflow-y-auto max-h-[60vh] pr-2">
+                    <TabsContent value="stats" className="space-y-6 mt-6 overflow-y-auto max-h-[60vh] pr-2 scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent hover:scrollbar-thumb-primary/40">
                       {!isGK && Object.entries(mainStats).map(([mainKey, mainValue]) => {
                         const detailedStats = detailedStatMapping[mainKey] || [];
                         
@@ -313,7 +313,7 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                       )}
                     </TabsContent>
 
-                    <TabsContent value="info" className="space-y-6 mt-6 overflow-y-auto max-h-[60vh] pr-2">
+                    <TabsContent value="info" className="space-y-6 mt-6 overflow-y-auto max-h-[60vh] pr-2 scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent hover:scrollbar-thumb-primary/40">
                       {/* Player Details Card */}
                       <Card className="p-6 bg-muted/20">
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
