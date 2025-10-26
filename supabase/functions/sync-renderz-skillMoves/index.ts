@@ -103,11 +103,13 @@ Deno.serve(async (req) => {
       const keyName = skillMove.name;
       const keyDesc = skillMove.description || null;
       
-      const displayName = translationMap.get(keyName) || keyName;
+      const displayName = translationMap.get(keyName) || keyName || 'Unknown Skill';
       const displayDescription = keyDesc ? (translationMap.get(keyDesc) || keyDesc) : null;
 
-      // Defensive architecture for stars
-      const stars = skillMove.stars ?? skillMove.starRating ?? skillMove.level ?? null;
+      // Defensive architecture for stars - parse to integer safely
+      const starsRaw = skillMove.stars ?? skillMove.starRating ?? skillMove.level;
+      const starsInt = starsRaw !== null && starsRaw !== undefined ? parseInt(String(starsRaw), 10) : NaN;
+      const stars = !isNaN(starsInt) ? starsInt : null;
       
       // Defensive architecture for mediaUrl
       const mediaUrl = skillMove.mediaUrl || skillMove.image || skillMove.video || null;
