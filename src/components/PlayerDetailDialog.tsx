@@ -166,14 +166,27 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
       console.log("Celebration:", data?.celebration);
       console.log("Traits data:", data?.traits);
 
-      // Process traits from player data
+      // Fetch traits from traits table
       if (data?.traits && Array.isArray(data.traits)) {
-        const traitsWithImages = data.traits.map((trait: any) => ({
-          name: trait.title || '',
-          image: trait.image || '',
-          category: 'Chỉ Số Ẩn'
-        }));
-        setTraitsData(traitsWithImages);
+        const traitIds = data.traits.map((trait: any) => trait.id).filter(Boolean);
+        
+        if (traitIds.length > 0) {
+          const { data: traitsDataFromDb } = await supabase
+            .from("traits")
+            .select("id, displayName")
+            .in("id", traitIds);
+          
+          if (traitsDataFromDb && traitsDataFromDb.length > 0) {
+            const traitsMap = new Map(traitsDataFromDb.map(t => [t.id, t.displayName]));
+            
+            const traitsWithImages = data.traits.map((trait: any) => ({
+              name: traitsMap.get(trait.id) || trait.title || '',
+              image: trait.image || '',
+              category: 'Chỉ Số Ẩn'
+            }));
+            setTraitsData(traitsWithImages);
+          }
+        }
       }
 
       // Fetch nation data if exists
