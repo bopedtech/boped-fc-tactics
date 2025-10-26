@@ -103,12 +103,12 @@ const statLabels: Record<string, string> = {
   agg: "Quyết Đoán",
   
   // GK stats (keys from DB)
-  diving: "Bắt Bóng",
+  diving: "Đỗ Ngươi",
   handling: "Xử Lý",
-  kicking: "Sút",
+  kicking: "Phát Bóng",
   reflexes: "Phản Xạ",
-  speed: "Tốc Độ",
-  positioning: "Vị Trí",
+  speed: "Thể Lực",
+  positioning: "Chọn Vị Trí",
   gkd: "Bắt Bóng",
   han: "Xử Lý",
   gkk: "Sút",
@@ -230,11 +230,11 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
   const mainStats = isGK 
     ? {
         diving: avgGkStatsArray[0] || 0,
+        positioning: avgGkStatsArray[5] || 0,
         handling: avgGkStatsArray[1] || 0,
-        kicking: avgGkStatsArray[2] || 0,
         reflexes: avgGkStatsArray[3] || 0,
-        speed: avgGkStatsArray[4] || 0,
-        positioning: avgGkStatsArray[5] || 0
+        kicking: avgGkStatsArray[2] || 0,
+        speed: avgGkStatsArray[4] || 0
       }
     : {
         pace: avgStatsArray[0] || 0,
@@ -302,11 +302,11 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                       })}
                       
                       {isGK && (
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-3">
                           {Object.entries(mainStats).map(([key, value]) => (
-                            <div key={key} className="p-4 bg-muted/30 rounded-lg">
-                              <div className="text-sm text-muted-foreground mb-1">{statLabels[key]}</div>
-                              <div className="text-3xl font-bold text-primary">{value || 0}</div>
+                            <div key={key} className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+                              <span className="text-base font-medium">{statLabels[key]}</span>
+                              <span className="text-2xl font-bold text-primary">{value || 0}</span>
                             </div>
                           ))}
                         </div>

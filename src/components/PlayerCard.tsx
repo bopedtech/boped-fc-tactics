@@ -67,17 +67,17 @@ export default function PlayerCard({ player, onClick, variant = 'list' }: Player
   ];
   
   const avgGkStats = [
-    avgGkStatsObj.avg1 || 0,
-    avgGkStatsObj.avg2 || 0,
-    avgGkStatsObj.avg3 || 0,
-    avgGkStatsObj.avg4 || 0,
-    avgGkStatsObj.avg5 || 0,
-    avgGkStatsObj.avg6 || 0
+    avgGkStatsObj.avg1 || 0,  // Đỗ ngươi
+    avgGkStatsObj.avg6 || 0,  // Chọn vị trí
+    avgGkStatsObj.avg2 || 0,  // Xử lý
+    avgGkStatsObj.avg4 || 0,  // Phản xạ
+    avgGkStatsObj.avg3 || 0,  // Phát bóng
+    avgGkStatsObj.avg5 || 0   // Thể lực
   ];
   
   // Map avgStats to Vietnamese stat labels
   const statLabels = isGK 
-    ? ["BẮT", "XỬ LÝ", "SÚT", "PHẢN XẠ", "TỐC ĐỘ", "VỊ TRÍ"]
+    ? ["ĐỖ NGƯƠI", "CHỌN VỊ TRÍ", "XỬ LÝ", "PHẢN XẠ", "PHÁT BÓNG", "THỂ LỰC"]
     : ["TỐC ĐỘ", "SÚT", "CHUYỀN", "RÊ DẮT", "THỦ", "THỂ LỰC"];
   
   const statsToShow = isGK ? avgGkStats : avgStats;
