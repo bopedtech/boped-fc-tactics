@@ -32,6 +32,7 @@ interface Player {
   stats: PlayerStats;
   traits?: any[];
   source?: string;
+  auctionable?: boolean;
 }
 
 interface PlayerCardProps {
@@ -114,6 +115,17 @@ export default function PlayerCard({ player, onClick, variant = 'list' }: Player
         )}
         
         <div className="relative h-full flex flex-col">
+          {/* Untradeable Icon - Top Right */}
+          {player.auctionable === false && (
+            <div className="absolute top-4 right-4 z-20">
+              <img 
+                src="https://images-bucket.renderz.app/common_23_untradeable_icon" 
+                alt="Untradeable"
+                className="w-10 h-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
+              />
+            </div>
+          )}
+
           {/* Top: OVR + Position - Moved right and down a bit */}
           <div className="absolute top-8 left-8 z-20">
             <div className="flex flex-col items-start">
