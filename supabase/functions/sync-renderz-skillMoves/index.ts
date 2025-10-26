@@ -129,9 +129,9 @@ Deno.serve(async (req) => {
 
     console.log(`✓ Transformed ${transformedSkillMoves.length} skillMoves with explicit mapping`);
 
-    // Upsert to skillMoves table
+    // Upsert to skillmoves table (lowercase)
     const { error: upsertError } = await supabase
-      .from('skillMoves')
+      .from('skillmoves')
       .upsert(transformedSkillMoves, {
         onConflict: 'id',
         ignoreDuplicates: false
