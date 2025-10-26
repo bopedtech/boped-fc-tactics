@@ -91,7 +91,7 @@ export default function PlayerCard({ player, onClick }: PlayerCardProps) {
       <div className="flex flex-col gap-3">
         {/* Card Container */}
         <Card
-          className="overflow-hidden relative border-0 shadow-2xl aspect-[3/4.2] transition-all duration-300 group-hover:shadow-[0_0_30px_rgba(250,204,21,0.5)] group-hover:scale-[1.02]"
+          className="overflow-hidden relative border-0 aspect-[3/4.2] transition-all duration-300 group-hover:shadow-[0_0_30px_rgba(250,204,21,0.5)] group-hover:scale-[1.02]"
         >
         {/* Card Background Image */}
         {cardBackground ? (
