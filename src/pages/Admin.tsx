@@ -21,6 +21,10 @@ export default function Admin() {
   const [traitsResult, setTraitsResult] = useState<any>(null);
   const [syncingPrograms, setSyncingPrograms] = useState(false);
   const [programsResult, setProgramsResult] = useState<any>(null);
+  const [syncingCelebrations, setSyncingCelebrations] = useState(false);
+  const [celebrationsResult, setCelebrationsResult] = useState<any>(null);
+  const [syncingSkillMoves, setSyncingSkillMoves] = useState(false);
+  const [skillMovesResult, setSkillMovesResult] = useState<any>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 
   const handleSyncPlayers = async (mode: 'test' | 'full' = 'test') => {
@@ -203,6 +207,46 @@ export default function Admin() {
     }
   };
 
+  const handleSyncCelebrations = async () => {
+    try {
+      setSyncingCelebrations(true);
+      setCelebrationsResult(null);
+      toast.info('Đang đồng bộ dữ liệu ăn mừng...');
+
+      const { data, error } = await supabase.functions.invoke('sync-renderz-celebrations');
+
+      if (error) throw error;
+
+      setCelebrationsResult(data);
+      toast.success("Đồng bộ ăn mừng thành công!");
+    } catch (error) {
+      console.error("Error syncing celebrations:", error);
+      toast.error("Lỗi khi đồng bộ ăn mừng: " + (error as Error).message);
+    } finally {
+      setSyncingCelebrations(false);
+    }
+  };
+
+  const handleSyncSkillMoves = async () => {
+    try {
+      setSyncingSkillMoves(true);
+      setSkillMovesResult(null);
+      toast.info('Đang đồng bộ dữ liệu kỹ năng...');
+
+      const { data, error } = await supabase.functions.invoke('sync-renderz-skillMoves');
+
+      if (error) throw error;
+
+      setSkillMovesResult(data);
+      toast.success("Đồng bộ kỹ năng thành công!");
+    } catch (error) {
+      console.error("Error syncing skill moves:", error);
+      toast.error("Lỗi khi đồng bộ kỹ năng: " + (error as Error).message);
+    } finally {
+      setSyncingSkillMoves(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -213,9 +257,8 @@ export default function Admin() {
           <p className="text-muted-foreground">Quản lý đồng bộ dữ liệu từ Renderz API</p>
         </div>
 
-        <div className="space-y-6">
-          {/* Import Dictionary Card */}
-          <Card>
+        {/* Import Dictionary - Full Width */}
+        <Card className="mb-6">
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Database className="w-5 h-5" />
@@ -294,6 +337,8 @@ export default function Admin() {
             </CardContent>
           </Card>
 
+        {/* Grid Layout for Sync Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Sync Leagues Card */}
           <Card>
             <CardHeader>
@@ -479,12 +524,86 @@ export default function Admin() {
             </CardContent>
           </Card>
 
-          {/* Sync Players Card */}
+          {/* Sync Celebrations Card */}
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
+                <Trophy className="w-5 h-5" />
+                <CardTitle>7. Đồng Bộ Ăn Mừng</CardTitle>
+              </div>
+              <CardDescription>
+                Đồng bộ dữ liệu celebrations (sử dụng dictionary để dịch tên và mô tả)
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Button 
+                onClick={handleSyncCelebrations}
+                disabled={syncingCelebrations}
+                className="w-full"
+              >
+                {syncingCelebrations ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Play className="w-4 h-4 mr-2" />
+                )}
+                Đồng Bộ Celebrations
+              </Button>
+
+              {celebrationsResult && (
+                <div className="bg-muted p-4 rounded-lg space-y-2">
+                  <p className="text-sm font-semibold text-green-600">✅ {celebrationsResult.message}</p>
+                  <div className="text-xs space-y-1">
+                    <p>• Tổng celebrations: {celebrationsResult.synced}</p>
+                    <p>• Đã dịch: {celebrationsResult.translationsUsed}</p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Sync SkillMoves Card */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Trophy className="w-5 h-5" />
+                <CardTitle>8. Đồng Bộ Kỹ Năng</CardTitle>
+              </div>
+              <CardDescription>
+                Đồng bộ dữ liệu skill moves (sử dụng dictionary để dịch tên và mô tả)
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Button 
+                onClick={handleSyncSkillMoves}
+                disabled={syncingSkillMoves}
+                className="w-full"
+              >
+                {syncingSkillMoves ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Play className="w-4 h-4 mr-2" />
+                )}
+                Đồng Bộ Skill Moves
+              </Button>
+
+              {skillMovesResult && (
+                <div className="bg-muted p-4 rounded-lg space-y-2">
+                  <p className="text-sm font-semibold text-green-600">✅ {skillMovesResult.message}</p>
+                  <div className="text-xs space-y-1">
+                    <p>• Tổng skill moves: {skillMovesResult.synced}</p>
+                    <p>• Đã dịch: {skillMovesResult.translationsUsed}</p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Sync Players Card */}
+          <Card className="md:col-span-2">
+            <CardHeader>
+              <div className="flex items-center gap-2">
                 <Users className="w-5 h-5" />
-                <CardTitle>7. Đồng Bộ Cầu Thủ</CardTitle>
+                <CardTitle>9. Đồng Bộ Cầu Thủ</CardTitle>
               </div>
               <CardDescription>
                 Đồng bộ dữ liệu cầu thủ từ mùa 24, 25, 26
@@ -540,8 +659,8 @@ export default function Admin() {
           </CardHeader>
           <CardContent className="space-y-2 text-sm text-muted-foreground">
             <p><strong>Bước 1:</strong> Import Localization Dictionary trước (chỉ cần 1 lần).</p>
-            <p><strong>Bước 2-6:</strong> Đồng bộ Leagues, Nations, Teams, Traits và Programs để áp dụng dictionary và dịch tên.</p>
-            <p><strong>Bước 7:</strong> Test đồng bộ cầu thủ (5 trang ~50 cầu thủ), sau đó chạy full sync.</p>
+            <p><strong>Bước 2-8:</strong> Đồng bộ Leagues, Nations, Teams, Traits, Programs, Celebrations và Skill Moves để áp dụng dictionary và dịch tên.</p>
+            <p><strong>Bước 9:</strong> Test đồng bộ cầu thủ (5 trang ~50 cầu thủ), sau đó chạy full sync.</p>
             <p className="text-yellow-600 mt-4"><strong>⚠️ Lưu ý:</strong> Full sync có thể mất vài phút. Không tắt trình duyệt trong lúc đồng bộ.</p>
           </CardContent>
         </Card>
