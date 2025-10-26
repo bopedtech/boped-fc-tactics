@@ -261,7 +261,9 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-4">
               {/* Left: Player Card */}
               <div className="lg:col-span-1">
-                <PlayerCard player={player as any} />
+                <div className="max-w-[280px] mx-auto">
+                  <PlayerCard player={player as any} variant="detail" />
+                </div>
               </div>
 
               {/* Right: Detailed Stats */}
