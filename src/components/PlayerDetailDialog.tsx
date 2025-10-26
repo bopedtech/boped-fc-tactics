@@ -159,6 +159,21 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
       if (error) throw error;
       setPlayer(data);
 
+      console.log("Player data:", data);
+      console.log("Skill Moves:", data?.skillMoves);
+      console.log("Celebration:", data?.celebration);
+      console.log("Traits data:", data?.traits);
+
+      // Process traits from player data
+      if (data?.traits && Array.isArray(data.traits)) {
+        const traitsWithImages = data.traits.map((trait: any) => ({
+          name: trait.title || '',
+          image: trait.image || '',
+          category: 'Chỉ Số Ẩn'
+        }));
+        setTraitsData(traitsWithImages);
+      }
+
       // Fetch nation data if exists
       if (data?.nation && typeof data.nation === 'object' && 'id' in data.nation) {
         const nationId = (data.nation as Record<string, unknown>).id;
@@ -204,36 +219,6 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
           if (clubData) {
             setClubInfo(clubData);
           }
-        }
-      }
-
-      // Fetch traits data
-      const traitIds: number[] = [];
-      Object.keys(data || {}).forEach(key => {
-        if (key.startsWith('trait_name_')) {
-          const id = parseInt(key.replace('trait_name_', ''));
-          if (!isNaN(id)) {
-            traitIds.push(id);
-          }
-        }
-      });
-
-      if (traitIds.length > 0) {
-        const { data: traitsDbData } = await supabase
-          .from("traits")
-          .select("id, displayName, localizationKeyName, rawData")
-          .in("id", traitIds);
-
-        if (traitsDbData) {
-          const traitsWithImages = traitsDbData.map(trait => {
-            const rawData = trait.rawData as any;
-            return {
-              name: trait.displayName,
-              image: rawData?.traitIconUrl || '',
-              category: 'Chỉ Số Ẩn'
-            };
-          });
-          setTraitsData(traitsWithImages);
         }
       }
     } catch (error) {
@@ -507,21 +492,21 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                       {/* Đặc Điểm */}
                       <div className="space-y-4 pt-4 border-t">
                         <h3 className="text-sm font-semibold text-muted-foreground">Đặc Điểm</h3>
-                        {((player as any).skillMoves?.skillMoves || (player as any).celebration?.celebrationIconUrl || traitsData.length > 0) ? (
+                        {((player as any).skillMoves?.image || (player as any).celebration?.image || traitsData.length > 0) ? (
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             {/* Skill Moves */}
-                            {(player as any).skillMoves?.skillMoves && (
+                            {(player as any).skillMoves?.image && (
                               <div className="flex flex-col items-center gap-2 p-4 bg-card rounded-lg border hover:border-primary/50 transition-colors">
                                 <div className="w-16 h-16 flex items-center justify-center">
                                   <img 
-                                    src={(player as any).skillMoves.skillMoves} 
+                                    src={(player as any).skillMoves.image} 
                                     alt="Skill Move"
                                     className="w-full h-full object-contain"
                                   />
                                 </div>
                                 <div className="text-center">
                                   <div className="text-sm font-semibold">
-                                    {(player as any).skillMoves?.skillMovesName || 'Skill Move'}
+                                    {(player as any).skillMoves?.title || 'Skill Move'}
                                   </div>
                                   <div className="text-xs text-muted-foreground">Động Tác Kỹ Thuật</div>
                                 </div>
@@ -529,18 +514,18 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                             )}
 
                             {/* Celebration */}
-                            {(player as any).celebration?.celebrationIconUrl && (
+                            {(player as any).celebration?.image && (
                               <div className="flex flex-col items-center gap-2 p-4 bg-card rounded-lg border hover:border-primary/50 transition-colors">
                                 <div className="w-16 h-16 flex items-center justify-center">
                                   <img 
-                                    src={(player as any).celebration.celebrationIconUrl} 
+                                    src={(player as any).celebration.image} 
                                     alt="Celebration"
                                     className="w-full h-full object-contain"
                                   />
                                 </div>
                                 <div className="text-center">
                                   <div className="text-sm font-semibold">
-                                    {(player as any).celebration?.celebrationName || 'Celebration'}
+                                    {(player as any).celebration?.title || 'Celebration'}
                                   </div>
                                   <div className="text-xs text-muted-foreground">Ăn Mừng</div>
                                 </div>
