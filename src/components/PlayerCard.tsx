@@ -149,7 +149,7 @@ export default function PlayerCard({ player, onClick, variant = 'list' }: Player
             {/* Player Name */}
             <div className="text-center mb-2 mt-8">
               <h3 className={`font-black ${variant === 'detail' ? 'text-2xl' : 'text-xl'} leading-none text-white drop-shadow-[0_3px_6px_rgba(0,0,0,1)] uppercase tracking-wider`}>
-                {player.cardName || (player.firstName && player.lastName ? `${player.firstName} ${player.lastName}` : player.commonName)}
+                {(player.firstName && player.lastName ? `${player.firstName} ${player.lastName}` : player.cardName || player.commonName)}
               </h3>
             </div>
 
