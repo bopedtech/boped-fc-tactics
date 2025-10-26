@@ -469,67 +469,6 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
 
                       </div>
 
-                      {/* Đặc Điểm Section */}
-                      <div className="space-y-4 pt-4 border-t">
-                        <h3 className="text-lg font-semibold">Đặc Điểm</h3>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                          {/* Skill Moves */}
-                          {(player as any).skillMoves?.skillMoves && (
-                            <div className="flex flex-col items-center gap-2 p-4 bg-card rounded-lg border hover:border-primary/50 transition-colors">
-                              <div className="w-16 h-16 flex items-center justify-center">
-                                <img 
-                                  src={(player as any).skillMoves.skillMoves} 
-                                  alt="Skill Move"
-                                  className="w-full h-full object-contain"
-                                />
-                              </div>
-                              <div className="text-center">
-                                <div className="text-sm font-semibold">
-                                  {(player as any).skillMoves?.skillMovesName || 'Skill Move'}
-                                </div>
-                                <div className="text-xs text-muted-foreground">Động Tác Kỹ Thuật</div>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Celebration */}
-                          {(player as any).celebration?.celebrationIconUrl && (
-                            <div className="flex flex-col items-center gap-2 p-4 bg-card rounded-lg border hover:border-primary/50 transition-colors">
-                              <div className="w-16 h-16 flex items-center justify-center">
-                                <img 
-                                  src={(player as any).celebration.celebrationIconUrl} 
-                                  alt="Celebration"
-                                  className="w-full h-full object-contain"
-                                />
-                              </div>
-                              <div className="text-center">
-                                <div className="text-sm font-semibold">
-                                  {(player as any).celebration?.celebrationName || 'Celebration'}
-                                </div>
-                                <div className="text-xs text-muted-foreground">Ăn Mừng</div>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Traits */}
-                          {traitsData.map((trait, idx) => (
-                            <div key={idx} className="flex flex-col items-center gap-2 p-4 bg-card rounded-lg border hover:border-primary/50 transition-colors">
-                              <div className="w-16 h-16 flex items-center justify-center">
-                                <img 
-                                  src={trait.image} 
-                                  alt={trait.name}
-                                  className="w-full h-full object-contain"
-                                />
-                              </div>
-                              <div className="text-center">
-                                <div className="text-sm font-semibold">{trait.name}</div>
-                                <div className="text-xs text-muted-foreground">{trait.category}</div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
                       {/* Work Rates */}
                       {(player as any).workRates && (
                         <div className="space-y-2 pt-4 border-t">
@@ -565,29 +504,64 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                         </div>
                       )}
 
-                      {/* Traits */}
-                      {player.traits && Array.isArray((player as any).traits) && (player as any).traits.length > 0 && (
-                        <div className="space-y-2 pt-4 border-t">
+                      {/* Đặc Điểm */}
+                      {((player as any).skillMoves?.skillMoves || (player as any).celebration?.celebrationIconUrl || traitsData.length > 0) && (
+                        <div className="space-y-4 pt-4 border-t">
                           <h3 className="text-sm font-semibold text-muted-foreground">Đặc Điểm</h3>
-                          <div className="flex flex-wrap gap-2">
-                            {((player as any).traits || []).map((trait: any, idx: number) => (
-                              <Badge key={idx} variant="outline">
-                                {trait.title || trait.label || trait.name}
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                      )}
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            {/* Skill Moves */}
+                            {(player as any).skillMoves?.skillMoves && (
+                              <div className="flex flex-col items-center gap-2 p-4 bg-card rounded-lg border hover:border-primary/50 transition-colors">
+                                <div className="w-16 h-16 flex items-center justify-center">
+                                  <img 
+                                    src={(player as any).skillMoves.skillMoves} 
+                                    alt="Skill Move"
+                                    className="w-full h-full object-contain"
+                                  />
+                                </div>
+                                <div className="text-center">
+                                  <div className="text-sm font-semibold">
+                                    {(player as any).skillMoves?.skillMovesName || 'Skill Move'}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground">Động Tác Kỹ Thuật</div>
+                                </div>
+                              </div>
+                            )}
 
-                      {/* Skills */}
-                      {player.skillMoves && Array.isArray((player as any).skillMoves) && (player as any).skillMoves.length > 0 && (
-                        <div className="space-y-2 pt-4 border-t">
-                          <h3 className="text-sm font-semibold text-muted-foreground">Động Tác Kỹ Thuật</h3>
-                          <div className="flex flex-wrap gap-2">
-                            {((player as any).skillMoves || []).map((skill: any, idx: number) => (
-                              <Badge key={idx} variant="secondary">
-                                {skill.label || skill.name}
-                              </Badge>
+                            {/* Celebration */}
+                            {(player as any).celebration?.celebrationIconUrl && (
+                              <div className="flex flex-col items-center gap-2 p-4 bg-card rounded-lg border hover:border-primary/50 transition-colors">
+                                <div className="w-16 h-16 flex items-center justify-center">
+                                  <img 
+                                    src={(player as any).celebration.celebrationIconUrl} 
+                                    alt="Celebration"
+                                    className="w-full h-full object-contain"
+                                  />
+                                </div>
+                                <div className="text-center">
+                                  <div className="text-sm font-semibold">
+                                    {(player as any).celebration?.celebrationName || 'Celebration'}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground">Ăn Mừng</div>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Traits */}
+                            {traitsData.map((trait, idx) => (
+                              <div key={idx} className="flex flex-col items-center gap-2 p-4 bg-card rounded-lg border hover:border-primary/50 transition-colors">
+                                <div className="w-16 h-16 flex items-center justify-center">
+                                  <img 
+                                    src={trait.image} 
+                                    alt={trait.name}
+                                    className="w-full h-full object-contain"
+                                  />
+                                </div>
+                                <div className="text-center">
+                                  <div className="text-sm font-semibold">{trait.name}</div>
+                                  <div className="text-xs text-muted-foreground">{trait.category}</div>
+                                </div>
+                              </div>
                             ))}
                           </div>
                         </div>
