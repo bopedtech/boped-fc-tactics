@@ -20,3 +20,9 @@ verify_jwt = false
 
 [functions.sync-renderz-programs]
 verify_jwt = false
+
+[functions.sync-renderz-celebrations]
+verify_jwt = false
+
+[functions.sync-renderz-skillMoves]
+verify_jwt = false

@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      celebrations: {
+        Row: {
+          createdAt: string | null
+          displayDescription: string | null
+          displayName: string
+          id: number
+          localizationKeyDescription: string | null
+          localizationKeyName: string
+          mediaUrl: string | null
+          rawData: Json
+          updatedAt: string | null
+        }
+        Insert: {
+          createdAt?: string | null
+          displayDescription?: string | null
+          displayName: string
+          id: number
+          localizationKeyDescription?: string | null
+          localizationKeyName: string
+          mediaUrl?: string | null
+          rawData: Json
+          updatedAt?: string | null
+        }
+        Update: {
+          createdAt?: string | null
+          displayDescription?: string | null
+          displayName?: string
+          id?: number
+          localizationKeyDescription?: string | null
+          localizationKeyName?: string
+          mediaUrl?: string | null
+          rawData?: Json
+          updatedAt?: string | null
+        }
+        Relationships: []
+      }
       formations: {
         Row: {
           category: string
@@ -312,6 +348,45 @@ export type Database = {
           image?: string | null
           localizationKey?: string
           rawData?: Json
+          updatedAt?: string | null
+        }
+        Relationships: []
+      }
+      skillmoves: {
+        Row: {
+          createdAt: string | null
+          displayDescription: string | null
+          displayName: string
+          id: number
+          localizationKeyDescription: string | null
+          localizationKeyName: string
+          mediaUrl: string | null
+          rawData: Json
+          stars: number | null
+          updatedAt: string | null
+        }
+        Insert: {
+          createdAt?: string | null
+          displayDescription?: string | null
+          displayName: string
+          id: number
+          localizationKeyDescription?: string | null
+          localizationKeyName: string
+          mediaUrl?: string | null
+          rawData: Json
+          stars?: number | null
+          updatedAt?: string | null
+        }
+        Update: {
+          createdAt?: string | null
+          displayDescription?: string | null
+          displayName?: string
+          id?: number
+          localizationKeyDescription?: string | null
+          localizationKeyName?: string
+          mediaUrl?: string | null
+          rawData?: Json
+          stars?: number | null
           updatedAt?: string | null
         }
         Relationships: []
