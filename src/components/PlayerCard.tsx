@@ -143,7 +143,7 @@ export default function PlayerCard({ player, onClick, variant = 'list' }: Player
           </div>
 
           {/* Bottom Section: Name + Icons - Close to player image */}
-          <div className={`absolute left-0 right-0 z-10 px-3 ${variant === 'detail' ? 'bottom-16' : 'bottom-12'}`}>
+          <div className={`absolute left-0 right-0 z-10 px-3 ${variant === 'detail' ? 'bottom-[68px]' : 'bottom-12'}`}>
             {/* Player Name */}
             <div className="text-center mb-2 mt-8">
               <h3 className={`font-black ${variant === 'detail' ? 'text-2xl' : 'text-xl'} leading-none text-white drop-shadow-[0_3px_6px_rgba(0,0,0,1)] uppercase tracking-wider`}>
