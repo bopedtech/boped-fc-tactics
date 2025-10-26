@@ -105,7 +105,7 @@ export default function AIAdvisor({ onClose, squadData }: AIAdvisorProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-background/95 backdrop-blur-sm z-50 overflow-y-auto">
+    <div className="fixed inset-0 bg-background/95 backdrop-blur-sm z-50 overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent hover:scrollbar-thumb-primary/40">
       <div className="container max-w-6xl mx-auto py-8 px-4">
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">

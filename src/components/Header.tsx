@@ -85,7 +85,7 @@ export default function Header() {
                 isActive("/database") ? "text-primary font-semibold" : "text-foreground/80"
               )}
             >
-              Cơ sở dữ liệu
+              Danh sách cầu thủ
             </Link>
             <Link
               to="/builder"

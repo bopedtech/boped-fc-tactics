@@ -5,9 +5,8 @@ import Header from "@/components/Header";
 import PlayerCard from "@/components/PlayerCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Filter, X, RefreshCw, Loader2 } from "lucide-react";
+import { Search, Filter, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { Card } from "@/components/ui/card";
 import PlayerFilters from "@/components/PlayerFilters";
 import { usePlayerFilters } from "@/hooks/usePlayerFilters";
 import PlayerDetailDialog from "@/components/PlayerDetailDialog";
@@ -71,12 +70,9 @@ export default function Database() {
   const queryClient = useQueryClient();
   const [searchName, setSearchName] = useState("");
   const [showFilters, setShowFilters] = useState(true);
-  const [syncing, setSyncing] = useState(false);
-  const [syncStatus, setSyncStatus] = useState<string>("");
   const [countriesData, setCountriesData] = useState<any[]>([]);
   const [teamsData, setTeamsData] = useState<Array<{ id: number; displayName: string; image?: string }>>([]);
   const [leaguesData, setLeaguesData] = useState<Array<{ id: number; displayName: string; image?: string }>>([]);
-  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [selectedPlayerAssetId, setSelectedPlayerAssetId] = useState<number | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -92,28 +88,7 @@ export default function Database() {
     fetchCountries();
     fetchTeams();
     fetchLeagues();
-    checkSuperAdminRole();
   }, []);
-
-  const checkSuperAdminRole = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data, error } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id)
-        .eq("role", "super_admin")
-        .single();
-
-      if (data && !error) {
-        setIsSuperAdmin(true);
-      }
-    } catch (error) {
-      console.error("Error checking super admin role:", error);
-    }
-  };
 
   const fetchCountries = async () => {
     try {
@@ -277,31 +252,6 @@ export default function Database() {
   const allPlayers = data?.pages.flatMap(page => page.players) || [];
   const totalCount = data?.pages[0]?.totalCount || 0;
 
-  const handleSync = async (mode: 'test' | 'full', maxPages: number = 2) => {
-    try {
-      setSyncing(true);
-      setSyncStatus(`Đang đồng bộ dữ liệu (${mode === 'test' ? 'Test' : 'Full'})...`);
-      
-      const { data, error } = await supabase.functions.invoke('sync-players', {
-        body: { mode, maxPages }
-      });
-
-      if (error) throw error;
-
-      setSyncStatus(data.message || 'Đồng bộ hoàn tất!');
-      toast.success(`Đã đồng bộ ${data.totalPlayers} cầu thủ`);
-      
-      // Refresh the player list
-      queryClient.invalidateQueries({ queryKey: ["players"] });
-    } catch (error: any) {
-      console.error('Sync error:', error);
-      setSyncStatus('Lỗi khi đồng bộ dữ liệu');
-      toast.error('Không thể đồng bộ dữ liệu cầu thủ');
-    } finally {
-      setSyncing(false);
-    }
-  };
-
   return (
     <div className="min-h-screen">
       <Header />
@@ -309,57 +259,12 @@ export default function Database() {
       <div className="container mx-auto py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold gradient-primary bg-clip-text text-transparent mb-2">
-            Cơ sở dữ liệu cầu thủ FC Mobile
+            Danh sách cầu thủ FC Mobile
           </h1>
           <p className="text-muted-foreground">
             Khám phá và tìm kiếm cầu thủ cho đội hình FC Mobile của bạn
           </p>
         </div>
-
-        {/* Sync Controls - Only for Super Admin */}
-        {isSuperAdmin && (
-          <Card className="p-6 mb-6">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-              <div>
-                <h3 className="text-lg font-semibold mb-1">Đồng bộ dữ liệu</h3>
-                <p className="text-sm text-muted-foreground">
-                  Cập nhật cơ sở dữ liệu cầu thủ từ FIFA Renderz
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  onClick={() => handleSync('test', 2)}
-                  disabled={syncing}
-                  variant="outline"
-                >
-                  {syncing ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                  )}
-                  Test (2 trang)
-                </Button>
-                <Button
-                  onClick={() => handleSync('full', 100)}
-                  disabled={syncing}
-                  className="gradient-primary"
-                >
-                  {syncing ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                  )}
-                  Full Sync
-                </Button>
-              </div>
-            </div>
-            {syncStatus && (
-              <div className="mt-4 p-3 bg-muted rounded-md">
-                <p className="text-sm">{syncStatus}</p>
-              </div>
-            )}
-          </Card>
-        )}
 
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Sidebar Filters */}
