@@ -199,7 +199,7 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
     return null;
   }
 
-  const playerName = player?.commonName || player?.cardName || `${player?.firstName} ${player?.lastName}`;
+  const playerName = player?.cardName || (player?.firstName && player?.lastName ? `${player?.firstName} ${player?.lastName}` : player?.commonName);
   const imageUrl = (player?.images as any)?.playerCardImage || (player?.images as any)?.portrait || (player?.images as any)?.card || "/placeholder.svg";
   const isGK = player?.position === "GK";
   
