@@ -247,7 +247,7 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-6xl max-h-[90vh] flex flex-col">
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="h-8 w-8 animate-spin" />
@@ -275,7 +275,7 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                       <TabsTrigger value="info">Thông Tin</TabsTrigger>
                     </TabsList>
 
-                    <TabsContent value="stats" className="space-y-6 mt-6">
+                    <TabsContent value="stats" className="space-y-6 mt-6 overflow-y-auto max-h-[60vh] pr-2">
                       {!isGK && Object.entries(mainStats).map(([mainKey, mainValue]) => {
                         const detailedStats = detailedStatMapping[mainKey] || [];
                         
@@ -313,7 +313,7 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                       )}
                     </TabsContent>
 
-                    <TabsContent value="info" className="space-y-6 mt-6">
+                    <TabsContent value="info" className="space-y-6 mt-6 overflow-y-auto max-h-[60vh] pr-2">
                       {/* Player Details Card */}
                       <Card className="p-6 bg-muted/20">
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
