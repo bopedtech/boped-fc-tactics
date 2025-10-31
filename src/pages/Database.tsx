@@ -133,6 +133,7 @@ export default function Database() {
     let query = supabase
       .from("players")
       .select("*", { count: "exact" })
+      .eq("is_visible", true) // Only show visible players to users
       .order("rating", { ascending: false })
       .order("assetId", { ascending: false });
 

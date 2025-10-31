@@ -7,44 +7,71 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Search, Trash2, Edit, Eye, Loader2, Users } from "lucide-react";
+import { Search, Trash2, Edit, Eye, Loader2, Users, EyeOff } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Switch } from "@/components/ui/switch";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function PlayersManagement() {
   const [players, setPlayers] = useState<any[]>([]);
   const [filteredPlayers, setFilteredPlayers] = useState<any[]>([]);
+  const [nationMap, setNationMap] = useState<Map<number, any>>(new Map());
+  const [clubMap, setClubMap] = useState<Map<number, any>>(new Map());
+  const [programMap, setProgramMap] = useState<Map<string, any>>(new Map());
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [positionFilter, setPositionFilter] = useState("all");
   const [ratingFilter, setRatingFilter] = useState("all");
+  const [visibilityFilter, setVisibilityFilter] = useState("all");
   const [selectedPlayer, setSelectedPlayer] = useState<any>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [playerToDelete, setPlayerToDelete] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [updatingVisibility, setUpdatingVisibility] = useState<Set<number>>(new Set());
   const playersPerPage = 20;
 
   useEffect(() => {
-    fetchPlayers();
+    fetchData();
   }, []);
 
   useEffect(() => {
     filterPlayers();
-  }, [searchQuery, positionFilter, ratingFilter, players]);
+  }, [searchQuery, positionFilter, ratingFilter, visibilityFilter, players]);
 
-  const fetchPlayers = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from("players")
-        .select("*")
-        .order("rating", { ascending: false })
-        .limit(500);
+      
+      // Fetch all data in parallel
+      const [playersRes, nationsRes, clubsRes, programsRes] = await Promise.all([
+        supabase.from("players").select("*").order("rating", { ascending: false }).limit(500),
+        supabase.from("nations").select("*"),
+        supabase.from("teams").select("*"),
+        supabase.from("programs").select("*"),
+      ]);
 
-      if (error) throw error;
-      setPlayers(data || []);
+      if (playersRes.error) throw playersRes.error;
+      if (nationsRes.error) throw nationsRes.error;
+      if (clubsRes.error) throw clubsRes.error;
+      if (programsRes.error) throw programsRes.error;
+
+      // Create maps for quick lookup
+      const nMap = new Map();
+      (nationsRes.data || []).forEach((n: any) => nMap.set(n.id, n));
+      setNationMap(nMap);
+
+      const cMap = new Map();
+      (clubsRes.data || []).forEach((c: any) => cMap.set(c.id, c));
+      setClubMap(cMap);
+
+      const pMap = new Map();
+      (programsRes.data || []).forEach((p: any) => pMap.set(p.id, p));
+      setProgramMap(pMap);
+
+      setPlayers(playersRes.data || []);
     } catch (error) {
-      console.error("Error fetching players:", error);
+      console.error("Error fetching data:", error);
       toast.error("Không thể tải danh sách cầu thủ");
     } finally {
       setLoading(false);
@@ -78,8 +105,50 @@ export default function PlayersManagement() {
       filtered = filtered.filter((p) => p.rating >= minRating && p.rating <= maxRating);
     }
 
+    // Visibility filter
+    if (visibilityFilter !== "all") {
+      const isVisible = visibilityFilter === "visible";
+      filtered = filtered.filter((p) => p.is_visible === isVisible);
+    }
+
     setFilteredPlayers(filtered);
     setCurrentPage(1);
+  };
+
+  const handleToggleVisibility = async (player: any) => {
+    const assetId = player.assetId;
+    setUpdatingVisibility((prev) => new Set(prev).add(assetId));
+
+    try {
+      const newVisibility = !player.is_visible;
+      
+      const { error } = await supabase
+        .from("players")
+        .update({ is_visible: newVisibility })
+        .eq("assetId", assetId);
+
+      if (error) throw error;
+
+      // Update local state
+      setPlayers((prev) =>
+        prev.map((p) =>
+          p.assetId === assetId ? { ...p, is_visible: newVisibility } : p
+        )
+      );
+
+      toast.success(
+        newVisibility ? "Đã hiển thị cầu thủ" : "Đã ẩn cầu thủ"
+      );
+    } catch (error) {
+      console.error("Error toggling visibility:", error);
+      toast.error("Không thể cập nhật trạng thái hiển thị");
+    } finally {
+      setUpdatingVisibility((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(assetId);
+        return newSet;
+      });
+    }
   };
 
   const handleDelete = async () => {
@@ -101,6 +170,22 @@ export default function PlayersManagement() {
       console.error("Error deleting player:", error);
       toast.error("Không thể xóa cầu thủ");
     }
+  };
+
+  const getNationInfo = (player: any) => {
+    const nationId = (player.nation as any)?.id;
+    return nationId ? nationMap.get(nationId) : null;
+  };
+
+  const getClubInfo = (player: any) => {
+    const clubId = (player.club as any)?.id;
+    return clubId ? clubMap.get(clubId) : null;
+  };
+
+  const getProgramInfo = (player: any) => {
+    // Programs can be string ID or object with id
+    const programId = typeof player.source === 'string' ? player.source : (player.source as any)?.id;
+    return programId ? programMap.get(programId) : null;
   };
 
   const positions = ["GK", "CB", "LB", "RB", "CDM", "CM", "CAM", "LW", "RW", "ST", "CF"];
@@ -207,10 +292,21 @@ export default function PlayersManagement() {
                 ))}
               </SelectContent>
             </Select>
+            <Select value={visibilityFilter} onValueChange={setVisibilityFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Hiển thị" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tất cả</SelectItem>
+                <SelectItem value="visible">Đang hiện</SelectItem>
+                <SelectItem value="hidden">Đang ẩn</SelectItem>
+              </SelectContent>
+            </Select>
             <Button variant="outline" onClick={() => {
               setSearchQuery("");
               setPositionFilter("all");
               setRatingFilter("all");
+              setVisibilityFilter("all");
             }}>
               Xóa lọc
             </Button>
@@ -243,59 +339,121 @@ export default function PlayersManagement() {
                       <TableHead>Rating</TableHead>
                       <TableHead>Quốc gia</TableHead>
                       <TableHead>CLB</TableHead>
+                      <TableHead>Program</TableHead>
+                      <TableHead>Hiển thị</TableHead>
                       <TableHead className="text-right">Thao tác</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {currentPlayers.map((player) => (
-                      <TableRow key={player.assetId}>
-                        <TableCell className="font-mono text-xs">{player.assetId}</TableCell>
-                        <TableCell className="font-medium">{getPlayerName(player)}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{player.position}</Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={
-                              player.rating >= 90
-                                ? "default"
-                                : player.rating >= 80
-                                ? "secondary"
-                                : "outline"
-                            }
-                          >
-                            {player.rating}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          {(player.nation as any)?.id || "-"}
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          {(player.club as any)?.id || "-"}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => setSelectedPlayer(player)}
+                    {currentPlayers.map((player) => {
+                      const nation = getNationInfo(player);
+                      const club = getClubInfo(player);
+                      const program = getProgramInfo(player);
+                      const isUpdating = updatingVisibility.has(player.assetId);
+
+                      return (
+                        <TableRow key={player.assetId}>
+                          <TableCell className="font-mono text-xs">{player.assetId}</TableCell>
+                          <TableCell className="font-medium">{getPlayerName(player)}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{player.position}</Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={
+                                player.rating >= 90
+                                  ? "default"
+                                  : player.rating >= 80
+                                  ? "secondary"
+                                  : "outline"
+                              }
                             >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => {
-                                setPlayerToDelete(player);
-                                setDeleteDialogOpen(true);
-                              }}
-                            >
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                              {player.rating}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {nation ? (
+                              <div className="flex items-center gap-2">
+                                {nation.image && (
+                                  <Avatar className="h-6 w-6">
+                                    <AvatarImage src={nation.image} alt={nation.displayName} />
+                                    <AvatarFallback>{nation.displayName?.[0]}</AvatarFallback>
+                                  </Avatar>
+                                )}
+                                <span className="text-sm">{nation.displayName}</span>
+                              </div>
+                            ) : (
+                              <span className="text-sm text-muted-foreground">-</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {club ? (
+                              <div className="flex items-center gap-2">
+                                {club.image && (
+                                  <Avatar className="h-6 w-6">
+                                    <AvatarImage src={club.image} alt={club.displayName} />
+                                    <AvatarFallback>{club.displayName?.[0]}</AvatarFallback>
+                                  </Avatar>
+                                )}
+                                <span className="text-sm">{club.displayName}</span>
+                              </div>
+                            ) : (
+                              <span className="text-sm text-muted-foreground">-</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {program ? (
+                              <div className="flex items-center gap-2">
+                                {program.image && (
+                                  <Avatar className="h-6 w-6">
+                                    <AvatarImage src={program.image} alt={program.displayName} />
+                                    <AvatarFallback>{program.displayName?.[0]}</AvatarFallback>
+                                  </Avatar>
+                                )}
+                                <span className="text-sm truncate max-w-[120px]">{program.displayName}</span>
+                              </div>
+                            ) : (
+                              <span className="text-sm text-muted-foreground">-</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Switch
+                                checked={player.is_visible ?? true}
+                                onCheckedChange={() => handleToggleVisibility(player)}
+                                disabled={isUpdating}
+                              />
+                              {player.is_visible ? (
+                                <Eye className="h-4 w-4 text-green-500" />
+                              ) : (
+                                <EyeOff className="h-4 w-4 text-muted-foreground" />
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => setSelectedPlayer(player)}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => {
+                                  setPlayerToDelete(player);
+                                  setDeleteDialogOpen(true);
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </div>

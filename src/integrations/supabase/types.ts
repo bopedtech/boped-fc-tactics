@@ -179,6 +179,7 @@ export type Database = {
           height: number | null
           id: number | null
           images: Json | null
+          is_visible: boolean | null
           isCard: boolean | null
           isSold: boolean | null
           lastName: string | null
@@ -230,6 +231,7 @@ export type Database = {
           height?: number | null
           id?: number | null
           images?: Json | null
+          is_visible?: boolean | null
           isCard?: boolean | null
           isSold?: boolean | null
           lastName?: string | null
@@ -281,6 +283,7 @@ export type Database = {
           height?: number | null
           id?: number | null
           images?: Json | null
+          is_visible?: boolean | null
           isCard?: boolean | null
           isSold?: boolean | null
           lastName?: string | null
