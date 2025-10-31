@@ -330,9 +330,10 @@ export default function PlayersManagement() {
             </div>
           ) : (
             <>
-              <ScrollArea className="h-[600px]">
-                <div className="rounded-md border">
-                  <Table>
+              <div className="rounded-md border">
+                <ScrollArea className="h-[600px] w-full">
+                  <div className="min-w-[1200px]">
+                    <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>ID</TableHead>
@@ -456,10 +457,11 @@ export default function PlayersManagement() {
                         </TableRow>
                       );
                     })}
-                  </TableBody>
-                </Table>
-              </div>
-            </ScrollArea>
+                    </TableBody>
+                  </Table>
+                </div>
+              </ScrollArea>
+            </div>
 
               {/* Pagination */}
               {totalPages > 1 && (
