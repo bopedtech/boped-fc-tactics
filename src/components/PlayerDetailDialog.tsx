@@ -469,7 +469,7 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                                 />
                                 <FootIcon 
                                   isLeft={false} 
-                                  className="w-10 h-12"
+                                  className="w-8 h-10"
                                   fill={player.foot === 1 ? "#8CC63F" : "#4a4f56"}
                                   rating={player.foot === 1 ? 5 : player.weakFoot}
                                 />
