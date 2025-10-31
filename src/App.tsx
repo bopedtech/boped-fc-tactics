@@ -13,6 +13,10 @@ import AdminLayout from "./pages/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/Dashboard";
 import SyncData from "./pages/admin/SyncData";
 import AdminSettings from "./pages/admin/Settings";
+import PlayersManagement from "./pages/admin/PlayersManagement";
+import LeaguesManagement from "./pages/admin/LeaguesManagement";
+import UsersManagement from "./pages/admin/UsersManagement";
+import LogsActivity from "./pages/admin/LogsActivity";
 
 const queryClient = new QueryClient();
 
@@ -32,12 +36,12 @@ const App = () => (
         {/* Admin Routes with Sidebar Layout */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />
+          <Route path="players" element={<PlayersManagement />} />
           <Route path="sync" element={<SyncData />} />
+          <Route path="leagues" element={<LeaguesManagement />} />
+          <Route path="users" element={<UsersManagement />} />
+          <Route path="logs" element={<LogsActivity />} />
           <Route path="settings" element={<AdminSettings />} />
-          <Route path="players" element={<div className="text-2xl font-bold">Quản Lý Cầu Thủ (Coming Soon)</div>} />
-          <Route path="leagues" element={<div className="text-2xl font-bold">Giải Đấu & CLB (Coming Soon)</div>} />
-          <Route path="users" element={<div className="text-2xl font-bold">Quản Lý Users (Coming Soon)</div>} />
-          <Route path="logs" element={<div className="text-2xl font-bold">Logs & Hoạt Động (Coming Soon)</div>} />
         </Route>
         
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
