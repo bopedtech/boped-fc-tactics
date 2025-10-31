@@ -477,21 +477,6 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                             </div>
                           )}
                           
-                          {/* Weak Foot */}
-                          {player.weakFoot && (
-                            <div className="space-y-1">
-                              <h3 className="text-xs font-semibold text-muted-foreground uppercase">Chân Phụ</h3>
-                              <div className="flex items-center gap-1">
-                                <span className="text-2xl font-bold">{player.weakFoot}</span>
-                                <div className="flex">
-                                  {Array.from({ length: 5 }).map((_, i) => (
-                                    <span key={i} className={`text-lg ${i < player.weakFoot ? 'text-primary' : 'text-muted-foreground/30'}`}>★</span>
-                                  ))}
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                          
                           {/* Skill Moves */}
                           {player.skillMovesLevel && (
                             <div className="space-y-1">
