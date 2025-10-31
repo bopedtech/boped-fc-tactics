@@ -209,8 +209,8 @@ export default function PlayersManagement() {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
+    <div className="h-[calc(100vh-8rem)] flex flex-col space-y-4 overflow-hidden">
+      <div className="shrink-0">
         <h1 className="text-4xl font-bold mb-2">Quản Lý Cầu Thủ</h1>
         <p className="text-muted-foreground">
           Quản lý và chỉnh sửa thông tin cầu thủ trong database
@@ -218,7 +218,7 @@ export default function PlayersManagement() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 shrink-0">
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium">Tổng Cầu Thủ</CardTitle>
@@ -250,12 +250,12 @@ export default function PlayersManagement() {
       </div>
 
       {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Bộ Lọc & Tìm Kiếm</CardTitle>
+      <Card className="shrink-0">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg">Bộ Lọc & Tìm Kiếm</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-col md:flex-row gap-4">
+        <CardContent>
+          <div className="flex flex-col md:flex-row gap-3">
             <div className="flex-1">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -268,7 +268,7 @@ export default function PlayersManagement() {
               </div>
             </div>
             <Select value={positionFilter} onValueChange={setPositionFilter}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-[140px]">
                 <SelectValue placeholder="Vị trí" />
               </SelectTrigger>
               <SelectContent>
@@ -281,7 +281,7 @@ export default function PlayersManagement() {
               </SelectContent>
             </Select>
             <Select value={ratingFilter} onValueChange={setRatingFilter}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-[140px]">
                 <SelectValue placeholder="Rating" />
               </SelectTrigger>
               <SelectContent>
@@ -294,7 +294,7 @@ export default function PlayersManagement() {
               </SelectContent>
             </Select>
             <Select value={visibilityFilter} onValueChange={setVisibilityFilter}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-[140px]">
                 <SelectValue placeholder="Hiển thị" />
               </SelectTrigger>
               <SelectContent>
@@ -316,34 +316,33 @@ export default function PlayersManagement() {
       </Card>
 
       {/* Players Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Danh Sách Cầu Thủ</CardTitle>
+      <Card className="flex-1 flex flex-col min-h-0">
+        <CardHeader className="pb-3 shrink-0">
+          <CardTitle className="text-lg">Danh Sách Cầu Thủ</CardTitle>
           <CardDescription>
             Hiển thị {currentPlayers.length} / {filteredPlayers.length} cầu thủ
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex-1 min-h-0 pb-4">
           {loading ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-8 w-8 animate-spin" />
             </div>
           ) : (
-            <>
-              <ScrollArea className="h-[600px] w-full rounded-md border">
-                <div className="min-w-[1200px]">
-                  <Table>
-                  <TableHeader>
+            <ScrollArea className="h-full w-full rounded-md border">
+              <div className="min-w-[1200px]">
+                <Table>
+                  <TableHeader className="sticky top-0 bg-background z-10">
                     <TableRow>
-                      <TableHead>ID</TableHead>
-                      <TableHead>Tên</TableHead>
-                      <TableHead>Vị trí</TableHead>
-                      <TableHead>Rating</TableHead>
-                      <TableHead>Quốc gia</TableHead>
-                      <TableHead>CLB</TableHead>
-                      <TableHead>Program</TableHead>
-                      <TableHead>Hiển thị</TableHead>
-                      <TableHead className="text-right">Thao tác</TableHead>
+                      <TableHead className="w-[100px]">ID</TableHead>
+                      <TableHead className="w-[200px]">Tên</TableHead>
+                      <TableHead className="w-[80px]">Vị trí</TableHead>
+                      <TableHead className="w-[80px]">Rating</TableHead>
+                      <TableHead className="w-[180px]">Quốc gia</TableHead>
+                      <TableHead className="w-[180px]">CLB</TableHead>
+                      <TableHead className="w-[180px]">Program</TableHead>
+                      <TableHead className="w-[100px]">Hiển thị</TableHead>
+                      <TableHead className="text-right w-[150px]">Thao tác</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -456,41 +455,38 @@ export default function PlayersManagement() {
                         </TableRow>
                       );
                     })}
-                    </TableBody>
-                  </Table>
-                </div>
-              </ScrollArea>
-
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="flex items-center justify-between mt-4">
-                  <div className="text-sm text-muted-foreground">
-                    Trang {currentPage} / {totalPages}
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                      disabled={currentPage === 1}
-                    >
-                      Trước
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                      disabled={currentPage === totalPages}
-                    >
-                      Sau
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </>
+                  </TableBody>
+                </Table>
+              </div>
+            </ScrollArea>
           )}
         </CardContent>
       </Card>
+
+      {/* Pagination */}
+      <div className="flex items-center justify-between shrink-0">
+        <p className="text-sm text-muted-foreground">
+          Trang {currentPage} / {totalPages}
+        </p>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+          >
+            Trước
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+          >
+            Sau
+          </Button>
+        </div>
+      </div>
 
       {/* View Player Dialog */}
       <PlayerDetailDialog 
