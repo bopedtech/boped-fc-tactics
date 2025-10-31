@@ -81,7 +81,7 @@ export default function PlayerCard({ player, onClick, variant = 'list' }: Player
   // Map avgStats to Vietnamese stat labels
   const statLabels = isGK 
     ? ["ĐỖ NGƯƠI", "CHỌN VỊ TRÍ", "XỬ LÝ", "PHẢN XẠ", "PHÁT BÓNG", "THỂ LỰC"]
-    : ["TỐC ĐỘ", "SÚT", "CHUYỀN", "RÊ DẮT", "THỦ", "THỂ LỰC"];
+    : ["TỐC ĐỘ", "SÚT", "CHUYỀN", "RÊ DẮT", "PHÒNG NGỰ", "THỂ LỰC"];
   
   const statsToShow = isGK ? avgGkStats : avgStats;
 
