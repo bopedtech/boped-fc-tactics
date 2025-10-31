@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Loader2, X } from "lucide-react";
 import PlayerCard from "@/components/PlayerCard";
+import { FootIcon } from "@/components/FootIcon";
 
 interface PlayerStats {
   pace?: number;
@@ -452,6 +453,25 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                             <div className="space-y-1">
                               <h3 className="text-xs font-semibold text-muted-foreground uppercase">Cân Nặng</h3>
                               <div className="text-2xl font-bold">{player.weight} <span className="text-sm text-muted-foreground">kg</span></div>
+                            </div>
+                          )}
+                          
+                          {/* Preferred Foot */}
+                          {player.foot && (
+                            <div className="space-y-1">
+                              <h3 className="text-xs font-semibold text-muted-foreground uppercase">Chân Thuận</h3>
+                              <div className="flex items-center gap-2">
+                                <FootIcon 
+                                  isLeft={true} 
+                                  className="w-8 h-8"
+                                  fill={player.foot === 2 ? "hsl(120, 70%, 45%)" : "hsl(var(--muted-foreground) / 0.3)"}
+                                />
+                                <FootIcon 
+                                  isLeft={false} 
+                                  className="w-8 h-8"
+                                  fill={player.foot === 1 ? "hsl(120, 70%, 45%)" : "hsl(var(--muted-foreground) / 0.3)"}
+                                />
+                              </div>
                             </div>
                           )}
                           
