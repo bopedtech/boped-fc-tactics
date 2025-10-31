@@ -57,24 +57,25 @@ export default function AdminLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <>
       <Header />
-      
       <SidebarProvider defaultOpen={true}>
-        <AdminSidebar />
-        <SidebarInset className="flex-1">
-          <div className="sticky top-0 z-10 flex h-14 items-center border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4">
-            <SidebarTrigger />
-            <div className="ml-4 flex-1">
-              <h2 className="text-lg font-semibold">Quản Trị Hệ Thống</h2>
+        <div className="flex w-full min-h-[calc(100vh-4rem)]">
+          <AdminSidebar />
+          <SidebarInset className="flex-1 flex flex-col">
+            <div className="sticky top-0 z-10 flex h-14 items-center border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4">
+              <SidebarTrigger />
+              <div className="ml-4 flex-1">
+                <h2 className="text-lg font-semibold">Quản Trị Hệ Thống</h2>
+              </div>
             </div>
-          </div>
-          
-          <main className="flex-1 p-6 overflow-auto">
-            <Outlet />
-          </main>
-        </SidebarInset>
+            
+            <main className="flex-1 p-6 overflow-auto">
+              <Outlet />
+            </main>
+          </SidebarInset>
+        </div>
       </SidebarProvider>
-    </div>
+    </>
   );
 }
