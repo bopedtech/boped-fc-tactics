@@ -361,40 +361,76 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                       <TabsTrigger value="stats">Chỉ Số</TabsTrigger>
                     </TabsList>
 
-                    <TabsContent value="stats" className="space-y-6 mt-6 overflow-y-auto max-h-[60vh] pr-2 scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent hover:scrollbar-thumb-primary/40">
-                      {!isGK && Object.entries(mainStats).map(([mainKey, mainValue]) => {
-                        const detailedStats = detailedStatMapping[mainKey] || [];
-                        
-                        return (
-                          <div key={mainKey} className="space-y-3">
-                            <div className="flex items-center justify-between pb-2 border-b">
-                              <h3 className="text-lg font-semibold">{statLabels[mainKey]}</h3>
-                              <span className="text-2xl font-bold text-primary">{mainValue || 0}</span>
-                            </div>
+                    <TabsContent value="stats" className="mt-6 overflow-y-auto max-h-[60vh] pr-2 scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent hover:scrollbar-thumb-primary/40">
+                      {!isGK && (
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                          {Object.entries(mainStats).map(([mainKey, mainValue]) => {
+                            const detailedStats = detailedStatMapping[mainKey] || [];
+                            const getStatColor = (value: number) => {
+                              if (value >= 80) return 'hsl(120, 70%, 45%)';
+                              if (value >= 70) return 'hsl(90, 70%, 45%)';
+                              if (value >= 60) return 'hsl(60, 70%, 45%)';
+                              if (value >= 50) return 'hsl(30, 70%, 45%)';
+                              return 'hsl(0, 70%, 45%)';
+                            };
                             
-                            <div className="grid grid-cols-2 gap-3">
-                              {detailedStats.map((statKey) => {
-                                const value = playerStats?.[statKey];
-                                return (
-                                  <div key={statKey} className="flex items-center justify-between p-2 bg-muted/30 rounded">
-                                    <span className="text-sm text-muted-foreground">{statLabels[statKey] || statKey}</span>
-                                    <span className="font-semibold">{value || 0}</span>
+                            return (
+                              <div key={mainKey} className="flex flex-col space-y-3 p-4 bg-muted/20 rounded-lg">
+                                <div className="text-center space-y-2 pb-3 border-b border-border/40">
+                                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">{statLabels[mainKey]}</h3>
+                                  <div 
+                                    className="text-4xl font-bold"
+                                    style={{ color: getStatColor(mainValue as number) }}
+                                  >
+                                    {mainValue || 0}
                                   </div>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        );
-                      })}
+                                </div>
+                                
+                                <div className="space-y-2">
+                                  {detailedStats.map((statKey) => {
+                                    const value = playerStats?.[statKey] || 0;
+                                    return (
+                                      <div key={statKey} className="flex items-center justify-between text-sm">
+                                        <span className="text-muted-foreground">{statLabels[statKey] || statKey}</span>
+                                        <span 
+                                          className="font-semibold"
+                                          style={{ color: getStatColor(value) }}
+                                        >
+                                          {value}
+                                        </span>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
                       
                       {isGK && (
-                        <div className="space-y-3">
-                          {Object.entries(mainStats).map(([key, value]) => (
-                            <div key={key} className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
-                              <span className="text-base font-medium">{statLabels[key]}</span>
-                              <span className="text-2xl font-bold text-primary">{value || 0}</span>
-                            </div>
-                          ))}
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                          {Object.entries(mainStats).map(([key, value]) => {
+                            const getStatColor = (val: number) => {
+                              if (val >= 80) return 'hsl(120, 70%, 45%)';
+                              if (val >= 70) return 'hsl(90, 70%, 45%)';
+                              if (val >= 60) return 'hsl(60, 70%, 45%)';
+                              if (val >= 50) return 'hsl(30, 70%, 45%)';
+                              return 'hsl(0, 70%, 45%)';
+                            };
+                            
+                            return (
+                              <div key={key} className="flex flex-col items-center justify-center p-4 bg-muted/20 rounded-lg space-y-2">
+                                <span className="text-sm font-semibold text-muted-foreground uppercase">{statLabels[key]}</span>
+                                <span 
+                                  className="text-3xl font-bold"
+                                  style={{ color: getStatColor(value as number) }}
+                                >
+                                  {value || 0}
+                                </span>
+                              </div>
+                            );
+                          })}
                         </div>
                       )}
                     </TabsContent>
