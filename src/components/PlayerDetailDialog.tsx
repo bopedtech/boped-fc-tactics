@@ -463,7 +463,7 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                               <div className="flex items-center gap-1">
                                 <FootIcon 
                                   isLeft={true} 
-                                  className="w-10 h-12"
+                                  className="w-8 h-10"
                                   fill={player.foot === 2 ? "#8CC63F" : "#4a4f56"}
                                   rating={player.foot === 2 ? 5 : player.weakFoot}
                                 />
