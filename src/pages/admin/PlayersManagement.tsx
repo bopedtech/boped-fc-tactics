@@ -8,10 +8,11 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Search, Trash2, Edit, Eye, Loader2, Users, EyeOff } from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import PlayerDetailDialog from "@/components/PlayerDetailDialog";
 
 export default function PlayersManagement() {
   const [players, setPlayers] = useState<any[]>([]);
@@ -329,8 +330,9 @@ export default function PlayersManagement() {
             </div>
           ) : (
             <>
-              <div className="rounded-md border">
-                <Table>
+              <ScrollArea className="h-[600px]">
+                <div className="rounded-md border">
+                  <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>ID</TableHead>
@@ -457,6 +459,7 @@ export default function PlayersManagement() {
                   </TableBody>
                 </Table>
               </div>
+            </ScrollArea>
 
               {/* Pagination */}
               {totalPages > 1 && (
@@ -490,52 +493,11 @@ export default function PlayersManagement() {
       </Card>
 
       {/* View Player Dialog */}
-      <Dialog open={!!selectedPlayer} onOpenChange={() => setSelectedPlayer(null)}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>{selectedPlayer && getPlayerName(selectedPlayer)}</DialogTitle>
-            <DialogDescription>Chi tiết thông tin cầu thủ</DialogDescription>
-          </DialogHeader>
-          {selectedPlayer && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Asset ID</p>
-                  <p className="font-mono">{selectedPlayer.assetId}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Player ID</p>
-                  <p className="font-mono">{selectedPlayer.playerId}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Vị trí</p>
-                  <p>{selectedPlayer.position}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Rating</p>
-                  <p className="text-2xl font-bold">{selectedPlayer.rating}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Chiều cao</p>
-                  <p>{selectedPlayer.height} cm</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Cân nặng</p>
-                  <p>{selectedPlayer.weight} kg</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Chân thuận</p>
-                  <p>{selectedPlayer.foot === 1 ? "Phải" : selectedPlayer.foot === 2 ? "Trái" : "N/A"}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Chân phụ</p>
-                  <p>{selectedPlayer.weakFoot} ⭐</p>
-                </div>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <PlayerDetailDialog 
+        assetId={selectedPlayer?.assetId || null}
+        open={!!selectedPlayer}
+        onOpenChange={(open) => !open && setSelectedPlayer(null)}
+      />
 
       {/* Delete Confirmation */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
