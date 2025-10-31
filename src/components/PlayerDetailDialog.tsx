@@ -363,7 +363,7 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
 
                     <TabsContent value="stats" className="mt-6 overflow-y-auto max-h-[60vh] pr-2 scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent hover:scrollbar-thumb-primary/40">
                       {!isGK && (
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                        <div className="grid grid-cols-3 gap-4">
                           {Object.entries(mainStats).map(([mainKey, mainValue]) => {
                             const detailedStats = detailedStatMapping[mainKey] || [];
                             const getStatColor = (value: number) => {
