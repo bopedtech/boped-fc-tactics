@@ -462,8 +462,8 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                               <div className="flex items-center gap-1">
                                 <span className="text-2xl font-bold">{player.weakFoot}</span>
                                 <div className="flex">
-                                  {Array.from({ length: player.weakFoot }).map((_, i) => (
-                                    <span key={i} className="text-primary text-lg">★</span>
+                                  {Array.from({ length: 5 }).map((_, i) => (
+                                    <span key={i} className={`text-lg ${i < player.weakFoot ? 'text-primary' : 'text-muted-foreground/30'}`}>★</span>
                                   ))}
                                 </div>
                               </div>
@@ -477,8 +477,8 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                               <div className="flex items-center gap-1">
                                 <span className="text-2xl font-bold">{player.skillMovesLevel}</span>
                                 <div className="flex">
-                                  {Array.from({ length: player.skillMovesLevel }).map((_, i) => (
-                                    <span key={i} className="text-primary text-lg">★</span>
+                                  {Array.from({ length: 5 }).map((_, i) => (
+                                    <span key={i} className={`text-lg ${i < player.skillMovesLevel ? 'text-primary' : 'text-muted-foreground/30'}`}>★</span>
                                   ))}
                                 </div>
                               </div>
