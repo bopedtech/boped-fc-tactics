@@ -105,15 +105,6 @@ export default function Header() {
             >
               Đội hình của tôi
             </Link>
-            <Link
-              to="/admin"
-              className={cn(
-                "transition-colors hover:text-primary",
-                isActive("/admin") ? "text-primary font-semibold" : "text-foreground/80"
-              )}
-            >
-              Quản trị
-            </Link>
           </nav>
         </div>
 
@@ -136,6 +127,13 @@ export default function Header() {
                 <DropdownMenuItem className="cursor-pointer">
                   <UserIcon className="mr-2 h-4 w-4" />
                   <span>{user.email}</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="cursor-pointer"
+                  onClick={() => navigate("/profile")}
+                >
+                  <UserIcon className="mr-2 h-4 w-4" />
+                  <span>Hồ sơ cá nhân</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   className="cursor-pointer"

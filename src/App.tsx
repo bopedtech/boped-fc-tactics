@@ -7,6 +7,7 @@ import Auth from "./pages/Auth";
 import Database from "./pages/Database";
 import Builder from "./pages/Builder";
 import MySquads from "./pages/MySquads";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import AdminLayout from "./pages/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -26,6 +27,7 @@ const App = () => (
         <Route path="/database" element={<Database />} />
         <Route path="/builder" element={<Builder />} />
         <Route path="/my-squads" element={<MySquads />} />
+        <Route path="/profile" element={<Profile />} />
         
         {/* Admin Routes with Sidebar Layout */}
         <Route path="/admin" element={<AdminLayout />}>
