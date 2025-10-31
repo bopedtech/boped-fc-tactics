@@ -460,17 +460,17 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                           {player.foot && (
                             <div className="space-y-1">
                               <h3 className="text-xs font-semibold text-muted-foreground uppercase">Chân Thuận</h3>
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-4">
                                 <FootIcon 
                                   isLeft={true} 
-                                  className="w-10 h-10"
-                                  fill={player.foot === 2 ? "hsl(120, 70%, 45%)" : "hsl(var(--muted-foreground) / 0.3)"}
+                                  className="w-16 h-20"
+                                  fill={player.foot === 2 ? "#8CC63F" : "#4a4f56"}
                                   rating={player.foot === 2 ? 5 : player.weakFoot}
                                 />
                                 <FootIcon 
                                   isLeft={false} 
-                                  className="w-10 h-10"
-                                  fill={player.foot === 1 ? "hsl(120, 70%, 45%)" : "hsl(var(--muted-foreground) / 0.3)"}
+                                  className="w-16 h-20"
+                                  fill={player.foot === 1 ? "#8CC63F" : "#4a4f56"}
                                   rating={player.foot === 1 ? 5 : player.weakFoot}
                                 />
                               </div>

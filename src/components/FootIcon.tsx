@@ -6,23 +6,39 @@ interface FootIconProps {
 }
 
 export const FootIcon = ({ isLeft = false, className = "", fill = "currentColor", rating }: FootIconProps) => {
+  const rotation = isLeft ? -10 : 10;
+  const translateX = isLeft ? 10 : 0;
+  
   return (
     <div className="relative inline-flex items-center justify-center">
       <svg 
-        viewBox="0 0 40 60" 
+        viewBox="0 0 150 220" 
         className={className}
-        style={{ transform: isLeft ? 'scaleX(-1)' : 'none' }}
+        xmlns="http://www.w3.org/2000/svg"
       >
-        <path
-          d="M20 5 Q 30 8, 32 20 Q 33 35, 30 45 Q 25 58, 20 58 Q 15 58, 10 45 Q 7 35, 8 20 Q 10 8, 20 5 Z"
-          fill={fill}
-        />
+        <defs>
+          <path 
+            id="foot-shape" 
+            d="M 50, 200 C -20, 150, 0, 40, 60, 20 C 100, 0, 140, 50, 120, 100 C 90, 150, 110, 180, 90, 210 Q 70, 220, 50, 200 Z" 
+          />
+        </defs>
+        
+        <g transform={`rotate(${rotation} 70 190) translate(${translateX} 0) ${isLeft ? '' : 'scale(-1 1) translate(-140 0)'}`}>
+          <use href="#foot-shape" fill={fill}/>
+          <text 
+            x="70" 
+            y="120" 
+            fill="white" 
+            fontSize="7rem" 
+            fontWeight="900" 
+            fontFamily="Inter, sans-serif"
+            textAnchor="middle"
+            transform={isLeft ? '' : 'scale(-1 1) translate(-140 0)'}
+          >
+            {rating}
+          </text>
+        </g>
       </svg>
-      {rating && (
-        <span className="absolute inset-0 flex items-center justify-center text-white font-bold text-lg">
-          {rating}
-        </span>
-      )}
     </div>
   );
 };
