@@ -460,7 +460,7 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                           {player.foot && (
                             <div className="space-y-1">
                               <h3 className="text-xs font-semibold text-muted-foreground uppercase">Chân Thuận</h3>
-                              <div className="flex items-center gap-1">
+                              <div className="flex items-center gap-0">
                                 <FootIcon 
                                   isLeft={true} 
                                   className="w-8 h-8"
