@@ -55,12 +55,12 @@ interface Player {
 
 const statLabels: Record<string, string> = {
   // Main stats Vietnamese
-  pace: "Tốc độ",
+  pace: "Tốc Độ",
   shooting: "Sút",
   passing: "Chuyền",
-  dribbling: "Rê dắt",
-  defense: "Phòng ngự",
-  physicality: "Thể lực",
+  dribbling: "Rê Dắt",
+  defense: "Phòng Ngự",
+  physicality: "Thể Lực",
   
   // Pace (keys from DB)
   acc: "Tăng Tốc",
@@ -375,9 +375,9 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                             };
                             
                             return (
-                              <div key={mainKey} className="flex flex-col space-y-3 p-4 bg-muted/20 rounded-lg">
+                              <div key={mainKey} className="flex flex-col space-y-3 p-3 bg-muted/20 rounded-lg min-w-0">
                                 <div className="text-center space-y-2 pb-3 border-b border-border/40">
-                                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">{statLabels[mainKey]}</h3>
+                                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide whitespace-nowrap">{statLabels[mainKey]}</h3>
                                   <div 
                                     className="text-4xl font-bold"
                                     style={{ color: getStatColor(mainValue as number) }}
@@ -390,10 +390,10 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                                   {detailedStats.map((statKey) => {
                                     const value = playerStats?.[statKey] || 0;
                                     return (
-                                      <div key={statKey} className="flex items-center justify-between text-sm">
-                                        <span className="text-muted-foreground">{statLabels[statKey] || statKey}</span>
+                                      <div key={statKey} className="flex items-center justify-between text-xs gap-2">
+                                        <span className="text-muted-foreground whitespace-nowrap">{statLabels[statKey] || statKey}</span>
                                         <span 
-                                          className="font-semibold"
+                                          className="font-semibold tabular-nums"
                                           style={{ color: getStatColor(value) }}
                                         >
                                           {value}
