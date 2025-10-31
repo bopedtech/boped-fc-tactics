@@ -463,13 +463,15 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                               <div className="flex items-center gap-2">
                                 <FootIcon 
                                   isLeft={true} 
-                                  className="w-8 h-8"
+                                  className="w-10 h-10"
                                   fill={player.foot === 2 ? "hsl(120, 70%, 45%)" : "hsl(var(--muted-foreground) / 0.3)"}
+                                  rating={player.foot === 2 ? 5 : player.weakFoot}
                                 />
                                 <FootIcon 
                                   isLeft={false} 
-                                  className="w-8 h-8"
+                                  className="w-10 h-10"
                                   fill={player.foot === 1 ? "hsl(120, 70%, 45%)" : "hsl(var(--muted-foreground) / 0.3)"}
+                                  rating={player.foot === 1 ? 5 : player.weakFoot}
                                 />
                               </div>
                             </div>
