@@ -137,9 +137,12 @@ export default function Header() {
                   <UserIcon className="mr-2 h-4 w-4" />
                   <span>{user.email}</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer">
+                <DropdownMenuItem 
+                  className="cursor-pointer"
+                  onClick={() => navigate("/admin")}
+                >
                   <Settings className="mr-2 h-4 w-4" />
-                  <span>Cài đặt</span>
+                  <span>Quản trị</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="cursor-pointer"
