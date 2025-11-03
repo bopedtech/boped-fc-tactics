@@ -333,15 +333,13 @@ export default function PlayersManagement() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                      <TableHead className="w-[100px]">ID</TableHead>
-                      <TableHead className="w-[200px]">Tên</TableHead>
-                      <TableHead className="w-[80px]">Vị trí</TableHead>
-                      <TableHead className="w-[80px]">Rating</TableHead>
-                      <TableHead className="w-[180px]">Quốc gia</TableHead>
-                      <TableHead className="w-[180px]">CLB</TableHead>
-                      <TableHead className="w-[180px]">Program</TableHead>
-                      <TableHead className="w-[100px]">Hiển thị</TableHead>
-                      <TableHead className="text-right w-[150px]">Thao tác</TableHead>
+                    <TableHead className="w-[80px]">ID</TableHead>
+                    <TableHead className="w-[280px]">Cầu Thủ</TableHead>
+                    <TableHead className="w-[200px]">Quốc gia</TableHead>
+                    <TableHead className="w-[200px]">CLB</TableHead>
+                    <TableHead className="w-[200px]">Program</TableHead>
+                    <TableHead className="w-[120px]">Hiển thị</TableHead>
+                    <TableHead className="text-right w-[120px]">Thao tác</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -354,22 +352,27 @@ export default function PlayersManagement() {
                       return (
                         <TableRow key={player.assetId}>
                           <TableCell className="font-mono text-xs">{player.assetId}</TableCell>
-                          <TableCell className="font-medium">{getPlayerName(player)}</TableCell>
                           <TableCell>
-                            <Badge variant="outline">{player.position}</Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Badge
-                              variant={
-                                player.rating >= 90
-                                  ? "default"
-                                  : player.rating >= 80
-                                  ? "secondary"
-                                  : "outline"
-                              }
-                            >
-                              {player.rating}
-                            </Badge>
+                            <div className="flex flex-col gap-1.5">
+                              <div className="font-medium text-sm">{getPlayerName(player)}</div>
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline" className="text-xs">
+                                  {player.position}
+                                </Badge>
+                                <Badge
+                                  variant={
+                                    player.rating >= 90
+                                      ? "default"
+                                      : player.rating >= 80
+                                      ? "secondary"
+                                      : "outline"
+                                  }
+                                  className="text-xs font-bold"
+                                >
+                                  {player.rating}
+                                </Badge>
+                              </div>
+                            </div>
                           </TableCell>
                           <TableCell>
                             {nation ? (
