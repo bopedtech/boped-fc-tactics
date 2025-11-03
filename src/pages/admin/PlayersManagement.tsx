@@ -30,7 +30,7 @@ export default function PlayersManagement() {
   const [playerToDelete, setPlayerToDelete] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [updatingVisibility, setUpdatingVisibility] = useState<Set<number>>(new Set());
-  const playersPerPage = 20;
+  const playersPerPage = 50;
 
   useEffect(() => {
     fetchData();
@@ -209,8 +209,8 @@ export default function PlayersManagement() {
   };
 
   return (
-    <div className="h-[calc(100vh-10rem)] flex flex-col space-y-4 overflow-hidden">
-      <div className="shrink-0">
+    <div className="flex flex-col space-y-4">
+      <div>
         <h1 className="text-4xl font-bold mb-2">Quản Lý Cầu Thủ</h1>
         <p className="text-muted-foreground">
           Quản lý và chỉnh sửa thông tin cầu thủ trong database
@@ -218,7 +218,7 @@ export default function PlayersManagement() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 shrink-0">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium">Tổng Cầu Thủ</CardTitle>
@@ -250,7 +250,7 @@ export default function PlayersManagement() {
       </div>
 
       {/* Filters */}
-      <Card className="shrink-0">
+      <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-lg">Bộ Lọc & Tìm Kiếm</CardTitle>
         </CardHeader>
@@ -316,22 +316,22 @@ export default function PlayersManagement() {
       </Card>
 
       {/* Players Table */}
-      <Card className="flex-1 flex flex-col min-h-0 overflow-hidden">
-        <CardHeader className="pb-3 shrink-0">
+      <Card>
+        <CardHeader className="pb-3">
           <CardTitle className="text-lg">Danh Sách Cầu Thủ</CardTitle>
           <CardDescription>
             Hiển thị {currentPlayers.length} / {filteredPlayers.length} cầu thủ
           </CardDescription>
         </CardHeader>
-        <CardContent className="flex-1 min-h-0 p-0 overflow-hidden">
+        <CardContent className="p-0">
           {loading ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-8 w-8 animate-spin" />
             </div>
           ) : (
-            <div className="h-full overflow-auto">
-              <Table className="min-w-[1200px]">
-                <TableHeader className="sticky top-0 bg-background z-10">
+            <div className="border rounded-md">
+              <Table>
+                <TableHeader>
                   <TableRow>
                       <TableHead className="w-[100px]">ID</TableHead>
                       <TableHead className="w-[200px]">Tên</TableHead>
@@ -462,7 +462,7 @@ export default function PlayersManagement() {
       </Card>
 
       {/* Pagination */}
-      <div className="flex items-center justify-between shrink-0">
+      <div className="flex items-center justify-between pb-4">
         <p className="text-sm text-muted-foreground">
           Trang {currentPage} / {totalPages}
         </p>
