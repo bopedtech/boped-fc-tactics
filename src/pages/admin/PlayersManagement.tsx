@@ -426,11 +426,6 @@ export default function PlayersManagement() {
                                 onCheckedChange={() => handleToggleVisibility(player)}
                                 disabled={isUpdating}
                               />
-                              {player.is_visible ? (
-                                <Eye className="h-4 w-4 text-green-500" />
-                              ) : (
-                                <EyeOff className="h-4 w-4 text-muted-foreground" />
-                              )}
                             </div>
                           </TableCell>
                           <TableCell className="text-right">
