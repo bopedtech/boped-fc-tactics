@@ -10,6 +10,7 @@ import {
   Eye,
   EyeOff,
   FileText,
+  Home,
 } from "lucide-react";
 import {
   Sidebar,
@@ -79,6 +80,24 @@ export function AdminSidebar() {
       collapsible="icon"
     >
       <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <NavLink
+                    to="/"
+                    className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors hover:bg-muted/50"
+                  >
+                    <Home className="h-4 w-4 shrink-0" />
+                    {!isCollapsed && <span>Về Trang Chủ</span>}
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
         <SidebarGroup>
           <SidebarGroupLabel>
             {isCollapsed ? "CMS" : "Bảng Điều Khiển CMS"}
