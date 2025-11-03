@@ -334,9 +334,9 @@ export default function PlayersManagement() {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-[80px]">ID</TableHead>
-                    <TableHead className="w-[280px]">Cầu Thủ</TableHead>
-                    <TableHead className="w-[200px]">Quốc gia</TableHead>
-                    <TableHead className="w-[200px]">CLB</TableHead>
+                    <TableHead className="w-[220px]">Cầu Thủ</TableHead>
+                    <TableHead className="w-[80px]">OVR</TableHead>
+                    <TableHead className="w-[240px]">Quốc gia & CLB</TableHead>
                     <TableHead className="w-[200px]">Program</TableHead>
                     <TableHead className="w-[120px]">Hiển thị</TableHead>
                     <TableHead className="text-right w-[120px]">Thao tác</TableHead>
@@ -353,56 +353,56 @@ export default function PlayersManagement() {
                         <TableRow key={player.assetId}>
                           <TableCell className="font-mono text-xs">{player.assetId}</TableCell>
                           <TableCell>
-                            <div className="flex flex-col gap-1.5">
+                            <div className="flex flex-col gap-1">
                               <div className="font-medium text-sm">{getPlayerName(player)}</div>
-                              <div className="flex items-center gap-2">
-                                <Badge variant="outline" className="text-xs">
-                                  {player.position}
-                                </Badge>
-                                <Badge
-                                  variant={
-                                    player.rating >= 90
-                                      ? "default"
-                                      : player.rating >= 80
-                                      ? "secondary"
-                                      : "outline"
-                                  }
-                                  className="text-xs font-bold"
-                                >
-                                  {player.rating}
-                                </Badge>
-                              </div>
+                              <Badge variant="outline" className="text-xs w-fit">
+                                {player.position}
+                              </Badge>
                             </div>
                           </TableCell>
                           <TableCell>
-                            {nation ? (
-                              <div className="flex items-center gap-2">
-                                {nation.image && (
-                                  <Avatar className="h-6 w-6">
-                                    <AvatarImage src={nation.image} alt={nation.displayName} />
-                                    <AvatarFallback>{nation.displayName?.[0]}</AvatarFallback>
-                                  </Avatar>
-                                )}
-                                <span className="text-sm">{nation.displayName}</span>
-                              </div>
-                            ) : (
-                              <span className="text-sm text-muted-foreground">-</span>
-                            )}
+                            <Badge
+                              variant={
+                                player.rating >= 90
+                                  ? "default"
+                                  : player.rating >= 80
+                                  ? "secondary"
+                                  : "outline"
+                              }
+                              className="text-sm font-bold"
+                            >
+                              {player.rating}
+                            </Badge>
                           </TableCell>
                           <TableCell>
-                            {club ? (
-                              <div className="flex items-center gap-2">
-                                {club.image && (
-                                  <Avatar className="h-6 w-6">
-                                    <AvatarImage src={club.image} alt={club.displayName} />
-                                    <AvatarFallback>{club.displayName?.[0]}</AvatarFallback>
-                                  </Avatar>
-                                )}
-                                <span className="text-sm">{club.displayName}</span>
-                              </div>
-                            ) : (
-                              <span className="text-sm text-muted-foreground">-</span>
-                            )}
+                            <div className="flex flex-col gap-2">
+                              {nation ? (
+                                <div className="flex items-center gap-2">
+                                  {nation.image && (
+                                    <Avatar className="h-5 w-5">
+                                      <AvatarImage src={nation.image} alt={nation.displayName} />
+                                      <AvatarFallback>{nation.displayName?.[0]}</AvatarFallback>
+                                    </Avatar>
+                                  )}
+                                  <span className="text-xs">{nation.displayName}</span>
+                                </div>
+                              ) : (
+                                <span className="text-xs text-muted-foreground">-</span>
+                              )}
+                              {club ? (
+                                <div className="flex items-center gap-2">
+                                  {club.image && (
+                                    <Avatar className="h-5 w-5">
+                                      <AvatarImage src={club.image} alt={club.displayName} />
+                                      <AvatarFallback>{club.displayName?.[0]}</AvatarFallback>
+                                    </Avatar>
+                                  )}
+                                  <span className="text-xs">{club.displayName}</span>
+                                </div>
+                              ) : (
+                                <span className="text-xs text-muted-foreground">-</span>
+                              )}
+                            </div>
                           </TableCell>
                           <TableCell>
                             {program ? (
