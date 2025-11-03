@@ -209,7 +209,7 @@ export default function PlayersManagement() {
   };
 
   return (
-    <div className="h-[calc(100vh-8rem)] flex flex-col space-y-4 overflow-hidden">
+    <div className="h-[calc(100vh-8rem)] flex flex-col space-y-4 overflow-hidden p-4">
       <div className="shrink-0">
         <h1 className="text-4xl font-bold mb-2">Quản Lý Cầu Thủ</h1>
         <p className="text-muted-foreground">
@@ -316,24 +316,23 @@ export default function PlayersManagement() {
       </Card>
 
       {/* Players Table */}
-      <Card className="flex-1 flex flex-col min-h-0">
+      <Card className="flex-1 flex flex-col min-h-0 overflow-hidden">
         <CardHeader className="pb-3 shrink-0">
           <CardTitle className="text-lg">Danh Sách Cầu Thủ</CardTitle>
           <CardDescription>
             Hiển thị {currentPlayers.length} / {filteredPlayers.length} cầu thủ
           </CardDescription>
         </CardHeader>
-        <CardContent className="flex-1 min-h-0 pb-4">
+        <CardContent className="flex-1 min-h-0 p-0 overflow-hidden">
           {loading ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-8 w-8 animate-spin" />
             </div>
           ) : (
-            <ScrollArea className="h-full w-full rounded-md border">
-              <div className="min-w-[1200px]">
-                <Table>
-                  <TableHeader className="sticky top-0 bg-background z-10">
-                    <TableRow>
+            <div className="h-full overflow-auto">
+              <Table className="min-w-[1200px]">
+                <TableHeader className="sticky top-0 bg-background z-10">
+                  <TableRow>
                       <TableHead className="w-[100px]">ID</TableHead>
                       <TableHead className="w-[200px]">Tên</TableHead>
                       <TableHead className="w-[80px]">Vị trí</TableHead>
@@ -343,9 +342,9 @@ export default function PlayersManagement() {
                       <TableHead className="w-[180px]">Program</TableHead>
                       <TableHead className="w-[100px]">Hiển thị</TableHead>
                       <TableHead className="text-right w-[150px]">Thao tác</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                     {currentPlayers.map((player) => {
                       const nation = getNationInfo(player);
                       const club = getClubInfo(player);
@@ -455,10 +454,9 @@ export default function PlayersManagement() {
                         </TableRow>
                       );
                     })}
-                  </TableBody>
-                </Table>
-              </div>
-            </ScrollArea>
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>
