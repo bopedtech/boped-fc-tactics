@@ -57,10 +57,8 @@ export default function AdminLayout() {
   }
 
   return (
-    <>
-      <Header />
-      <SidebarProvider defaultOpen={true}>
-        <div className="flex w-full min-h-[calc(100vh-4rem)] overflow-x-hidden">
+    <SidebarProvider defaultOpen={true}>
+      <div className="flex w-full min-h-screen overflow-x-hidden">
           <AdminSidebar />
           <SidebarInset className="flex-1 flex flex-col min-w-0">
             <div className="sticky top-0 z-10 flex h-14 items-center border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4">
@@ -76,6 +74,5 @@ export default function AdminLayout() {
           </SidebarInset>
         </div>
       </SidebarProvider>
-    </>
   );
 }
