@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Search, Trash2, Edit, Eye, Loader2, Users, EyeOff, Ban } from "lucide-react";
+import { Search, Trash2, Edit, Eye, Loader2, Users, EyeOff } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -358,7 +358,11 @@ export default function PlayersManagement() {
                                 <div className="flex items-center gap-2">
                                   <span className="font-medium text-sm">{getPlayerName(player)}</span>
                                   {player.auctionable === false && (
-                                    <Ban className="h-4 w-4 text-muted-foreground" />
+                                    <img 
+                                      src="https://images-bucket.renderz.app/common_23_untradeable_icon" 
+                                      alt="Untradeable" 
+                                      className="h-4 w-4"
+                                    />
                                   )}
                                 </div>
                                 <Badge variant="outline" className="text-xs w-fit">
