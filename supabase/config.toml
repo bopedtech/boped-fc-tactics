@@ -3,6 +3,9 @@ project_id = "nhdmgiyoienkixokcoue"
 [functions.sync-players]
 verify_jwt = false
 
+[functions.translate-localization]
+verify_jwt = false
+
 [functions.sync-leagues]
 verify_jwt = false
 
