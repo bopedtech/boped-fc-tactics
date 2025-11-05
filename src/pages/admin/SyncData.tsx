@@ -25,6 +25,8 @@ export default function SyncData() {
   const [syncingSkillMoves, setSyncingSkillMoves] = useState(false);
   const [skillMovesResult, setSkillMovesResult] = useState<any>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [translating, setTranslating] = useState(false);
+  const [translationResult, setTranslationResult] = useState<any>(null);
 
   const handleSyncPlayers = async (mode: 'test' | 'full' = 'test') => {
     try {
@@ -243,6 +245,26 @@ export default function SyncData() {
     }
   };
 
+  const handleTranslateLocalization = async () => {
+    try {
+      setTranslating(true);
+      setTranslationResult(null);
+      toast.info('Đang dịch từ điển sang tiếng Việt...');
+
+      const { data, error } = await supabase.functions.invoke('translate-localization');
+
+      if (error) throw error;
+
+      setTranslationResult(data);
+      toast.success(`Dịch thành công ${data.translated} bản ghi!`);
+    } catch (error) {
+      console.error("Error translating localization:", error);
+      toast.error("Lỗi khi dịch: " + (error as Error).message);
+    } finally {
+      setTranslating(false);
+    }
+  };
+
   return (
     <div className="space-y-8">
       <div>
@@ -325,6 +347,54 @@ export default function SyncData() {
               {dictSyncResult.totalImported && (
                 <p className="text-xs mt-1">
                   Đã import: {dictSyncResult.totalImported} / {dictSyncResult.totalEntries} mục
+                </p>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Translate Dictionary - Full Width */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Database className="w-5 h-5" />
+            <CardTitle>2. Dịch Từ Điển Sang Tiếng Việt</CardTitle>
+          </div>
+          <CardDescription>
+            Dịch toàn bộ từ điển bản địa hóa từ tiếng Anh sang tiếng Việt bằng AI
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Button
+            onClick={handleTranslateLocalization}
+            disabled={translating}
+            className="w-full"
+          >
+            {translating ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Đang dịch...
+              </>
+            ) : (
+              <>
+                <Database className="mr-2 h-4 w-4" />
+                Dịch Toàn Bộ Sang Tiếng Việt
+              </>
+            )}
+          </Button>
+          
+          {translationResult && (
+            <div className={`p-4 rounded-lg ${translationResult.success ? 'bg-green-50 dark:bg-green-950' : 'bg-red-50 dark:bg-red-950'}`}>
+              <p className="text-sm font-medium">
+                {translationResult.success ? '✓ Thành công' : '✗ Lỗi'}
+              </p>
+              <p className="text-xs mt-1">
+                {translationResult.message}
+              </p>
+              {translationResult.translated && (
+                <p className="text-xs mt-1">
+                  Đã dịch: {translationResult.translated} / {translationResult.totalRecords} bản ghi
                 </p>
               )}
             </div>
