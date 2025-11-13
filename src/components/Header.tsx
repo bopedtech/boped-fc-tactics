@@ -89,7 +89,7 @@ export default function Header() {
               to="/"
               className={cn(
                 "transition-colors hover:text-primary",
-                isActive("/") ? "text-primary font-semibold" : "text-foreground/80"
+                isActive("/") ? "text-primary font-semibold" : "text-gray-700"
               )}
             >
               Trang chủ
@@ -98,7 +98,7 @@ export default function Header() {
               to="/database"
               className={cn(
                 "transition-colors hover:text-primary",
-                isActive("/database") ? "text-primary font-semibold" : "text-foreground/80"
+                isActive("/database") ? "text-primary font-semibold" : "text-gray-700"
               )}
             >
               Danh sách cầu thủ
@@ -107,7 +107,7 @@ export default function Header() {
               to="/builder"
               className={cn(
                 "transition-colors hover:text-primary",
-                isActive("/builder") ? "text-primary font-semibold" : "text-foreground/80"
+                isActive("/builder") ? "text-primary font-semibold" : "text-gray-700"
               )}
             >
               Xây dựng đội hình
@@ -116,7 +116,7 @@ export default function Header() {
               to="/my-squads"
               className={cn(
                 "transition-colors hover:text-primary",
-                isActive("/my-squads") ? "text-primary font-semibold" : "text-foreground/80"
+                isActive("/my-squads") ? "text-primary font-semibold" : "text-gray-700"
               )}
             >
               Đội hình của tôi
