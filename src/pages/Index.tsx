@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Database, Users, Zap, TrendingUp } from "lucide-react";
+import logoImage from "@/assets/bopedfctactics-logo.png";
 
 const Index = () => {
   return (
@@ -13,6 +14,13 @@ const Index = () => {
         <div className="absolute inset-0 gradient-glow opacity-20" />
         <div className="container relative z-10 mx-auto px-4">
           <div className="text-center max-w-4xl mx-auto">
+            <div className="flex justify-center mb-8">
+              <img 
+                src={logoImage} 
+                alt="BopedFCTactics Logo" 
+                className="h-48 md:h-64 w-auto"
+              />
+            </div>
             <h1 className="text-5xl md:text-7xl font-bold mb-6">
               <span className="gradient-primary bg-clip-text text-transparent">
                 BopedFCTactics

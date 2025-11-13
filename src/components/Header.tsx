@@ -14,6 +14,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { LogOut, Settings, User as UserIcon, Shield } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import logoImage from "@/assets/bopedfctactics-logo.png";
 
 export default function Header() {
   const [user, setUser] = useState<User | null>(null);
@@ -76,24 +77,11 @@ export default function Header() {
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-8">
           <Link to="/" className="flex items-center space-x-2">
-            <div className="gradient-primary rounded-lg p-2">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-6 w-6 text-white"
-              >
-                <circle cx="12" cy="12" r="10" />
-                <path d="M12 2v20M2 12h20" />
-              </svg>
-            </div>
-            <span className="text-xl font-bold gradient-primary bg-clip-text text-transparent">
-              BopedFCTactics
-            </span>
+            <img 
+              src={logoImage} 
+              alt="BopedFCTactics Logo" 
+              className="h-12 w-auto"
+            />
           </Link>
 
           <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
