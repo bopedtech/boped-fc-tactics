@@ -15,11 +15,13 @@ const Index = () => {
         <div className="container relative z-10 mx-auto px-4">
           <div className="text-center max-w-4xl mx-auto">
             <div className="flex justify-center mb-8">
-              <img 
-                src={logoImage} 
-                alt="BopedFCTactics Logo" 
-                className="h-48 md:h-64 w-auto"
-              />
+              <div className="bg-white rounded-full p-8 shadow-lg">
+                <img 
+                  src={logoImage} 
+                  alt="BopedFCTactics Logo" 
+                  className="h-48 md:h-64 w-auto"
+                />
+              </div>
             </div>
             <h1 className="text-5xl md:text-7xl font-bold mb-6">
               <span className="gradient-primary bg-clip-text text-transparent">
