@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import AISearchBar from "@/components/AISearchBar";
 import NewsSection from "@/components/NewsSection";
 import Footer from "@/components/Footer";
+import PlayerCard from "@/components/PlayerCard";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Database, Users, Zap, TrendingUp, Shield, Gift } from "lucide-react";
@@ -118,34 +119,11 @@ const Index = () => {
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {latestPlayers.map((player) => (
-                <Card
-                  key={player.assetId}
-                  className="card-hover p-4 border-border/50 hover:border-primary/50 transition-all group cursor-pointer"
+                <PlayerCard 
+                  key={player.assetId} 
+                  player={player}
                   onClick={() => toast.info("Chi tiết cầu thủ - Coming soon!")}
-                >
-                  <div className="relative mb-2">
-                    <div className="absolute top-0 left-0 bg-primary text-primary-foreground text-xs font-bold px-2 py-1 rounded">
-                      {player.rating}
-                    </div>
-                    <div className="aspect-square bg-gradient-to-br from-primary/10 to-purple-500/10 rounded-lg flex items-center justify-center">
-                      {player.images?.portrait ? (
-                        <img
-                          src={player.images.portrait}
-                          alt={player.commonName || player.lastName}
-                          className="w-full h-full object-cover rounded-lg"
-                        />
-                      ) : (
-                        <Shield className="h-12 w-12 text-muted-foreground" />
-                      )}
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <p className="font-bold text-sm truncate">
-                      {player.commonName || player.lastName}
-                    </p>
-                    <p className="text-xs text-muted-foreground">{player.position}</p>
-                  </div>
-                </Card>
+                />
               ))}
             </div>
           )}
