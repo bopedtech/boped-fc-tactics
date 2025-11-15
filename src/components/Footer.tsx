@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Facebook, Twitter, Youtube, Mail, MapPin, Phone, MessageCircle } from "lucide-react";
-import bopedLogo from "@/assets/logo-boped.png";
+import bopedLogo from "@/assets/bopedfctactics-logo.png";
 
 const Footer = () => {
   return (
