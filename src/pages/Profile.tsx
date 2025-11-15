@@ -212,16 +212,35 @@ export default function Profile() {
       // Validate form data
       const validatedData = profileSchema.parse(formData);
 
-      // Update profile
-      const { error } = await supabase
+      // Check if profile exists
+      const { data: existingProfile } = await supabase
         .from("profiles")
-        .upsert({
-          user_id: user.id,
-          ...validatedData,
-          updated_at: new Date().toISOString(),
-        });
+        .select("id")
+        .eq("user_id", user.id)
+        .maybeSingle();
 
-      if (error) throw error;
+      if (existingProfile) {
+        // Update existing profile
+        const { error } = await supabase
+          .from("profiles")
+          .update({
+            ...validatedData,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("user_id", user.id);
+
+        if (error) throw error;
+      } else {
+        // Insert new profile
+        const { error } = await supabase
+          .from("profiles")
+          .insert({
+            user_id: user.id,
+            ...validatedData,
+          });
+
+        if (error) throw error;
+      }
 
       toast.success("Đã cập nhật profile thành công!");
     } catch (error) {
