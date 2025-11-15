@@ -112,15 +112,6 @@ export default function Header() {
             >
               Xây dựng đội hình
             </Link>
-            <Link
-              to="/my-squads"
-              className={cn(
-                "transition-colors hover:text-primary",
-                isActive("/my-squads") ? "text-primary font-semibold" : "text-gray-700"
-              )}
-            >
-              Đội hình của tôi
-            </Link>
           </nav>
         </div>
 
