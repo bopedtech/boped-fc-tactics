@@ -179,9 +179,8 @@ export default function Database() {
       query = query.in("source", filters.programs);
     }
 
-    // Pagination - fetch more to compensate for client-side filtering
-    const fetchSize = filters.positions.length > 0 ? PAGE_SIZE * 3 : PAGE_SIZE;
-    query = query.range(pageParam, pageParam + fetchSize - 1);
+    // Pagination - always fetch PAGE_SIZE
+    query = query.range(pageParam, pageParam + PAGE_SIZE - 1);
 
     const { data, error, count } = await query;
 
@@ -198,12 +197,9 @@ export default function Database() {
       filteredPlayers = applyFiltersToQuery(filteredPlayers);
     }
 
-    // Take only PAGE_SIZE results after filtering
-    const paginatedPlayers = filteredPlayers.slice(0, PAGE_SIZE);
-
     return {
-      players: paginatedPlayers,
-      nextPage: paginatedPlayers.length === PAGE_SIZE ? pageParam + PAGE_SIZE : undefined,
+      players: filteredPlayers,
+      nextPage: filteredPlayers.length > 0 && (data?.length || 0) === PAGE_SIZE ? pageParam + PAGE_SIZE : undefined,
       totalCount: count || 0,
     };
   };
