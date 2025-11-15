@@ -5,6 +5,7 @@ import AISearchBar from "@/components/AISearchBar";
 import NewsSection from "@/components/NewsSection";
 import Footer from "@/components/Footer";
 import PlayerCard from "@/components/PlayerCard";
+import PlayerDetailDialog from "@/components/PlayerDetailDialog";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Database, Users, Zap, TrendingUp, Shield, Gift } from "lucide-react";
@@ -14,6 +15,8 @@ import { toast } from "sonner";
 const Index = () => {
   const [latestPlayers, setLatestPlayers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedPlayerAssetId, setSelectedPlayerAssetId] = useState<number | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchFeaturedData();
@@ -122,7 +125,10 @@ const Index = () => {
                 <PlayerCard 
                   key={player.assetId} 
                   player={player}
-                  onClick={() => toast.info("Chi tiết cầu thủ - Coming soon!")}
+                  onClick={() => {
+                    setSelectedPlayerAssetId(player.assetId);
+                    setDialogOpen(true);
+                  }}
                 />
               ))}
             </div>
@@ -132,6 +138,13 @@ const Index = () => {
 
       {/* News Section */}
       <NewsSection />
+
+      {/* Player Detail Dialog */}
+      <PlayerDetailDialog
+        assetId={selectedPlayerAssetId}
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+      />
 
       {/* Footer */}
       <Footer />
