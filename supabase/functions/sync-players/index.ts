@@ -47,12 +47,14 @@ interface RawPlayerData {
   added?: string;
   revealOn?: string;
   source?: string;
+  created?: string; // Timestamp from Renderz API
   sort?: any[]; // Trường phân trang - sẽ bị loại bỏ
 }
 
 const RENDERZ_API_URL = 'https://renderz.app/api/search/elasticsearch';
-const BATCH_SIZE = 10; // Test mode: Only 10 players
-const DELAY_MS = 1500; // 1.5 second delay between requests
+const BATCH_SIZE = 50; // Increased batch size for better performance
+const DELAY_MS = 1000; // 1 second delay between requests
+const MAX_PAGES_PER_INVOCATION = 50; // Process max 50 pages per function call to avoid timeout
 
 // Xử lý phản hồi API và trích xuất cầu thủ + cursor
 function processApiResponse(responseData: any): { extractedPlayers: RawPlayerData[], nextCursor: any[] | null } {
@@ -137,7 +139,12 @@ function processPlayerData(rawPlayers: RawPlayerData[]): any[] {
     record.playerId = player.playerId ?? 0;
     record.rating = player.rating ?? 0;
     
-    // 5. Cập nhật timestamp
+    // 5. Lưu created_at từ API vào created_at_renderz
+    if (player.created) {
+      record.created_at_renderz = player.created;
+    }
+    
+    // 6. Cập nhật timestamp
     record.updatedAt = new Date().toISOString();
     
     return record;
@@ -155,19 +162,23 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { mode = 'test', maxPages = 5 } = await req.json();
+    const { mode = 'test', maxPages = 5, cursor: startCursor = null } = await req.json();
     
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     console.log(`Starting search_after pagination sync in ${mode} mode...`);
-    console.log(`Max pages to fetch: ${mode === 'test' ? maxPages : 'unlimited'}`);
+    console.log(`Max pages to fetch: ${mode === 'test' ? maxPages : MAX_PAGES_PER_INVOCATION}`);
+    if (startCursor) {
+      console.log(`Resuming from cursor: ${JSON.stringify(startCursor)}`);
+    }
     
     let totalSynced = 0;
     let pageCount = 0;
-    let cursor: any[] | null = null; // search_after cursor
+    let cursor: any[] | null = startCursor; // search_after cursor (can be passed from previous call)
     const isTestMode = mode === 'test';
+    const maxPagesToProcess = isTestMode ? maxPages : MAX_PAGES_PER_INVOCATION;
     
     // Pagination loop using search_after
     while (true) {
@@ -292,9 +303,9 @@ Deno.serve(async (req) => {
         break;
       }
 
-      // Test mode: stop after maxPages
-      if (isTestMode && pageCount >= maxPages) {
-        console.log(`Test mode: Reached max pages (${maxPages}). Stopping.`);
+      // Check if reached max pages for this invocation
+      if (pageCount >= maxPagesToProcess) {
+        console.log(`Reached max pages (${maxPagesToProcess}) for this invocation. Will continue in next call if needed.`);
         break;
       }
 
@@ -303,9 +314,12 @@ Deno.serve(async (req) => {
       await delay(DELAY_MS);
     }
 
+    const hasMore = cursor !== null;
     const message = isTestMode 
       ? `Test sync completed: ${totalSynced} players synced (${pageCount} pages)`
-      : `Full sync completed: ${totalSynced} players synced (${pageCount} pages)`;
+      : hasMore
+        ? `Batch completed: ${totalSynced} players synced (${pageCount} pages). More data available.`
+        : `Full sync completed: ${totalSynced} players synced (${pageCount} pages)`;
 
     return new Response(
       JSON.stringify({
@@ -314,6 +328,8 @@ Deno.serve(async (req) => {
         totalPlayers: totalSynced,
         totalPages: pageCount,
         mode,
+        hasMore,
+        nextCursor: cursor,
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

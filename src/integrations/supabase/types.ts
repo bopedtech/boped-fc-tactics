@@ -176,6 +176,7 @@ export type Database = {
           celebration: Json | null
           club: Json | null
           commonName: string | null
+          created_at_renderz: string | null
           createdAt: string | null
           firstName: string | null
           foot: number | null
@@ -228,6 +229,7 @@ export type Database = {
           celebration?: Json | null
           club?: Json | null
           commonName?: string | null
+          created_at_renderz?: string | null
           createdAt?: string | null
           firstName?: string | null
           foot?: number | null
@@ -280,6 +282,7 @@ export type Database = {
           celebration?: Json | null
           club?: Json | null
           commonName?: string | null
+          created_at_renderz?: string | null
           createdAt?: string | null
           firstName?: string | null
           foot?: number | null
