@@ -1,31 +1,13 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Sparkles, Zap, Users, TrendingUp } from "lucide-react";
+import { Search, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 const AISearchBar = () => {
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
-
-  const quickActions = [
-    {
-      icon: Users,
-      label: "Tìm cầu thủ",
-      action: () => navigate("/database"),
-    },
-    {
-      icon: Zap,
-      label: "Xây đội hình",
-      action: () => navigate("/builder"),
-    },
-    {
-      icon: TrendingUp,
-      label: "Đội hình của tôi",
-      action: () => navigate("/my-squads"),
-    },
-  ];
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,7 +34,15 @@ const AISearchBar = () => {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-4">
+    <div className="w-full max-w-4xl mx-auto space-y-6">
+      {/* Title */}
+      <div className="text-center space-y-2">
+        <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary via-purple-500 to-primary bg-clip-text text-transparent">
+          Boped FC Tactics
+        </h1>
+        <p className="text-muted-foreground text-lg">AI trợ lý thông minh cho FC Mobile</p>
+      </div>
+
       {/* AI Search Input */}
       <form onSubmit={handleSearch} className="relative">
         <div className="relative group">
@@ -71,22 +61,6 @@ const AISearchBar = () => {
           </div>
         </div>
       </form>
-
-      {/* Quick Actions */}
-      <div className="flex flex-wrap gap-3 justify-center">
-        {quickActions.map((action, idx) => (
-          <Button
-            key={idx}
-            variant="outline"
-            size="sm"
-            onClick={action.action}
-            className="gap-2 hover:border-primary/50 hover:bg-primary/5"
-          >
-            <action.icon className="h-4 w-4" />
-            {action.label}
-          </Button>
-        ))}
-      </div>
     </div>
   );
 };
