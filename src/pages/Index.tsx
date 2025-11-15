@@ -122,14 +122,15 @@ const Index = () => {
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {latestPlayers.map((player) => (
-                <PlayerCard 
-                  key={player.assetId} 
-                  player={player}
-                  onClick={() => {
-                    setSelectedPlayerAssetId(player.assetId);
-                    setDialogOpen(true);
-                  }}
-                />
+                <div key={player.assetId} className="max-w-[280px] mx-auto">
+                  <PlayerCard 
+                    player={player}
+                    onClick={() => {
+                      setSelectedPlayerAssetId(player.assetId);
+                      setDialogOpen(true);
+                    }}
+                  />
+                </div>
               ))}
             </div>
           )}
