@@ -152,7 +152,7 @@ export default function Header() {
                   onClick={() => navigate("/profile")}
                 >
                   <UserIcon className="mr-2 h-4 w-4" />
-                  <span>Hồ sơ cá nhân</span>
+                  <span>Cá nhân</span>
                 </DropdownMenuItem>
                 
                 {isAdmin && (
