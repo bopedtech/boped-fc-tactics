@@ -32,19 +32,48 @@ export default function SyncData() {
     try {
       setSyncingPlayers(true);
       setPlayersResult(null);
-      toast.info(`Đang đồng bộ cầu thủ (${mode === 'test' ? '5 trang test' : 'toàn bộ'})...`);
+      
+      let totalSynced = 0;
+      let totalPages = 0;
+      let hasMore = true;
+      let cursor: any[] | null = null;
+      let iterations = 0;
+      const MAX_ITERATIONS = 100; // Prevent infinite loops
+      
+      toast.info(`Đang bắt đầu đồng bộ cầu thủ (${mode === 'test' ? '5 trang test' : 'toàn bộ'})...`);
 
-      const { data, error } = await supabase.functions.invoke('sync-players', {
-        body: { 
-          mode: mode,
-          maxPages: 5
+      while (hasMore && iterations < MAX_ITERATIONS) {
+        iterations++;
+        
+        const { data, error } = await supabase.functions.invoke('sync-players', {
+          body: { 
+            mode: mode,
+            maxPages: mode === 'test' ? 5 : undefined,
+            cursor: cursor
+          }
+        });
+
+        if (error) throw error;
+
+        totalSynced += data.totalPlayers;
+        totalPages += data.totalPages;
+        hasMore = data.hasMore;
+        cursor = data.nextCursor;
+        
+        if (hasMore) {
+          toast.info(`Đã đồng bộ ${totalSynced} cầu thủ (${totalPages} trang). Tiếp tục...`);
+          // Small delay between batches
+          await new Promise(resolve => setTimeout(resolve, 2000));
         }
+      }
+
+      setPlayersResult({ 
+        success: true, 
+        totalPlayers: totalSynced,
+        totalPages: totalPages,
+        message: `Đã hoàn thành đồng bộ ${totalSynced} cầu thủ từ ${totalPages} trang`
       });
-
-      if (error) throw error;
-
-      setPlayersResult(data);
-      toast.success("Đồng bộ cầu thủ thành công!");
+      toast.success(`Đồng bộ thành công ${totalSynced} cầu thủ!`);
     } catch (error) {
       console.error("Error syncing players:", error);
       toast.error("Lỗi khi đồng bộ cầu thủ: " + (error as Error).message);
