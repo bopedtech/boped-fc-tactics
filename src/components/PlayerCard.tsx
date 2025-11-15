@@ -129,10 +129,10 @@ export default function PlayerCard({ player, onClick, variant = 'list' }: Player
           {/* Top: OVR + Position - Moved right and down a bit */}
           <div className="absolute top-8 left-8 z-20">
             <div className="flex flex-col items-start">
-              <div className={`${variant === 'detail' ? 'text-5xl' : 'text-4xl'} font-black text-white leading-none drop-shadow-[0_3px_6px_rgba(0,0,0,1)]`}>
+              <div className="text-4xl font-black text-white leading-none drop-shadow-[0_3px_6px_rgba(0,0,0,1)]">
                 {player.rating}
               </div>
-              <div className={`${variant === 'detail' ? 'text-lg' : 'text-base'} font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,1)] mt-0.5 ml-0.5`}>
+              <div className="text-base font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,1)] mt-0.5 ml-0.5">
                 {player.position}
               </div>
             </div>
@@ -157,10 +157,10 @@ export default function PlayerCard({ player, onClick, variant = 'list' }: Player
           </div>
 
           {/* Bottom Section: Name + Icons - Close to player image */}
-          <div className={`absolute left-0 right-0 z-10 px-3 ${variant === 'detail' ? 'bottom-[68px]' : 'bottom-[52px]'}`}>
+          <div className="absolute left-0 right-0 z-10 px-3 bottom-[68px]">
             {/* Player Name */}
             <div className="text-center mb-2">
-              <h3 className={`font-black ${variant === 'detail' ? 'text-2xl' : 'text-xl'} leading-none text-white drop-shadow-[0_3px_6px_rgba(0,0,0,1)] uppercase tracking-wider`}>
+              <h3 className="font-black text-xl leading-none text-white drop-shadow-[0_3px_6px_rgba(0,0,0,1)] uppercase tracking-wider">
                 {player.cardName || player.commonName}
               </h3>
             </div>
