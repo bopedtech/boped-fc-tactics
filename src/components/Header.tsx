@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LogOut, Settings, User as UserIcon, Shield } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -19,6 +19,7 @@ import logoImage from "@/assets/bopedfctactics-logo.png";
 export default function Header() {
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -27,6 +28,7 @@ export default function Header() {
       setUser(session?.user ?? null);
       if (session?.user) {
         checkAdminStatus(session.user.id);
+        fetchAvatar(session.user.id);
       }
     });
 
@@ -37,14 +39,30 @@ export default function Header() {
       if (session?.user) {
         setTimeout(() => {
           checkAdminStatus(session.user.id);
+          fetchAvatar(session.user.id);
         }, 0);
       } else {
         setIsAdmin(false);
+        setAvatarUrl(null);
       }
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const fetchAvatar = async (userId: string) => {
+    try {
+      const { data } = await supabase
+        .from("profiles")
+        .select("avatar_url")
+        .eq("user_id", userId)
+        .maybeSingle();
+      
+      setAvatarUrl(data?.avatar_url || null);
+    } catch (error) {
+      console.error("Error fetching avatar:", error);
+    }
+  };
 
   const checkAdminStatus = async (userId: string) => {
     try {
@@ -124,6 +142,7 @@ export default function Header() {
                   className="relative h-10 w-10 rounded-full"
                 >
                   <Avatar>
+                    <AvatarImage src={avatarUrl || undefined} alt="Avatar" />
                     <AvatarFallback className="gradient-primary text-white">
                       {user.email?.[0].toUpperCase()}
                     </AvatarFallback>
