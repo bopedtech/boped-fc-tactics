@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { Loader2, Save, User, Upload, Plus, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
+import { AvatarCropDialog } from "@/components/AvatarCropDialog";
 import { z } from "zod";
 
 const profileSchema = z.object({
@@ -42,6 +43,8 @@ export default function Profile() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [squads, setSquads] = useState<Squad[]>([]);
   const [squadsLoading, setSquadsLoading] = useState(false);
+  const [cropDialogOpen, setCropDialogOpen] = useState(false);
+  const [imageToCrop, setImageToCrop] = useState<string>("");
   const [formData, setFormData] = useState<ProfileFormData>({
     full_name: "",
     display_name: "",
@@ -135,21 +138,37 @@ export default function Profile() {
     }
   };
 
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || !e.target.files[0] || !user) return;
+  const handleAvatarSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || !e.target.files[0]) return;
 
     const file = e.target.files[0];
-    const fileExt = file.name.split('.').pop();
-    const fileName = `avatar.${fileExt}`;
-    const filePath = `${user.id}/${fileName}`;
+    const reader = new FileReader();
+    
+    reader.onload = () => {
+      setImageToCrop(reader.result as string);
+      setCropDialogOpen(true);
+    };
+    
+    reader.readAsDataURL(file);
+    e.target.value = ""; // Reset input
+  };
+
+  const handleCroppedImage = async (croppedImageBlob: Blob) => {
+    if (!user) return;
 
     try {
       setUploading(true);
+      
+      const fileName = `avatar.jpg`;
+      const filePath = `${user.id}/${fileName}`;
 
       // Upload file
       const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(filePath, file, { upsert: true });
+        .upload(filePath, croppedImageBlob, { 
+          upsert: true,
+          contentType: 'image/jpeg'
+        });
 
       if (uploadError) throw uploadError;
 
@@ -274,7 +293,7 @@ export default function Profile() {
                         id="avatar-upload"
                         accept="image/*"
                         className="hidden"
-                        onChange={handleAvatarUpload}
+                        onChange={handleAvatarSelect}
                         disabled={uploading}
                       />
                       <Label htmlFor="avatar-upload">
@@ -477,6 +496,13 @@ export default function Profile() {
           </TabsContent>
         </Tabs>
       </div>
+
+      <AvatarCropDialog
+        open={cropDialogOpen}
+        onClose={() => setCropDialogOpen(false)}
+        imageSrc={imageToCrop}
+        onCropComplete={handleCroppedImage}
+      />
     </div>
   );
 }
