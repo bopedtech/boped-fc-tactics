@@ -140,8 +140,8 @@ export default function Profile() {
 
     const file = e.target.files[0];
     const fileExt = file.name.split('.').pop();
-    const fileName = `${user.id}-${Math.random()}.${fileExt}`;
-    const filePath = `avatars/${fileName}`;
+    const fileName = `avatar.${fileExt}`;
+    const filePath = `${user.id}/${fileName}`;
 
     try {
       setUploading(true);
