@@ -3,7 +3,7 @@ import { FilterState } from "@/components/PlayerFilters";
 
 export const usePlayerFilters = (initialPosition?: string) => {
   const [filters, setFilters] = useState<FilterState>({
-    ratingRange: [0, 125],
+    ratingRange: [40, 125],
     positionFilter: initialPosition || "all",
     positions: [],
     positionType: "all",
@@ -23,7 +23,7 @@ export const usePlayerFilters = (initialPosition?: string) => {
 
   const resetFilters = () => {
     setFilters({
-      ratingRange: [0, 125],
+      ratingRange: [40, 125],
       positionFilter: initialPosition || "all",
       positions: [],
       positionType: "all",
