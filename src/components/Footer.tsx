@@ -1,17 +1,15 @@
 import { Link } from "react-router-dom";
 import { Facebook, Twitter, Youtube, Mail, MapPin, Phone } from "lucide-react";
 import bopedLogo from "@/assets/logo-boped.png";
-
 const Footer = () => {
-  return (
-    <footer className="border-t border-border/40 bg-card/30 backdrop-blur-sm">
+  return <footer className="border-t border-border/40 bg-card/30 backdrop-blur-sm">
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
             <img src={bopedLogo} alt="Boped" className="h-12 w-12 rounded-full object-cover" />
             <p className="text-sm text-muted-foreground">
-              Công ty chủ quản của BopedFCTactics - Nền tảng xây dựng đội hình FC Mobile thông minh với AI
+              © 2025 Boped. All rights reserved. Powered by BopedFCTactics.
             </p>
           </div>
 
@@ -84,8 +82,6 @@ const Footer = () => {
           </p>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default Footer;
