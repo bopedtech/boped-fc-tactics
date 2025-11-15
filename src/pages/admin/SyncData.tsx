@@ -38,7 +38,7 @@ export default function SyncData() {
       let hasMore = true;
       let cursor: any[] | null = null;
       let iterations = 0;
-      const MAX_ITERATIONS = 200; // Allow up to 1000 pages (200 iterations × 5 pages)
+      const MAX_ITERATIONS = 334; // Allow up to 1000 pages (334 iterations × 3 pages)
       
       toast.info(`Đang bắt đầu đồng bộ cầu thủ (${mode === 'test' ? '5 trang test' : 'toàn bộ'})...`);
 
