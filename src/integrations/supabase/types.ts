@@ -113,18 +113,21 @@ export type Database = {
           source: string | null
           updatedAt: string | null
           value_en: string
+          value_vi: string | null
         }
         Insert: {
           key: string
           source?: string | null
           updatedAt?: string | null
           value_en: string
+          value_vi?: string | null
         }
         Update: {
           key?: string
           source?: string | null
           updatedAt?: string | null
           value_en?: string
+          value_vi?: string | null
         }
         Relationships: []
       }
