@@ -349,7 +349,7 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
               {/* Left: Player Card */}
               <div className="lg:col-span-1">
                 <div className="max-w-[280px] mx-auto">
-                  <PlayerCard player={player as any} variant="detail" />
+                  <PlayerCard player={player as any} />
                 </div>
               </div>
 

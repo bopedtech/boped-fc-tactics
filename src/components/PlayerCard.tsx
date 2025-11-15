@@ -38,10 +38,9 @@ interface Player {
 interface PlayerCardProps {
   player: Player;
   onClick?: () => void;
-  variant?: 'list' | 'detail';
 }
 
-export default function PlayerCard({ player, onClick, variant = 'list' }: PlayerCardProps) {
+export default function PlayerCard({ player, onClick }: PlayerCardProps) {
   const isGK = player.position === "GK";
   
   // Lấy tất cả từ player.images
