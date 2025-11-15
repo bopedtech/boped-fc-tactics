@@ -54,7 +54,7 @@ interface RawPlayerData {
 const RENDERZ_API_URL = 'https://renderz.app/api/search/elasticsearch';
 const BATCH_SIZE = 50; // Increased batch size for better performance
 const DELAY_MS = 1200; // 1200ms delay between requests to avoid rate limiting
-const MAX_PAGES_PER_INVOCATION = 8; // Process max 8 pages per function call to be more conservative
+const MAX_PAGES_PER_INVOCATION = 5; // Process max 5 pages per function call to avoid timeout
 const MAX_RETRIES = 3; // Maximum retries for 520 errors
 
 // Xử lý phản hồi API và trích xuất cầu thủ + cursor
