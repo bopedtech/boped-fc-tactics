@@ -1,48 +1,240 @@
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import Header from "@/components/Header";
+import AISearchBar from "@/components/AISearchBar";
 import { Button } from "@/components/ui/button";
-import { Database, Users, Zap, TrendingUp } from "lucide-react";
-import logoImage from "@/assets/bopedfctactics-logo.png";
+import { Card } from "@/components/ui/card";
+import { Database, Users, Zap, Sparkles, TrendingUp, Shield, Award } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const Index = () => {
+  const [featuredPlayers, setFeaturedPlayers] = useState<any[]>([]);
+  const [formations, setFormations] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchFeaturedData();
+  }, []);
+
+  const fetchFeaturedData = async () => {
+    try {
+      // Fetch top-rated players
+      const { data: players, error: playersError } = await supabase
+        .from("players")
+        .select("*")
+        .eq("is_visible", true)
+        .order("rating", { ascending: false })
+        .limit(12);
+
+      if (playersError) throw playersError;
+      setFeaturedPlayers(players || []);
+
+      // Fetch popular formations
+      const { data: formationsData, error: formationsError } = await supabase
+        .from("formations")
+        .select("*")
+        .limit(6);
+
+      if (formationsError) throw formationsError;
+      setFormations(formationsData || []);
+    } catch (error: any) {
+      console.error("Error fetching featured data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const quickLinks = [
+    {
+      icon: Database,
+      title: "Cơ sở dữ liệu",
+      description: "Tìm kiếm và phân tích cầu thủ",
+      link: "/database",
+      gradient: "from-blue-500/20 to-cyan-500/20",
+    },
+    {
+      icon: Zap,
+      title: "Squad Builder",
+      description: "Xây dựng đội hình tối ưu",
+      link: "/builder",
+      gradient: "from-purple-500/20 to-pink-500/20",
+    },
+    {
+      icon: TrendingUp,
+      title: "Đội hình của tôi",
+      description: "Quản lý các squad đã lưu",
+      link: "/my-squads",
+      gradient: "from-orange-500/20 to-red-500/20",
+    },
+  ];
+
   return (
     <div className="min-h-screen">
       <Header />
 
-      {/* Hero Section */}
-      <section className="relative overflow-hidden py-20 md:py-32">
-        <div className="absolute inset-0 gradient-glow opacity-20" />
+      {/* AI Search Hero */}
+      <section className="relative overflow-hidden py-16 md:py-24">
+        <div className="absolute inset-0 gradient-glow opacity-10" />
         <div className="container relative z-10 mx-auto px-4">
-          <div className="text-center max-w-4xl mx-auto">
-            <div className="flex justify-center mb-8">
-              <div className="bg-white rounded-full p-8 shadow-lg">
-                <img 
-                  src={logoImage} 
-                  alt="BopedFCTactics Logo" 
-                  className="h-48 md:h-64 w-auto"
-                />
-              </div>
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
+              <Sparkles className="h-4 w-4 text-primary" />
+              <span className="text-sm font-medium">AI-Powered Squad Builder</span>
             </div>
-            <h1 className="text-5xl md:text-7xl font-bold mb-6">
+            <h1 className="text-4xl md:text-6xl font-bold mb-4">
               <span className="gradient-primary bg-clip-text text-transparent">
                 BopedFCTactics
               </span>
             </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground mb-8">
-              Xây dựng đội hình FC Mobile tối ưu với AI
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-12">
+              Xây dựng đội hình FC Mobile hoàn hảo với sự trợ giúp của AI
             </p>
-            <p className="text-lg text-foreground/80 mb-12 max-w-2xl mx-auto">
-              Công cụ phân tích chiến thuật thông minh giúp bạn tạo ra đội hình hoàn hảo 
-              cho FC Mobile, với gợi ý từ AI về lối chơi và thiết lập Manager Mode tùy chỉnh.
+          </div>
+
+          <AISearchBar />
+        </div>
+      </section>
+
+      {/* Quick Links */}
+      <section className="py-12 border-t border-border/40">
+        <div className="container mx-auto px-4">
+          <div className="grid md:grid-cols-3 gap-6">
+            {quickLinks.map((link, idx) => (
+              <Link key={idx} to={link.link}>
+                <Card className="card-hover p-6 border-border/50 hover:border-primary/50 transition-all group">
+                  <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${link.gradient} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+                    <link.icon className="h-6 w-6 text-foreground" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">{link.title}</h3>
+                  <p className="text-muted-foreground text-sm">{link.description}</p>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Players */}
+      <section className="py-12 border-t border-border/40">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-2xl md:text-3xl font-bold mb-2">Cầu thủ nổi bật</h2>
+              <p className="text-muted-foreground">Top cầu thủ được đánh giá cao nhất</p>
+            </div>
+            <Button variant="outline" asChild>
+              <Link to="/database">
+                Xem tất cả
+                <Users className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+
+          {loading ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {[...Array(12)].map((_, i) => (
+                <div key={i} className="animate-pulse bg-card rounded-lg h-48" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {featuredPlayers.map((player) => (
+                <Card
+                  key={player.assetId}
+                  className="card-hover p-4 border-border/50 hover:border-primary/50 transition-all group cursor-pointer"
+                  onClick={() => toast.info("Chi tiết cầu thủ - Coming soon!")}
+                >
+                  <div className="relative mb-2">
+                    <div className="absolute top-0 left-0 bg-primary text-primary-foreground text-xs font-bold px-2 py-1 rounded">
+                      {player.rating}
+                    </div>
+                    <div className="aspect-square bg-gradient-to-br from-primary/10 to-purple-500/10 rounded-lg flex items-center justify-center">
+                      {player.images?.portrait ? (
+                        <img
+                          src={player.images.portrait}
+                          alt={player.commonName || player.lastName}
+                          className="w-full h-full object-cover rounded-lg"
+                        />
+                      ) : (
+                        <Shield className="h-12 w-12 text-muted-foreground" />
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <p className="font-bold text-sm truncate">
+                      {player.commonName || player.lastName}
+                    </p>
+                    <p className="text-xs text-muted-foreground">{player.position}</p>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Featured Formations */}
+      <section className="py-12 border-t border-border/40">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-2xl md:text-3xl font-bold mb-2">Sơ đồ chiến thuật phổ biến</h2>
+              <p className="text-muted-foreground">Các formation được sử dụng nhiều nhất</p>
+            </div>
+            <Button variant="outline" asChild>
+              <Link to="/builder">
+                Xây đội hình
+                <Zap className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+
+          {loading ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="animate-pulse bg-card rounded-lg h-32" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              {formations.map((formation) => (
+                <Card
+                  key={formation.id}
+                  className="card-hover p-4 border-border/50 hover:border-primary/50 transition-all group cursor-pointer"
+                  onClick={() => toast.info("Sử dụng formation này trong Builder!")}
+                >
+                  <div className="text-center">
+                    <div className="mb-2 text-3xl font-bold text-primary">{formation.nameEn}</div>
+                    <p className="text-sm font-medium">{formation.name}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{formation.category}</p>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* AI Features Highlight */}
+      <section className="py-16 border-t border-border/40 bg-gradient-to-b from-primary/5 to-transparent">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto text-center">
+            <Sparkles className="h-12 w-12 text-primary mx-auto mb-4" />
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              AI trợ lý chiến thuật thông minh
+            </h2>
+            <p className="text-lg text-muted-foreground mb-8">
+              Nhận gợi ý cầu thủ, sơ đồ chiến thuật và Manager Mode tối ưu từ AI
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="gradient-primary text-lg px-8" asChild>
+            <div className="flex flex-wrap gap-4 justify-center">
+              <Button size="lg" className="gradient-primary" asChild>
                 <Link to="/builder">
                   <Zap className="mr-2 h-5 w-5" />
                   Bắt đầu xây dựng
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" className="text-lg px-8" asChild>
+              <Button size="lg" variant="outline" asChild>
                 <Link to="/database">
                   <Database className="mr-2 h-5 w-5" />
                   Khám phá cầu thủ
@@ -50,117 +242,6 @@ const Index = () => {
               </Button>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="py-20 border-t border-border/40">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">
-            Tính năng nổi bật
-          </h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="card-hover bg-card rounded-lg p-6 border border-border/50">
-              <div className="w-12 h-12 rounded-lg gradient-primary flex items-center justify-center mb-4">
-                <Database className="h-6 w-6 text-white" />
-              </div>
-              <h3 className="text-xl font-bold mb-2">Danh sách cầu thủ</h3>
-              <p className="text-muted-foreground">
-                Tra cứu và lọc hàng trăm cầu thủ với thông tin chi tiết về chỉ số và đặc điểm.
-              </p>
-            </div>
-
-            <div className="card-hover bg-card rounded-lg p-6 border border-border/50">
-              <div className="w-12 h-12 rounded-lg gradient-primary flex items-center justify-center mb-4">
-                <Users className="h-6 w-6 text-white" />
-              </div>
-              <h3 className="text-xl font-bold mb-2">Xây dựng đội hình</h3>
-              <p className="text-muted-foreground">
-                Xây dựng đội hình FC Mobile với giao diện kéo thả trực quan, hỗ trợ nhiều sơ đồ chiến thuật phổ biến.
-              </p>
-            </div>
-
-            <div className="card-hover bg-card rounded-lg p-6 border border-border/50">
-              <div className="w-12 h-12 rounded-lg gradient-primary flex items-center justify-center mb-4">
-                <Zap className="h-6 w-6 text-white" />
-              </div>
-              <h3 className="text-xl font-bold mb-2">Trợ lý AI chiến thuật</h3>
-              <p className="text-muted-foreground">
-                Nhận gợi ý Manager Mode thông minh dựa trên đội hình và lối chơi bạn chọn, tối ưu cho FC Mobile.
-              </p>
-            </div>
-
-            <div className="card-hover bg-card rounded-lg p-6 border border-border/50">
-              <div className="w-12 h-12 rounded-lg gradient-primary flex items-center justify-center mb-4">
-                <TrendingUp className="h-6 w-6 text-white" />
-              </div>
-              <h3 className="text-xl font-bold mb-2">Phân tích chi tiết</h3>
-              <p className="text-muted-foreground">
-                Nhận phân tích sâu về điểm mạnh, điểm yếu và cách tối ưu hóa đội hình.
-              </p>
-            </div>
-
-            <div className="card-hover bg-card rounded-lg p-6 border border-border/50">
-              <div className="w-12 h-12 rounded-lg gradient-primary flex items-center justify-center mb-4">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-6 w-6 text-white"
-                >
-                  <path d="M3 3v18h18" />
-                  <path d="m19 9-5 5-4-4-3 3" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold mb-2">Lưu trữ đội hình</h3>
-              <p className="text-muted-foreground">
-                Lưu và quản lý nhiều đội hình khác nhau cho các trận đấu và giải đấu.
-              </p>
-            </div>
-
-            <div className="card-hover bg-card rounded-lg p-6 border border-border/50">
-              <div className="w-12 h-12 rounded-lg gradient-primary flex items-center justify-center mb-4">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-6 w-6 text-white"
-                >
-                  <circle cx="12" cy="12" r="10" />
-                  <polyline points="12 6 12 12 16 14" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold mb-2">Cập nhật liên tục</h3>
-              <p className="text-muted-foreground">
-                Dữ liệu cầu thủ và tính năng được cập nhật thường xuyên theo mùa giải.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-20 border-t border-border/40">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Sẵn sàng xây dựng đội hình chiến thắng?
-          </h2>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Tham gia ngay để trải nghiệm công cụ quản lý đội hình thông minh nhất
-          </p>
-          <Button size="lg" className="gradient-primary text-lg px-8" asChild>
-            <Link to="/auth">
-              Bắt đầu miễn phí
-            </Link>
-          </Button>
         </div>
       </section>
     </div>
