@@ -321,15 +321,7 @@ export type Database = {
           workRateDef?: number | null
           workRates?: Json | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "fk_players_source_programs"
-            columns: ["source"]
-            isOneToOne: false
-            referencedRelation: "programs"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       profiles: {
         Row: {
