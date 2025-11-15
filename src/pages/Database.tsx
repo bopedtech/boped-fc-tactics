@@ -345,11 +345,12 @@ export default function Database() {
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {allPlayers.map((player) => (
-                    <PlayerCard 
-                      key={player.assetId} 
-                      player={player as any} 
-                      onClick={() => handlePlayerClick(player.assetId)}
-                    />
+                    <div key={player.assetId} className="max-w-[280px] mx-auto">
+                      <PlayerCard 
+                        player={player as any} 
+                        onClick={() => handlePlayerClick(player.assetId)}
+                      />
+                    </div>
                   ))}
                 </div>
                 
