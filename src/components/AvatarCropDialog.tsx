@@ -110,6 +110,10 @@ export function AvatarCropDialog({ open, onClose, imageSrc, onCropComplete }: Av
           <DialogTitle>Cắt ảnh đại diện</DialogTitle>
         </DialogHeader>
         
+        <p className="text-sm text-muted-foreground px-6">
+          Di chuyển và thu phóng ảnh để chọn vùng bạn muốn làm ảnh đại diện
+        </p>
+        
         <div className="relative h-[400px] bg-muted">
           <Cropper
             image={imageSrc}
