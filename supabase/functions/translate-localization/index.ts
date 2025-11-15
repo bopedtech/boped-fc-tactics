@@ -23,24 +23,29 @@ Deno.serve(async (req) => {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    // Fetch all records that need translation (where value_vi is null or empty)
+    // Limit to 200 records per invocation to avoid timeout
+    const MAX_RECORDS_PER_RUN = 200;
+    
+    // Fetch limited records that need translation (where value_vi is null or empty)
     const { data: records, error: fetchError } = await supabase
       .from('localization_dictionary')
       .select('key, value_en')
-      .or('value_vi.is.null,value_vi.eq.');
+      .or('value_vi.is.null,value_vi.eq.')
+      .limit(MAX_RECORDS_PER_RUN);
 
     if (fetchError) {
       throw new Error(`Failed to fetch records: ${fetchError.message}`);
     }
 
-    console.log(`Found ${records?.length || 0} records to translate`);
+    console.log(`Found ${records?.length || 0} records to translate in this batch`);
 
     if (!records || records.length === 0) {
       return new Response(
         JSON.stringify({
           success: true,
           message: 'No records to translate',
-          translated: 0
+          translated: 0,
+          remaining: 0
         }),
         { 
           status: 200,
@@ -49,7 +54,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Process in batches to avoid rate limits and timeouts
+    // Process in batches to avoid rate limits
     const BATCH_SIZE = 20;
     let totalTranslated = 0;
 
@@ -121,18 +126,25 @@ Deno.serve(async (req) => {
 
       // Add small delay between batches to avoid rate limiting
       if (i + BATCH_SIZE < records.length) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
     }
 
+    // Check if there are more records to translate
+    const { count: remainingCount } = await supabase
+      .from('localization_dictionary')
+      .select('*', { count: 'exact', head: true })
+      .or('value_vi.is.null,value_vi.eq.');
+
     const result = {
       success: true,
-      message: 'Translation completed successfully',
-      totalRecords: records.length,
-      translated: totalTranslated
+      message: totalTranslated === records.length ? 'Translation batch completed successfully' : 'Partial translation completed',
+      translated: totalTranslated,
+      remaining: (remainingCount || 0) - totalTranslated,
+      hasMore: ((remainingCount || 0) - totalTranslated) > 0
     };
 
-    console.log('=== Translation Complete ===', result);
+    console.log('=== Translation Batch Complete ===', result);
 
     return new Response(
       JSON.stringify(result),
