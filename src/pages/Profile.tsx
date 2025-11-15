@@ -6,8 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { toast } from "sonner";
-import { Loader2, Save, User } from "lucide-react";
+import { Loader2, Save, User, Upload, Plus, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import { z } from "zod";
@@ -18,25 +20,34 @@ const profileSchema = z.object({
   age: z.number().min(1, "Tuổi phải lớn hơn 0").max(120, "Tuổi không hợp lệ").optional().nullable(),
   bio: z.string().max(500, "Giới thiệu không được quá 500 ký tự").optional(),
   fc_mobile_experience: z.string().max(100).optional(),
-  favorite_formation: z.string().max(50).optional(),
-  favorite_position: z.string().max(20).optional(),
 });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
+
+interface Squad {
+  id: string;
+  squadName: string;
+  formation: string;
+  lineup: any;
+  playstyle?: string;
+  createdAt: string;
+}
 
 export default function Profile() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [squads, setSquads] = useState<Squad[]>([]);
+  const [squadsLoading, setSquadsLoading] = useState(false);
   const [formData, setFormData] = useState<ProfileFormData>({
     full_name: "",
     display_name: "",
     age: null,
     bio: "",
     fc_mobile_experience: "Người mới",
-    favorite_formation: "",
-    favorite_position: "",
   });
 
   useEffect(() => {
@@ -55,6 +66,7 @@ export default function Profile() {
 
       setUser(user);
       await fetchProfile(user.id);
+      await fetchSquads(user.id);
     } catch (error) {
       console.error("Auth error:", error);
       navigate("/auth");
@@ -79,15 +91,91 @@ export default function Profile() {
           age: data.age,
           bio: data.bio || "",
           fc_mobile_experience: data.fc_mobile_experience || "Người mới",
-          favorite_formation: data.favorite_formation || "",
-          favorite_position: data.favorite_position || "",
         });
+        setAvatarUrl(data.avatar_url);
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
       toast.error("Không thể tải thông tin profile");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchSquads = async (userId: string) => {
+    try {
+      setSquadsLoading(true);
+      const { data, error } = await supabase
+        .from("squads")
+        .select("*")
+        .eq("userId", userId)
+        .order("createdAt", { ascending: false });
+
+      if (error) throw error;
+      setSquads(data || []);
+    } catch (error: any) {
+      toast.error("Không thể tải đội hình");
+      console.error(error);
+    } finally {
+      setSquadsLoading(false);
+    }
+  };
+
+  const deleteSquad = async (id: string) => {
+    try {
+      const { error } = await supabase.from("squads").delete().eq("id", id);
+
+      if (error) throw error;
+
+      setSquads(squads.filter((s) => s.id !== id));
+      toast.success("Đã xóa đội hình");
+    } catch (error: any) {
+      toast.error("Không thể xóa đội hình");
+      console.error(error);
+    }
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || !e.target.files[0] || !user) return;
+
+    const file = e.target.files[0];
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${user.id}-${Math.random()}.${fileExt}`;
+    const filePath = `avatars/${fileName}`;
+
+    try {
+      setUploading(true);
+
+      // Upload file
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      // Update profile with avatar URL
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .upsert({
+          user_id: user.id,
+          avatar_url: publicUrl,
+          updated_at: new Date().toISOString(),
+        });
+
+      if (updateError) throw updateError;
+
+      setAvatarUrl(publicUrl);
+      toast.success("Đã cập nhật avatar!");
+    } catch (error: any) {
+      toast.error("Không thể tải avatar lên");
+      console.error(error);
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -128,10 +216,11 @@ export default function Profile() {
     }
   };
 
-  const handleChange = (field: keyof ProfileFormData, value: any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { id, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [field]: value
+      [id]: id === 'age' ? (value ? parseInt(value) : null) : value
     }));
   };
 
@@ -150,181 +239,243 @@ export default function Profile() {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <div className="container mx-auto px-4 py-8 max-w-3xl">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Hồ Sơ Cá Nhân</h1>
-          <p className="text-muted-foreground">
-            Quản lý thông tin cá nhân và tùy chỉnh trải nghiệm của bạn
-          </p>
-        </div>
+      <div className="container mx-auto py-8 max-w-4xl">
+        <Tabs defaultValue="profile" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="profile">Thông tin cá nhân</TabsTrigger>
+            <TabsTrigger value="squads">Đội hình của tôi</TabsTrigger>
+          </TabsList>
 
-        <form onSubmit={handleSubmit}>
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <User className="w-5 h-5" />
-                <CardTitle>Thông Tin Cơ Bản</CardTitle>
-              </div>
-              <CardDescription>
-                Cập nhật thông tin của bạn để cộng đồng dễ dàng kết nối
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Full Name */}
-              <div className="space-y-2">
-                <Label htmlFor="full_name">Tên đầy đủ</Label>
-                <Input
-                  id="full_name"
-                  value={formData.full_name}
-                  onChange={(e) => handleChange("full_name", e.target.value)}
-                  placeholder="Nguyễn Văn A"
-                  maxLength={100}
-                />
-              </div>
+          <TabsContent value="profile">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <User className="h-6 w-6" />
+                    <CardTitle>Thông tin cá nhân</CardTitle>
+                  </div>
+                </div>
+                <CardDescription>
+                  Cập nhật thông tin profile của bạn
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="flex flex-col items-center space-y-4 mb-6">
+                    <Avatar className="h-24 w-24">
+                      <AvatarImage src={avatarUrl || undefined} />
+                      <AvatarFallback>
+                        {formData.display_name?.charAt(0)?.toUpperCase() || <User className="h-12 w-12" />}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <input
+                        type="file"
+                        id="avatar-upload"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleAvatarUpload}
+                        disabled={uploading}
+                      />
+                      <Label htmlFor="avatar-upload">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={uploading}
+                          onClick={() => document.getElementById('avatar-upload')?.click()}
+                        >
+                          {uploading ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Đang tải...
+                            </>
+                          ) : (
+                            <>
+                              <Upload className="mr-2 h-4 w-4" />
+                              Tải avatar lên
+                            </>
+                          )}
+                        </Button>
+                      </Label>
+                    </div>
+                  </div>
 
-              {/* Display Name */}
-              <div className="space-y-2">
-                <Label htmlFor="display_name">Tên hiển thị</Label>
-                <Input
-                  id="display_name"
-                  value={formData.display_name}
-                  onChange={(e) => handleChange("display_name", e.target.value)}
-                  placeholder="VanA_Gaming"
-                  maxLength={50}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Tên này sẽ hiển thị công khai trong cộng đồng
-                </p>
-              </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="display_name">Tên hiển thị</Label>
+                    <Input
+                      id="display_name"
+                      value={formData.display_name || ""}
+                      onChange={handleChange}
+                      placeholder="Tên hiển thị trong ứng dụng"
+                    />
+                  </div>
 
-              {/* Age */}
-              <div className="space-y-2">
-                <Label htmlFor="age">Tuổi</Label>
-                <Input
-                  id="age"
-                  type="number"
-                  value={formData.age || ""}
-                  onChange={(e) => handleChange("age", e.target.value ? parseInt(e.target.value) : null)}
-                  placeholder="25"
-                  min="1"
-                  max="120"
-                />
-              </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="full_name">Tên đầy đủ</Label>
+                      <Input
+                        id="full_name"
+                        value={formData.full_name || ""}
+                        onChange={handleChange}
+                        placeholder="Nhập tên đầy đủ"
+                      />
+                    </div>
 
-              {/* Bio */}
-              <div className="space-y-2">
-                <Label htmlFor="bio">Giới thiệu</Label>
-                <Textarea
-                  id="bio"
-                  value={formData.bio}
-                  onChange={(e) => handleChange("bio", e.target.value)}
-                  placeholder="Chia sẻ một chút về bản thân bạn..."
-                  rows={4}
-                  maxLength={500}
-                />
-                <p className="text-xs text-muted-foreground">
-                  {formData.bio?.length || 0}/500 ký tự
-                </p>
-              </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="age">Tuổi</Label>
+                      <Input
+                        id="age"
+                        type="number"
+                        value={formData.age || ""}
+                        onChange={handleChange}
+                        placeholder="Tuổi"
+                      />
+                    </div>
+                  </div>
 
-              {/* FC Mobile Experience */}
-              <div className="space-y-2">
-                <Label htmlFor="fc_mobile_experience">Kinh nghiệm chơi FC Mobile</Label>
-                <Select
-                  value={formData.fc_mobile_experience}
-                  onValueChange={(value) => handleChange("fc_mobile_experience", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Chọn mức độ" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Người mới">Người mới (0-6 tháng)</SelectItem>
-                    <SelectItem value="Trung bình">Trung bình (6-12 tháng)</SelectItem>
-                    <SelectItem value="Có kinh nghiệm">Có kinh nghiệm (1-2 năm)</SelectItem>
-                    <SelectItem value="Chuyên nghiệp">Chuyên nghiệp (2+ năm)</SelectItem>
-                    <SelectItem value="Pro Player">Pro Player / Thi đấu</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="fc_mobile_experience">Kinh nghiệm FC Mobile</Label>
+                    <Select
+                      value={formData.fc_mobile_experience}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, fc_mobile_experience: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Người mới">Người mới</SelectItem>
+                        <SelectItem value="Trung bình">Trung bình</SelectItem>
+                        <SelectItem value="Có kinh nghiệm">Có kinh nghiệm</SelectItem>
+                        <SelectItem value="Chuyên nghiệp">Chuyên nghiệp</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-              {/* Favorite Formation */}
-              <div className="space-y-2">
-                <Label htmlFor="favorite_formation">Sơ đồ chiến thuật yêu thích</Label>
-                <Select
-                  value={formData.favorite_formation}
-                  onValueChange={(value) => handleChange("favorite_formation", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Chọn sơ đồ" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="4-3-3">4-3-3</SelectItem>
-                    <SelectItem value="4-4-2">4-4-2</SelectItem>
-                    <SelectItem value="4-2-3-1">4-2-3-1</SelectItem>
-                    <SelectItem value="3-5-2">3-5-2</SelectItem>
-                    <SelectItem value="5-3-2">5-3-2</SelectItem>
-                    <SelectItem value="4-1-2-1-2">4-1-2-1-2</SelectItem>
-                    <SelectItem value="4-3-1-2">4-3-1-2</SelectItem>
-                    <SelectItem value="3-4-3">3-4-3</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="bio">Giới thiệu</Label>
+                    <Textarea
+                      id="bio"
+                      value={formData.bio || ""}
+                      onChange={handleChange}
+                      placeholder="Viết một vài dòng về bản thân..."
+                      rows={3}
+                    />
+                  </div>
 
-              {/* Favorite Position */}
-              <div className="space-y-2">
-                <Label htmlFor="favorite_position">Vị trí yêu thích</Label>
-                <Select
-                  value={formData.favorite_position}
-                  onValueChange={(value) => handleChange("favorite_position", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Chọn vị trí" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="GK">Thủ môn (GK)</SelectItem>
-                    <SelectItem value="CB">Trung vệ (CB)</SelectItem>
-                    <SelectItem value="LB">Hậu vệ trái (LB)</SelectItem>
-                    <SelectItem value="RB">Hậu vệ phải (RB)</SelectItem>
-                    <SelectItem value="CDM">Tiền vệ phòng ngự (CDM)</SelectItem>
-                    <SelectItem value="CM">Tiền vệ trung tâm (CM)</SelectItem>
-                    <SelectItem value="CAM">Tiền vệ tấn công (CAM)</SelectItem>
-                    <SelectItem value="LW">Cánh trái (LW)</SelectItem>
-                    <SelectItem value="RW">Cánh phải (RW)</SelectItem>
-                    <SelectItem value="ST">Tiền đạo (ST)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+                  <div className="flex gap-3 pt-4">
+                    <Button
+                      type="submit"
+                      className="flex-1 gradient-primary"
+                      disabled={saving}
+                    >
+                      {saving ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Đang lưu...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="mr-2 h-4 w-4" />
+                          Lưu thay đổi
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => navigate("/")}
+                    >
+                      Hủy
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-              {/* Save Button */}
-              <div className="flex gap-4 pt-4">
+          <TabsContent value="squads">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold">Đội hình của tôi</h2>
+                  <p className="text-muted-foreground">
+                    Quản lý các đội hình bạn đã tạo
+                  </p>
+                </div>
                 <Button
-                  type="submit"
-                  disabled={saving}
-                  className="flex-1"
+                  className="gradient-primary"
+                  onClick={() => navigate("/builder")}
                 >
-                  {saving ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Đang lưu...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="mr-2 h-4 w-4" />
-                      Lưu thay đổi
-                    </>
-                  )}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => navigate("/")}
-                >
-                  Hủy
+                  <Plus className="h-4 w-4 mr-2" />
+                  Tạo đội hình mới
                 </Button>
               </div>
-            </CardContent>
-          </Card>
-        </form>
+
+              {squadsLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="h-64 bg-card animate-pulse rounded-lg" />
+                  ))}
+                </div>
+              ) : squads.length === 0 ? (
+                <Card className="p-16">
+                  <div className="text-center">
+                    <div className="mb-4 text-6xl">⚽</div>
+                    <h3 className="text-2xl font-bold mb-2">Chưa có đội hình nào</h3>
+                    <p className="text-muted-foreground mb-6">
+                      Bắt đầu xây dựng đội hình đầu tiên của bạn
+                    </p>
+                    <Button
+                      className="gradient-primary"
+                      onClick={() => navigate("/builder")}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Tạo đội hình
+                    </Button>
+                  </div>
+                </Card>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {squads.map((squad) => (
+                    <Card key={squad.id} className="p-6 card-hover">
+                      <div className="mb-4">
+                        <h3 className="text-xl font-bold mb-1">{squad.squadName}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Sơ đồ: {squad.formation}
+                        </p>
+                        {squad.playstyle && (
+                          <p className="text-sm text-muted-foreground">
+                            Phong cách: {squad.playstyle}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          className="flex-1"
+                          onClick={() => navigate(`/builder?squad=${squad.id}`)}
+                        >
+                          Chỉnh sửa
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => deleteSquad(squad.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
