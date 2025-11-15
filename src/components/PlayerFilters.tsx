@@ -234,7 +234,7 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
               <span>{filters.ratingRange[1]}</span>
             </div>
             <Slider
-              min={0}
+              min={40}
               max={125}
               step={1}
               value={filters.ratingRange}
