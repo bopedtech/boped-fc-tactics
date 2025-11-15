@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Facebook, Twitter, Youtube, Mail, MapPin, Phone, MessageCircle } from "lucide-react";
 import bopedLogo from "@/assets/bopedfctactics-logo.png";
+import bopedDevLogo from "@/assets/boped-developer-logo.png";
 
 const Footer = () => {
   return (
@@ -125,7 +126,7 @@ const Footer = () => {
         <div className="mt-12 pt-8 border-t border-border/40">
           <div className="flex flex-col md:flex-row items-center justify-center gap-4">
             <div className="flex items-center gap-3">
-              <img src={bopedLogo} alt="Boped" className="h-10 w-10 rounded-full object-cover" />
+              <img src={bopedDevLogo} alt="Boped" className="h-10 w-10 rounded-full object-cover" />
               <span className="text-sm text-muted-foreground">
                 Website được phát triển bởi <span className="text-primary font-semibold">Boped</span>
               </span>
