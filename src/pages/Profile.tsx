@@ -172,23 +172,26 @@ export default function Profile() {
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
+      // Get public URL with timestamp to force refresh
+      const timestamp = new Date().getTime();
       const { data: { publicUrl } } = supabase.storage
         .from('avatars')
         .getPublicUrl(filePath);
+      
+      const finalUrl = `${publicUrl}?t=${timestamp}`;
 
       // Update profile with avatar URL
       const { error: updateError } = await supabase
         .from('profiles')
-        .upsert({
-          user_id: user.id,
-          avatar_url: publicUrl,
+        .update({
+          avatar_url: finalUrl,
           updated_at: new Date().toISOString(),
-        });
+        })
+        .eq('user_id', user.id);
 
       if (updateError) throw updateError;
 
-      setAvatarUrl(publicUrl);
+      setAvatarUrl(finalUrl);
       toast.success("Đã cập nhật avatar!");
     } catch (error: any) {
       toast.error("Không thể tải avatar lên");
