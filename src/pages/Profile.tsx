@@ -193,6 +193,9 @@ export default function Profile() {
 
       setAvatarUrl(finalUrl);
       toast.success("Đã cập nhật avatar!");
+      
+      // Trigger event to update avatar in Header
+      window.dispatchEvent(new CustomEvent('avatarUpdated', { detail: { avatarUrl: finalUrl } }));
     } catch (error: any) {
       toast.error("Không thể tải avatar lên");
       console.error(error);

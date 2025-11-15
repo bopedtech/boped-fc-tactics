@@ -47,7 +47,17 @@ export default function Header() {
       }
     });
 
-    return () => subscription.unsubscribe();
+    // Listen for avatar updates
+    const handleAvatarUpdate = (event: CustomEvent) => {
+      setAvatarUrl(event.detail.avatarUrl);
+    };
+
+    window.addEventListener('avatarUpdated', handleAvatarUpdate as EventListener);
+
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener('avatarUpdated', handleAvatarUpdate as EventListener);
+    };
   }, []);
 
   const fetchAvatar = async (userId: string) => {
