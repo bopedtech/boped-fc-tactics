@@ -8,6 +8,8 @@ import Database from "./pages/Database";
 import Builder from "./pages/Builder";
 import MySquads from "./pages/MySquads";
 import Profile from "./pages/Profile";
+import News from "./pages/News";
+import NewsDetail from "./pages/NewsDetail";
 import NotFound from "./pages/NotFound";
 import AdminLayout from "./pages/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -32,6 +34,8 @@ const App = () => (
         <Route path="/builder" element={<Builder />} />
         <Route path="/my-squads" element={<MySquads />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/news" element={<News />} />
+        <Route path="/news/:id" element={<NewsDetail />} />
         
         {/* Admin Routes with Sidebar Layout */}
         <Route path="/admin" element={<AdminLayout />}>

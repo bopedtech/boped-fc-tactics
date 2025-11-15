@@ -140,6 +140,15 @@ export default function Header() {
             >
               Xây dựng đội hình
             </Link>
+            <Link
+              to="/news"
+              className={cn(
+                "transition-colors hover:text-primary",
+                isActive("/news") ? "text-primary font-semibold" : "text-gray-700"
+              )}
+            >
+              Bảng tin
+            </Link>
           </nav>
         </div>
 

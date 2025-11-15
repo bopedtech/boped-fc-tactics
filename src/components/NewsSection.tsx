@@ -1,5 +1,7 @@
 import { Card } from "@/components/ui/card";
-import { Calendar, TrendingUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const NewsSection = () => {
   // Mock news data - in production this would come from an API or database
@@ -42,14 +44,19 @@ const NewsSection = () => {
             <h2 className="text-2xl md:text-3xl font-bold mb-2">Bảng tin FC Mobile</h2>
             <p className="text-muted-foreground">Tin tức và cập nhật mới nhất</p>
           </div>
+          <Button variant="outline" asChild>
+            <Link to="/news">
+              Xem tất cả
+            </Link>
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {news.map((item) => (
-            <Card
-              key={item.id}
-              className="card-hover p-6 border-border/50 hover:border-primary/50 transition-all cursor-pointer"
-            >
+            <Link key={item.id} to={`/news/${item.id}`}>
+              <Card
+                className="card-hover p-6 border-border/50 hover:border-primary/50 transition-all cursor-pointer h-full"
+              >
               <div className="mb-3">
                 <span className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
                   {item.category}
@@ -63,7 +70,8 @@ const NewsSection = () => {
                 <Calendar className="h-3 w-3" />
                 <span>{new Date(item.date).toLocaleDateString("vi-VN")}</span>
               </div>
-            </Card>
+              </Card>
+            </Link>
           ))}
         </div>
       </div>
