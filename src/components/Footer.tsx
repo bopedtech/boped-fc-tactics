@@ -9,7 +9,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
-            <img src={bopedLogo} alt="Boped" className="h-12 w-auto" />
+            <img src={bopedLogo} alt="Boped" className="h-12 w-12 rounded-full object-cover" />
             <p className="text-sm text-muted-foreground">
               Công ty chủ quản của BopedFCTactics - Nền tảng xây dựng đội hình FC Mobile thông minh với AI
             </p>
