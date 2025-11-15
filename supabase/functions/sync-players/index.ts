@@ -53,8 +53,9 @@ interface RawPlayerData {
 
 const RENDERZ_API_URL = 'https://renderz.app/api/search/elasticsearch';
 const BATCH_SIZE = 50; // Increased batch size for better performance
-const DELAY_MS = 800; // 800ms delay between requests
-const MAX_PAGES_PER_INVOCATION = 10; // Process max 10 pages per function call to avoid timeout (frontend will call multiple times)
+const DELAY_MS = 1200; // 1200ms delay between requests to avoid rate limiting
+const MAX_PAGES_PER_INVOCATION = 8; // Process max 8 pages per function call to be more conservative
+const MAX_RETRIES = 3; // Maximum retries for 520 errors
 
 // Xử lý phản hồi API và trích xuất cầu thủ + cursor
 function processApiResponse(responseData: any): { extractedPlayers: RawPlayerData[], nextCursor: any[] | null } {
@@ -208,8 +209,13 @@ Deno.serve(async (req) => {
         console.log(`Using cursor: ${JSON.stringify(cursor)}`);
       }
 
-      // Make request to Renderz API with Android mobile browser headers
-      const response = await fetch(RENDERZ_API_URL, {
+      // Retry logic for 520 errors
+      let retryCount = 0;
+      let response: Response | null = null;
+      
+      while (retryCount <= MAX_RETRIES) {
+        // Make request to Renderz API with Android mobile browser headers
+        response = await fetch(RENDERZ_API_URL, {
         method: 'POST',
         headers: {
           'Accept': '*/*',
@@ -232,18 +238,38 @@ Deno.serve(async (req) => {
         body: JSON.stringify(payload),
       });
 
-      console.log('Response status:', response.status);
+        console.log('Response status:', response.status);
 
-      if (!response.ok) {
-        if (response.status === 429) {
-          console.log('Rate limited (429). Waiting 60 seconds...');
-          await delay(60000);
-          continue; // Retry the same request
+        if (!response.ok) {
+          if (response.status === 429) {
+            console.log('Rate limited (429). Waiting 60 seconds...');
+            await delay(60000);
+            retryCount++;
+            continue; // Retry the same request
+          }
+          
+          if (response.status === 520) {
+            retryCount++;
+            if (retryCount <= MAX_RETRIES) {
+              const waitTime = 30000 * retryCount; // 30s, 60s, 90s
+              console.log(`Got 520 error. Retry ${retryCount}/${MAX_RETRIES}. Waiting ${waitTime/1000} seconds...`);
+              await delay(waitTime);
+              continue; // Retry the same request
+            }
+          }
+          
+          const errorText = await response.text();
+          console.error(`HTTP error! status: ${response.status}`);
+          console.error(`RAW ERROR RESPONSE (first 1000 chars): ${errorText.substring(0, 1000)}`);
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const errorText = await response.text();
-        console.error(`HTTP error! status: ${response.status}`);
-        console.error(`RAW ERROR RESPONSE (first 1000 chars): ${errorText.substring(0, 1000)}`);
-        throw new Error(`HTTP error! status: ${response.status}`);
+        
+        // Success - break out of retry loop
+        break;
+      }
+      
+      if (!response) {
+        throw new Error('Failed to get response after retries');
       }
 
       // Get raw response text first for error logging
