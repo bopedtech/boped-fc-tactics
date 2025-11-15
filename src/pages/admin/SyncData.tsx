@@ -249,14 +249,37 @@ export default function SyncData() {
     try {
       setTranslating(true);
       setTranslationResult(null);
-      toast.info('Đang dịch từ điển sang tiếng Việt...');
+      
+      let totalTranslated = 0;
+      let hasMore = true;
+      let iterations = 0;
+      const MAX_ITERATIONS = 10; // Prevent infinite loops
+      
+      toast.info('Đang bắt đầu dịch từ điển sang tiếng Việt...');
 
-      const { data, error } = await supabase.functions.invoke('translate-localization');
+      while (hasMore && iterations < MAX_ITERATIONS) {
+        iterations++;
+        
+        const { data, error } = await supabase.functions.invoke('translate-localization');
 
-      if (error) throw error;
+        if (error) throw error;
 
-      setTranslationResult(data);
-      toast.success(`Dịch thành công ${data.translated} bản ghi!`);
+        totalTranslated += data.translated;
+        hasMore = data.hasMore;
+        
+        if (hasMore) {
+          toast.info(`Đã dịch ${totalTranslated} bản ghi, còn ${data.remaining} bản ghi. Tiếp tục...`);
+          // Small delay between batches
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
+
+      setTranslationResult({ 
+        success: true, 
+        translated: totalTranslated,
+        message: `Đã hoàn thành dịch ${totalTranslated} bản ghi`
+      });
+      toast.success(`Dịch thành công ${totalTranslated} bản ghi!`);
     } catch (error) {
       console.error("Error translating localization:", error);
       toast.error("Lỗi khi dịch: " + (error as Error).message);
