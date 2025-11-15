@@ -75,6 +75,7 @@ const Index = () => {
       {/* Widgets */}
       <section className="py-8 border-t border-border/40">
         <div className="container mx-auto px-4">
+          <h2 className="text-2xl md:text-3xl font-bold mb-6">Tiện ích</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {widgets.map((widget, idx) => (
               <Link key={idx} to={widget.link}>
