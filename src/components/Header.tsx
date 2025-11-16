@@ -122,7 +122,7 @@ export default function Header() {
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-64">
+              <SheetContent side="left" className="w-64 bg-white z-50">
                 <nav className="flex flex-col gap-4 mt-8">
                   {navItems.map((item) => (
                     <Link
