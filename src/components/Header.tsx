@@ -11,17 +11,21 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { LogOut, Settings, User as UserIcon, Shield } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { LogOut, Settings, User as UserIcon, Shield, Menu } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 import logoImage from "@/assets/bopedfctactics-logo.png";
 
 export default function Header() {
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -100,10 +104,46 @@ export default function Header() {
     return location.pathname === path;
   };
 
+  const navItems = [
+    { path: "/", label: "Trang chủ" },
+    { path: "/database", label: "Danh sách cầu thủ" },
+    { path: "/builder", label: "Xây dựng đội hình" },
+    { path: "/news", label: "Bảng tin" },
+  ];
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-white shadow-sm">
       <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center gap-8">
+        <div className="flex items-center gap-4">
+          {isMobile && (
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="md:hidden">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-64">
+                <nav className="flex flex-col gap-4 mt-8">
+                  {navItems.map((item) => (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={cn(
+                        "text-base transition-colors hover:text-primary px-2 py-2 rounded-md",
+                        isActive(item.path) 
+                          ? "text-primary font-semibold bg-muted" 
+                          : "text-gray-700"
+                      )}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </nav>
+              </SheetContent>
+            </Sheet>
+          )}
+
           <Link to="/" className="flex items-center space-x-2">
             <img 
               src={logoImage} 
@@ -113,46 +153,22 @@ export default function Header() {
           </Link>
 
           <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
-            <Link
-              to="/"
-              className={cn(
-                "transition-colors hover:text-primary",
-                isActive("/") ? "text-primary font-semibold" : "text-gray-700"
-              )}
-            >
-              Trang chủ
-            </Link>
-            <Link
-              to="/database"
-              className={cn(
-                "transition-colors hover:text-primary",
-                isActive("/database") ? "text-primary font-semibold" : "text-gray-700"
-              )}
-            >
-              Danh sách cầu thủ
-            </Link>
-            <Link
-              to="/builder"
-              className={cn(
-                "transition-colors hover:text-primary",
-                isActive("/builder") ? "text-primary font-semibold" : "text-gray-700"
-              )}
-            >
-              Xây dựng đội hình
-            </Link>
-            <Link
-              to="/news"
-              className={cn(
-                "transition-colors hover:text-primary",
-                isActive("/news") ? "text-primary font-semibold" : "text-gray-700"
-              )}
-            >
-              Bảng tin
-            </Link>
+            {navItems.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={cn(
+                  "transition-colors hover:text-primary",
+                  isActive(item.path) ? "text-primary font-semibold" : "text-gray-700"
+                )}
+              >
+                {item.label}
+              </Link>
+            ))}
           </nav>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4">
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
