@@ -56,6 +56,7 @@ const BATCH_SIZE = 50; // Increased batch size for better performance
 const DELAY_MS = 1000; // 1000ms delay between requests to avoid rate limiting
 const MAX_PAGES_PER_INVOCATION = 3; // Process max 3 pages per function call to avoid timeout
 const MAX_RETRIES = 3; // Maximum retries for 502/520 errors
+const JOB_NAME = 'player_sync'; // Unique identifier for sync job
 
 // Xử lý phản hồi API và trích xuất cầu thủ + cursor
 function processApiResponse(responseData: any): { extractedPlayers: RawPlayerData[], nextCursor: any[] | null } {
@@ -156,6 +157,56 @@ async function delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+// Load sync state from database
+async function loadSyncState(supabase: any): Promise<{ cursor: any[] | null, totalSynced: number }> {
+  const { data, error } = await supabase
+    .from('sync_state')
+    .select('last_cursor, is_complete, total_synced')
+    .eq('job_name', JOB_NAME)
+    .single();
+
+  // PGRST116 = Row not found (first run)
+  if (error && error.code !== 'PGRST116') {
+    console.error('Error loading sync state:', error);
+    throw error;
+  }
+
+  // If previous cycle completed or no state exists, start fresh
+  if (data?.is_complete || !data) {
+    console.log('Starting fresh sync cycle');
+    return { cursor: null, totalSynced: 0 };
+  }
+
+  // Continue from last cursor
+  console.log('Resuming from saved state:', { cursor: data.last_cursor, totalSynced: data.total_synced });
+  return { cursor: data.last_cursor, totalSynced: data.total_synced || 0 };
+}
+
+// Save sync state to database
+async function saveSyncState(
+  supabase: any, 
+  cursor: any[] | null, 
+  isComplete: boolean, 
+  totalSynced: number
+) {
+  const { error } = await supabase
+    .from('sync_state')
+    .upsert({
+      job_name: JOB_NAME,
+      last_cursor: cursor,
+      is_complete: isComplete,
+      total_synced: totalSynced,
+      updated_at: new Date().toISOString()
+    });
+
+  if (error) {
+    console.error('Error saving sync state:', error);
+    throw error;
+  }
+  
+  console.log('Saved sync state:', { cursor, isComplete, totalSynced });
+}
+
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -163,23 +214,31 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { mode = 'test', maxPages = 5, cursor: startCursor = null } = await req.json();
+    const { mode = 'test', maxPages = 5 } = await req.json();
     
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     console.log(`Starting search_after pagination sync in ${mode} mode...`);
-    console.log(`Max pages to fetch: ${mode === 'test' ? maxPages : MAX_PAGES_PER_INVOCATION}`);
-    if (startCursor) {
-      console.log(`Resuming from cursor: ${JSON.stringify(startCursor)}`);
-    }
     
-    let totalSynced = 0;
-    let pageCount = 0;
-    let cursor: any[] | null = startCursor; // search_after cursor (can be passed from previous call)
+    // Load sync state from database (resumable sync)
+    const { cursor: startCursor, totalSynced: previousTotalSynced } = await loadSyncState(supabase);
+    
     const isTestMode = mode === 'test';
     const maxPagesToProcess = isTestMode ? maxPages : MAX_PAGES_PER_INVOCATION;
+    
+    console.log(`Max pages to fetch: ${maxPagesToProcess}`);
+    if (startCursor) {
+      console.log(`Resuming from cursor: ${JSON.stringify(startCursor)}`);
+      console.log(`Previously synced: ${previousTotalSynced} players`);
+    }
+    
+    let totalSynced = previousTotalSynced;
+    let currentBatchSynced = 0;
+    let pageCount = 0;
+    let cursor: any[] | null = startCursor;
+    let isSyncComplete = false;
     
     // Pagination loop using search_after
     while (true) {
@@ -287,13 +346,38 @@ Deno.serve(async (req) => {
       
       // Xử lý phản hồi API bằng hàm mới
       const { extractedPlayers, nextCursor } = processApiResponse(data);
+      
+      // Get raw players count before filtering
+      const rawPlayersCount = data.players?.length || 0;
 
-      console.log(`✅ Nhận được ${extractedPlayers.length} cầu thủ hợp lệ ở trang ${pageCount}`);
+      console.log(`✅ Trang ${pageCount}: Nhận ${rawPlayersCount} cầu thủ từ API, ${extractedPlayers.length} hợp lệ sau khi lọc`);
 
-      // Nếu không còn cầu thủ, dừng đồng bộ
-      if (extractedPlayers.length === 0) {
-        console.log('Không còn cầu thủ. Hoàn tất đồng bộ.');
+      // CRITICAL: Check if API returned empty RAW data (true end condition)
+      if (rawPlayersCount === 0) {
+        console.log('API trả về trang rỗng. Hoàn tất đồng bộ.');
+        isSyncComplete = true;
         break;
+      }
+      
+      // IMPORTANT: Even if no valid players after filtering, continue to next page
+      // Only stop when API returns empty raw data
+      if (extractedPlayers.length === 0) {
+        console.warn('Trang này không có cầu thủ hợp lệ sau khi lọc. Tiếp tục sang trang kế tiếp.');
+        // Update cursor and continue - don't break!
+        cursor = nextCursor;
+        if (!cursor) {
+          console.log('Không có cursor tiếp theo. Hoàn tất đồng bộ.');
+          isSyncComplete = true;
+          break;
+        }
+        pageCount++;
+        
+        // Save state even when no valid players (maintain progress)
+        await saveSyncState(supabase, cursor, false, totalSynced);
+        
+        console.log(`Waiting ${DELAY_MS}ms before next request...`);
+        await delay(DELAY_MS);
+        continue; // Skip to next iteration
       }
 
       // Process và prepare data
@@ -317,8 +401,9 @@ Deno.serve(async (req) => {
         throw error;
       }
 
+      currentBatchSynced += processedPlayers.length;
       totalSynced += processedPlayers.length;
-      console.log(`Đã đồng bộ ${processedPlayers.length} cầu thủ. Tổng: ${totalSynced}`);
+      console.log(`Đã đồng bộ ${processedPlayers.length} cầu thủ. Tổng batch: ${currentBatchSynced}, Tổng toàn bộ: ${totalSynced}`);
 
       // Cập nhật cursor từ phản hồi API
       cursor = nextCursor;
@@ -327,8 +412,12 @@ Deno.serve(async (req) => {
         console.log(`Cursor tiếp theo: ${JSON.stringify(cursor)}`);
       } else {
         console.log('Không có cursor tiếp theo. Hoàn tất đồng bộ.');
+        isSyncComplete = true;
         break;
       }
+      
+      // SAVE STATE AFTER EACH PAGE (Durability guarantee)
+      await saveSyncState(supabase, cursor, false, totalSynced);
 
       // Check if reached max pages for this invocation
       if (pageCount >= maxPagesToProcess) {
@@ -341,21 +430,29 @@ Deno.serve(async (req) => {
       await delay(DELAY_MS);
     }
 
-    const hasMore = cursor !== null;
+    // Mark as complete if sync finished
+    if (isSyncComplete) {
+      await saveSyncState(supabase, null, true, totalSynced);
+      console.log('✅ Hoàn tất toàn bộ quá trình đồng bộ.');
+    }
+    
+    const hasMore = !isSyncComplete && cursor !== null;
     const message = isTestMode 
-      ? `Test sync completed: ${totalSynced} players synced (${pageCount} pages)`
-      : hasMore
-        ? `Batch completed: ${totalSynced} players synced (${pageCount} pages). More data available.`
-        : `Full sync completed: ${totalSynced} players synced (${pageCount} pages)`;
+      ? `Test sync completed: ${currentBatchSynced} players synced in this batch (${pageCount} pages). Total: ${totalSynced}`
+      : isSyncComplete
+        ? `🎉 Full sync completed: ${totalSynced} total players synced`
+        : `Batch completed: ${currentBatchSynced} players synced (${pageCount} pages). Total: ${totalSynced}. More data available.`;
 
     return new Response(
       JSON.stringify({
         success: true,
         message,
+        batchPlayers: currentBatchSynced,
         totalPlayers: totalSynced,
         totalPages: pageCount,
         mode,
         hasMore,
+        isComplete: isSyncComplete,
         nextCursor: cursor,
       }),
       {

@@ -470,6 +470,30 @@ export type Database = {
         }
         Relationships: []
       }
+      sync_state: {
+        Row: {
+          is_complete: boolean | null
+          job_name: string
+          last_cursor: Json | null
+          total_synced: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          is_complete?: boolean | null
+          job_name: string
+          last_cursor?: Json | null
+          total_synced?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          is_complete?: boolean | null
+          job_name?: string
+          last_cursor?: Json | null
+          total_synced?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       teams: {
         Row: {
           createdAt: string | null
