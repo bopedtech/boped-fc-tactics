@@ -33,10 +33,9 @@ export default function SyncData() {
       setSyncingPlayers(true);
       setPlayersResult(null);
       
-      let totalSynced = 0;
+      let totalSyncedOverall = 0;
       let totalPages = 0;
       let hasMore = true;
-      let cursor: any[] | null = null;
       let iterations = 0;
       const MAX_ITERATIONS = 334; // Allow up to 1000 pages (334 iterations × 3 pages)
       
@@ -48,32 +47,38 @@ export default function SyncData() {
         const { data, error } = await supabase.functions.invoke('sync-players', {
           body: { 
             mode: mode,
-            maxPages: mode === 'test' ? 5 : undefined,
-            cursor: cursor
+            maxPages: mode === 'test' ? 5 : undefined
           }
         });
 
         if (error) throw error;
 
-        totalSynced += data.totalPlayers;
-        totalPages += data.totalPages;
-        hasMore = data.hasMore;
-        cursor = data.nextCursor;
+        // Update overall totals
+        totalSyncedOverall = data.totalPlayers || totalSyncedOverall;
+        totalPages += data.totalPages || 0;
+        hasMore = data.hasMore && !data.isComplete;
         
-        if (hasMore) {
-          toast.info(`Đã đồng bộ ${totalSynced} cầu thủ (${totalPages} trang). Tiếp tục...`);
+        // Show progress
+        if (data.isComplete) {
+          toast.success(`🎉 Hoàn tất đồng bộ! Tổng cộng ${totalSyncedOverall} cầu thủ đã được đồng bộ.`);
+          break;
+        } else if (hasMore) {
+          toast.info(`Đã đồng bộ ${data.batchPlayers} cầu thủ (Tổng: ${totalSyncedOverall}, ${totalPages} trang). Tiếp tục...`);
           // Small delay between batches
           await new Promise(resolve => setTimeout(resolve, 2000));
         }
       }
 
+      if (iterations >= MAX_ITERATIONS && hasMore) {
+        toast.warning(`Đã đạt giới hạn ${MAX_ITERATIONS} lần gọi. Vui lòng chạy lại để tiếp tục từ vị trí đã dừng.`);
+      }
+
       setPlayersResult({ 
         success: true, 
-        totalPlayers: totalSynced,
+        totalPlayers: totalSyncedOverall,
         totalPages: totalPages,
-        message: `Đã hoàn thành đồng bộ ${totalSynced} cầu thủ từ ${totalPages} trang`
+        message: `Đã hoàn thành đồng bộ ${totalSyncedOverall} cầu thủ từ ${totalPages} trang`
       });
-      toast.success(`Đồng bộ thành công ${totalSynced} cầu thủ!`);
     } catch (error) {
       console.error("Error syncing players:", error);
       toast.error("Lỗi khi đồng bộ cầu thủ: " + (error as Error).message);
