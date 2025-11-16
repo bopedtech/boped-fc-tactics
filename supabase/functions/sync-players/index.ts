@@ -53,9 +53,9 @@ interface RawPlayerData {
 
 const RENDERZ_API_URL = 'https://renderz.app/api/search/elasticsearch';
 const BATCH_SIZE = 50; // Increased batch size for better performance
-const DELAY_MS = 1200; // 1200ms delay between requests to avoid rate limiting
+const DELAY_MS = 2000; // 2000ms delay between requests to avoid rate limiting
 const MAX_PAGES_PER_INVOCATION = 3; // Process max 3 pages per function call to avoid timeout
-const MAX_RETRIES = 3; // Maximum retries for 520 errors
+const MAX_RETRIES = 5; // Maximum retries for 502/520 errors
 
 // Xử lý phản hồi API và trích xuất cầu thủ + cursor
 function processApiResponse(responseData: any): { extractedPlayers: RawPlayerData[], nextCursor: any[] | null } {
@@ -248,11 +248,12 @@ Deno.serve(async (req) => {
             continue; // Retry the same request
           }
           
-          if (response.status === 520) {
+          // Retry for 502 Bad Gateway and 520 errors
+          if (response.status === 502 || response.status === 520) {
             retryCount++;
             if (retryCount <= MAX_RETRIES) {
               const waitTime = 30000 * retryCount; // 30s, 60s, 90s
-              console.log(`Got 520 error. Retry ${retryCount}/${MAX_RETRIES}. Waiting ${waitTime/1000} seconds...`);
+              console.log(`Got ${response.status} error. Retry ${retryCount}/${MAX_RETRIES}. Waiting ${waitTime/1000} seconds...`);
               await delay(waitTime);
               continue; // Retry the same request
             }
