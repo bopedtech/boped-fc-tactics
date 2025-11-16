@@ -96,7 +96,7 @@ export default function HeaderPlayerSearch({ isMobile = false }: HeaderPlayerSea
         variant="ghost"
         size="sm"
         onClick={() => setShowSearch(true)}
-        className="text-foreground hover:text-primary"
+        className="text-black hover:text-primary"
       >
         <Search className="h-5 w-5" />
       </Button>
