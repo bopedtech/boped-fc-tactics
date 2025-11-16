@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import logoImage from "@/assets/bopedfctactics-logo.png";
+import HeaderPlayerSearch from "./HeaderPlayerSearch";
 
 export default function Header() {
   const [user, setUser] = useState<User | null>(null);
@@ -123,23 +124,30 @@ export default function Header() {
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="w-64 bg-white z-50">
-                <nav className="flex flex-col gap-4 mt-8">
-                  {navItems.map((item) => (
-                    <Link
-                      key={item.path}
-                      to={item.path}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={cn(
-                        "text-base transition-colors hover:text-primary px-2 py-2 rounded-md",
-                        isActive(item.path) 
-                          ? "text-primary font-semibold bg-muted" 
-                          : "text-gray-700"
-                      )}
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
-                </nav>
+                <div className="flex flex-col gap-4 mt-4">
+                  {/* Mobile Search */}
+                  <div className="px-2">
+                    <HeaderPlayerSearch isMobile={true} />
+                  </div>
+                  
+                  <nav className="flex flex-col gap-2 mt-4">
+                    {navItems.map((item) => (
+                      <Link
+                        key={item.path}
+                        to={item.path}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={cn(
+                          "text-base transition-colors hover:text-primary px-2 py-2 rounded-md",
+                          isActive(item.path) 
+                            ? "text-primary font-semibold bg-muted" 
+                            : "text-gray-700"
+                        )}
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                  </nav>
+                </div>
               </SheetContent>
             </Sheet>
           )}
@@ -166,6 +174,11 @@ export default function Header() {
               </Link>
             ))}
           </nav>
+        </div>
+
+        {/* Desktop Search */}
+        <div className="hidden md:flex flex-1 justify-center max-w-md mx-4">
+          <HeaderPlayerSearch />
         </div>
 
         <div className="flex items-center gap-2 md:gap-4">
