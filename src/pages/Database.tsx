@@ -5,7 +5,8 @@ import Header from "@/components/Header";
 import PlayerCard from "@/components/PlayerCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Filter, X, Loader2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Search, Filter, X, Loader2, ArrowUpDown } from "lucide-react";
 import { toast } from "sonner";
 import PlayerFilters from "@/components/PlayerFilters";
 import { usePlayerFilters } from "@/hooks/usePlayerFilters";
@@ -70,6 +71,7 @@ export default function Database() {
   const queryClient = useQueryClient();
   const [searchName, setSearchName] = useState("");
   const [showFilters, setShowFilters] = useState(true);
+  const [sortBy, setSortBy] = useState("newest");
   const [countriesData, setCountriesData] = useState<any[]>([]);
   const [teamsData, setTeamsData] = useState<Array<{ id: number; displayName: string; image?: string }>>([]);
   const [leaguesData, setLeaguesData] = useState<Array<{ id: number; displayName: string; image?: string }>>([]);
@@ -133,9 +135,33 @@ export default function Database() {
     let query = supabase
       .from("players")
       .select("*", { count: "exact" })
-      .eq("is_visible", true) // Only show visible players to users
-      .order("rating", { ascending: false })
-      .order("assetId", { ascending: false });
+      .eq("is_visible", true); // Only show visible players to users
+    
+    // Apply sorting
+    switch (sortBy) {
+      case "rating_desc":
+        query = query.order("rating", { ascending: false });
+        break;
+      case "rating_asc":
+        query = query.order("rating", { ascending: true });
+        break;
+      case "name_asc":
+        query = query.order("commonName", { ascending: true, nullsFirst: false });
+        break;
+      case "name_desc":
+        query = query.order("commonName", { ascending: false, nullsFirst: false });
+        break;
+      case "oldest":
+        query = query.order("createdAt", { ascending: true, nullsFirst: false });
+        break;
+      case "newest":
+      default:
+        query = query.order("createdAt", { ascending: false, nullsFirst: false });
+        break;
+    }
+    
+    // Add secondary sort by assetId for consistency
+    query = query.order("assetId", { ascending: false });
 
     // Apply search filter
     if (searchName.trim()) {
@@ -212,7 +238,7 @@ export default function Database() {
     isLoading,
     isError,
   } = useInfiniteQuery({
-    queryKey: ["players", searchName, filters],
+    queryKey: ["players", searchName, filters, sortBy],
     queryFn: fetchPlayersPage,
     getNextPageParam: (lastPage) => lastPage.nextPage,
     initialPageParam: 0,
@@ -305,8 +331,9 @@ export default function Database() {
 
           {/* Player Grid */}
           <div className="flex-1">
+            {/* Mobile header */}
             <div className="mb-4 flex justify-between items-center lg:hidden">
-                <Button
+              <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setShowFilters(true)}
@@ -317,6 +344,47 @@ export default function Database() {
               <p className="text-sm text-muted-foreground">
                 {allPlayers.length} / {totalCount} cầu thủ
               </p>
+            </div>
+
+            {/* Desktop header with sort */}
+            <div className="mb-4 hidden lg:flex justify-between items-center">
+              <p className="text-sm text-muted-foreground">
+                Hiển thị {allPlayers.length} / {totalCount} cầu thủ
+              </p>
+              <div className="flex items-center gap-2">
+                <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue placeholder="Sắp xếp" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="newest">Mới nhất</SelectItem>
+                    <SelectItem value="oldest">Cũ nhất</SelectItem>
+                    <SelectItem value="rating_desc">OVR cao → thấp</SelectItem>
+                    <SelectItem value="rating_asc">OVR thấp → cao</SelectItem>
+                    <SelectItem value="name_asc">Tên A → Z</SelectItem>
+                    <SelectItem value="name_desc">Tên Z → A</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Mobile sort */}
+            <div className="mb-4 flex lg:hidden items-center gap-2">
+              <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="flex-1">
+                  <SelectValue placeholder="Sắp xếp" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">Mới nhất</SelectItem>
+                  <SelectItem value="oldest">Cũ nhất</SelectItem>
+                  <SelectItem value="rating_desc">OVR cao → thấp</SelectItem>
+                  <SelectItem value="rating_asc">OVR thấp → cao</SelectItem>
+                  <SelectItem value="name_asc">Tên A → Z</SelectItem>
+                  <SelectItem value="name_desc">Tên Z → A</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {isLoading ? (
