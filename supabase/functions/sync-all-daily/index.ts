@@ -22,13 +22,7 @@ Deno.serve(async (req) => {
 
     // List of all sync functions to run
     const syncFunctions = [
-      'sync-renderz-nations',
-      'sync-renderz-teams',
-      'sync-renderz-leagues',
-      'sync-renderz-traits',
       'sync-renderz-programs',
-      'sync-renderz-celebrations',
-      'sync-renderz-skillMoves',
       'sync-players',
     ];
 
