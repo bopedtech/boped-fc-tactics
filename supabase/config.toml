@@ -29,3 +29,6 @@ verify_jwt = false
 
 [functions.sync-renderz-skillMoves]
 verify_jwt = false
+
+[functions.sync-all-daily]
+verify_jwt = false
