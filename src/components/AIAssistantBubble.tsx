@@ -12,13 +12,13 @@ interface Message {
 }
 
 const randomGreetings = [
-  "👋 Bấm để chat với AI ngay!",
-  "🤖 Cần trợ giúp? Hỏi tôi đi!",
-  "⚽ Click để hỏi về FC Mobile!",
-  "🎯 Bấm vào để được tư vấn!",
-  "💡 Có thắc mắc? Chat ngay!",
-  "🔥 Bấm để nhận gợi ý đội hình!",
-  "✨ Click ngay để được hỗ trợ!",
+  "Tìm cầu thủ có tốc độ nhanh nhất FC Mobile",
+  "Bấm để nhận gợi ý về chiến thuật giả lập xếp hạng",
+  "Tìm cầu thủ phù hợp với đội hình Tiki-Taka",
+  "Gợi ý cầu thủ có giá trị tốt nhất theo vị trí",
+  "Chiến thuật phòng ngự phản công hiệu quả",
+  "So sánh 2 cầu thủ bất kỳ trong FC Mobile",
+  "Xây dựng đội hình hoàn hảo cho budget của bạn",
 ];
 
 const AIAssistantBubble = () => {
@@ -126,7 +126,7 @@ const AIAssistantBubble = () => {
                 className="w-full h-full object-contain"
               />
             </div>
-            <Bot className="h-5 w-5 absolute bottom-0 right-0 text-primary bg-white rounded-full p-0.5 shadow-md" />
+            <Sparkles className="h-5 w-5 absolute -bottom-0.5 -right-0.5 text-primary bg-white rounded-full p-1 shadow-lg animate-pulse" />
           </div>
         ) : (
           <div className="bg-card border-2 border-primary/30 rounded-2xl shadow-2xl w-[90vw] md:w-[400px] h-[600px] flex flex-col animate-in slide-in-from-bottom duration-300">
