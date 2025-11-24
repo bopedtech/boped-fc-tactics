@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
-import { X, Send, Sparkles, Bot } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { X, Send, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import logoImage from "@/assets/bopedfctactics-logo.png";
 
 interface Message {
@@ -27,6 +28,8 @@ const AIAssistantBubble = () => {
   const [greeting, setGreeting] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Show random greeting every 5 seconds
@@ -67,23 +70,96 @@ const AIAssistantBubble = () => {
     }
   };
 
-  const handleSend = () => {
-    if (!inputValue.trim()) return;
+  const handleSend = async () => {
+    if (!inputValue.trim() || isLoading) return;
 
-    // Add user message
     const userMessage: Message = { role: "user", content: inputValue };
     setMessages(prev => [...prev, userMessage]);
-
-    // Simulate AI response (replace with actual AI call later)
-    setTimeout(() => {
-      const aiMessage: Message = {
-        role: "assistant",
-        content: "Cảm ơn bạn đã nhắn tin! Chức năng AI đang được phát triển. Hiện tại bạn có thể sử dụng thanh tìm kiếm ở trên để tìm cầu thủ nhé! 🎮"
-      };
-      setMessages(prev => [...prev, aiMessage]);
-    }, 1000);
-
     setInputValue("");
+    setIsLoading(true);
+
+    let assistantContent = "";
+    
+    try {
+      const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
+      const response = await fetch(CHAT_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({ messages: [...messages, userMessage] }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Lỗi kết nối");
+      }
+
+      if (!response.body) throw new Error("No response body");
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let textBuffer = "";
+      let streamDone = false;
+
+      // Add initial assistant message
+      setMessages(prev => [...prev, { role: "assistant", content: "" }]);
+
+      while (!streamDone) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        textBuffer += decoder.decode(value, { stream: true });
+
+        let newlineIndex: number;
+        while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
+          let line = textBuffer.slice(0, newlineIndex);
+          textBuffer = textBuffer.slice(newlineIndex + 1);
+
+          if (line.endsWith("\r")) line = line.slice(0, -1);
+          if (line.startsWith(":") || line.trim() === "") continue;
+          if (!line.startsWith("data: ")) continue;
+
+          const jsonStr = line.slice(6).trim();
+          if (jsonStr === "[DONE]") {
+            streamDone = true;
+            break;
+          }
+
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+            if (content) {
+              assistantContent += content;
+              setMessages(prev => {
+                const newMessages = [...prev];
+                const lastMessage = newMessages[newMessages.length - 1];
+                if (lastMessage.role === "assistant") {
+                  lastMessage.content = assistantContent;
+                }
+                return newMessages;
+              });
+            }
+          } catch {
+            textBuffer = line + "\n" + textBuffer;
+            break;
+          }
+        }
+      }
+
+      // Scroll to bottom
+      setTimeout(() => {
+        scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+
+    } catch (error) {
+      console.error("Chat error:", error);
+      toast.error(error instanceof Error ? error.message : "Lỗi khi gửi tin nhắn");
+      setMessages(prev => prev.slice(0, -1)); // Remove empty assistant message
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -118,23 +194,22 @@ const AIAssistantBubble = () => {
             onClick={handleOpen}
             className="h-16 w-16 rounded-full shadow-2xl bg-white hover:scale-110 transition-all cursor-pointer relative overflow-hidden group border-2 border-primary/30"
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-purple-500/10 group-hover:from-primary/20 group-hover:to-purple-500/20 transition-all" />
-            <div className="w-full h-full flex items-center justify-center p-2 relative z-10">
+            <div className="w-full h-full flex items-center justify-center p-2">
               <img 
                 src={logoImage} 
                 alt="AI Assistant" 
                 className="w-full h-full object-contain"
               />
             </div>
-            <Sparkles className="h-5 w-5 absolute -bottom-0.5 -right-0.5 text-primary bg-white rounded-full p-1 shadow-lg animate-pulse" />
+            <Sparkles className="h-4 w-4 absolute -bottom-0.5 -right-0.5 text-primary bg-white rounded-full p-0.5 shadow-lg animate-pulse" />
           </div>
         ) : (
           <div className="bg-card border-2 border-primary/30 rounded-2xl shadow-2xl w-[90vw] md:w-[400px] h-[600px] flex flex-col animate-in slide-in-from-bottom duration-300">
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-border">
               <div className="flex items-center gap-2">
-                <div className="h-10 w-10 rounded-full gradient-primary flex items-center justify-center">
-                  <Sparkles className="h-5 w-5 text-white" />
+                <div className="h-10 w-10 rounded-full bg-white border border-border flex items-center justify-center p-1.5">
+                  <img src={logoImage} alt="Boped FC Tactics" className="w-full h-full object-contain" />
                 </div>
                 <div>
                   <h3 className="font-bold text-sm">AI Trợ lý</h3>
@@ -170,10 +245,18 @@ const AIAssistantBubble = () => {
                           : "bg-muted"
                       )}
                     >
-                      <p className="text-sm">{message.content}</p>
+                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                     </div>
                   </div>
                 ))}
+                {isLoading && (
+                  <div className="flex justify-start">
+                    <div className="rounded-2xl px-4 py-2 bg-muted">
+                      <p className="text-sm">Đang trả lời...</p>
+                    </div>
+                  </div>
+                )}
+                <div ref={scrollRef} />
               </div>
             </ScrollArea>
 
@@ -196,7 +279,7 @@ const AIAssistantBubble = () => {
                   type="submit"
                   size="sm"
                   className="gradient-primary"
-                  disabled={!inputValue.trim()}
+                  disabled={!inputValue.trim() || isLoading}
                 >
                   <Send className="h-4 w-4" />
                 </Button>
