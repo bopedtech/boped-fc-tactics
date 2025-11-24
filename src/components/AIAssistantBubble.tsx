@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { MessageCircle, X, Send, Sparkles } from "lucide-react";
+import { X, Send, Sparkles, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import logoImage from "@/assets/bopedfctactics-logo.png";
 
 interface Message {
   role: "user" | "assistant";
@@ -11,11 +12,13 @@ interface Message {
 }
 
 const randomGreetings = [
-  "Bạn cần tôi trợ giúp gì không? 🤖",
-  "Có câu hỏi gì về FC Mobile không? ⚽",
-  "Tôi có thể giúp gì cho bạn? 💬",
-  "Cần tư vấn về đội hình không? 🎯",
-  "Muốn tìm cầu thủ phù hợp? 🔍",
+  "👋 Bấm để chat với AI ngay!",
+  "🤖 Cần trợ giúp? Hỏi tôi đi!",
+  "⚽ Click để hỏi về FC Mobile!",
+  "🎯 Bấm vào để được tư vấn!",
+  "💡 Có thắc mắc? Chat ngay!",
+  "🔥 Bấm để nhận gợi ý đội hình!",
+  "✨ Click ngay để được hỗ trợ!",
 ];
 
 const AIAssistantBubble = () => {
@@ -26,25 +29,29 @@ const AIAssistantBubble = () => {
   const [inputValue, setInputValue] = useState("");
 
   useEffect(() => {
-    // Show random greeting after 3 seconds
-    const timer = setTimeout(() => {
+    // Show random greeting every 5 seconds
+    const showRandomGreeting = () => {
       const randomGreeting = randomGreetings[Math.floor(Math.random() * randomGreetings.length)];
       setGreeting(randomGreeting);
       setShowGreeting(true);
-    }, 3000);
 
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    // Hide greeting after 5 seconds
-    if (showGreeting) {
-      const timer = setTimeout(() => {
+      // Hide after 4 seconds
+      setTimeout(() => {
         setShowGreeting(false);
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [showGreeting]);
+      }, 4000);
+    };
+
+    // First greeting after 3 seconds
+    const initialTimer = setTimeout(showRandomGreeting, 3000);
+
+    // Then repeat every 5 seconds
+    const intervalTimer = setInterval(showRandomGreeting, 5000);
+
+    return () => {
+      clearTimeout(initialTimer);
+      clearInterval(intervalTimer);
+    };
+  }, []);
 
   const handleOpen = () => {
     setIsOpen(true);
@@ -83,17 +90,23 @@ const AIAssistantBubble = () => {
     <>
       {/* Greeting bubble */}
       {showGreeting && !isOpen && (
-        <div className="fixed bottom-24 right-4 md:right-8 z-50 animate-in slide-in-from-right">
-          <div className="bg-card border-2 border-primary/30 rounded-2xl px-4 py-3 shadow-xl max-w-[250px] relative">
+        <div className="fixed bottom-24 right-4 md:right-8 z-50 animate-in slide-in-from-right-5">
+          <div 
+            onClick={handleOpen}
+            className="bg-gradient-to-r from-primary/90 to-purple-500/90 backdrop-blur-sm rounded-2xl px-4 py-3 shadow-2xl max-w-[250px] relative cursor-pointer hover:scale-105 transition-transform"
+          >
             <Button
               variant="ghost"
               size="sm"
-              className="absolute -top-2 -right-2 h-6 w-6 p-0 rounded-full bg-card border border-border"
-              onClick={() => setShowGreeting(false)}
+              className="absolute -top-2 -right-2 h-6 w-6 p-0 rounded-full bg-card border border-border hover:bg-muted"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowGreeting(false);
+              }}
             >
               <X className="h-3 w-3" />
             </Button>
-            <p className="text-sm font-medium">{greeting}</p>
+            <p className="text-sm font-bold text-white drop-shadow-lg">{greeting}</p>
           </div>
         </div>
       )}
@@ -104,9 +117,15 @@ const AIAssistantBubble = () => {
           <Button
             onClick={handleOpen}
             size="lg"
-            className="h-14 w-14 rounded-full shadow-2xl gradient-primary hover:scale-110 transition-transform"
+            className="h-16 w-16 rounded-full shadow-2xl gradient-primary hover:scale-110 transition-all relative overflow-hidden group"
           >
-            <MessageCircle className="h-6 w-6" />
+            <div className="absolute inset-0 bg-white/20 rounded-full blur-xl group-hover:blur-2xl transition-all" />
+            <img 
+              src={logoImage} 
+              alt="AI Assistant" 
+              className="h-10 w-10 relative z-10 drop-shadow-lg"
+            />
+            <Bot className="h-4 w-4 absolute bottom-1 right-1 text-white z-10" />
           </Button>
         ) : (
           <div className="bg-card border-2 border-primary/30 rounded-2xl shadow-2xl w-[90vw] md:w-[400px] h-[600px] flex flex-col animate-in slide-in-from-bottom duration-300">
