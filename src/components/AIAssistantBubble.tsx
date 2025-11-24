@@ -114,19 +114,20 @@ const AIAssistantBubble = () => {
       {/* Main bubble button */}
       <div className="fixed bottom-4 right-4 md:bottom-8 md:right-8 z-50">
         {!isOpen ? (
-          <Button
+          <div
             onClick={handleOpen}
-            size="lg"
-            className="h-16 w-16 rounded-full shadow-2xl gradient-primary hover:scale-110 transition-all relative overflow-hidden group"
+            className="h-16 w-16 rounded-full shadow-2xl bg-white hover:scale-110 transition-all cursor-pointer relative overflow-hidden group border-2 border-primary/30"
           >
-            <div className="absolute inset-0 bg-white/20 rounded-full blur-xl group-hover:blur-2xl transition-all" />
-            <img 
-              src={logoImage} 
-              alt="AI Assistant" 
-              className="h-10 w-10 relative z-10 drop-shadow-lg"
-            />
-            <Bot className="h-4 w-4 absolute bottom-1 right-1 text-white z-10" />
-          </Button>
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-purple-500/10 group-hover:from-primary/20 group-hover:to-purple-500/20 transition-all" />
+            <div className="w-full h-full flex items-center justify-center p-2 relative z-10">
+              <img 
+                src={logoImage} 
+                alt="AI Assistant" 
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <Bot className="h-5 w-5 absolute bottom-0 right-0 text-primary bg-white rounded-full p-0.5 shadow-md" />
+          </div>
         ) : (
           <div className="bg-card border-2 border-primary/30 rounded-2xl shadow-2xl w-[90vw] md:w-[400px] h-[600px] flex flex-col animate-in slide-in-from-bottom duration-300">
             {/* Header */}
