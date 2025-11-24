@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Header from "@/components/Header";
-import AISearchBar from "@/components/AISearchBar";
+import PlayerSearchBar from "@/components/PlayerSearchBar";
+import AIAssistantBubble from "@/components/AIAssistantBubble";
 import NewsSection from "@/components/NewsSection";
 import Footer from "@/components/Footer";
 import PlayerCard from "@/components/PlayerCard";
@@ -68,11 +69,11 @@ const Index = () => {
     <div className="min-h-screen">
       <Header />
 
-      {/* AI Search Hero */}
+      {/* Player Search Hero */}
       <section className="relative overflow-hidden py-12 md:py-16">
         <div className="absolute inset-0 gradient-glow opacity-10" />
         <div className="container relative z-10 mx-auto px-4">
-          <AISearchBar />
+          <PlayerSearchBar />
         </div>
       </section>
 
@@ -146,6 +147,9 @@ const Index = () => {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
       />
+
+      {/* AI Assistant Bubble */}
+      <AIAssistantBubble />
 
       {/* Footer */}
       <Footer />
