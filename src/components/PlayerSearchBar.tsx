@@ -183,7 +183,7 @@ const PlayerSearchBar = () => {
         {/* Results dropdown */}
         {isOpen && players.length > 0 && (
           <div className="mt-4 w-full">
-            <div className="rounded-2xl border-2 border-primary/20 shadow-2xl bg-card/95 backdrop-blur-sm p-6">
+            <div className="rounded-2xl border-2 border-primary/20 shadow-2xl bg-card/95 backdrop-blur-sm p-6 max-h-[60vh] overflow-y-auto">
               <div className="grid grid-cols-3 gap-4">
                 {players.map((player) => (
                   <div 
