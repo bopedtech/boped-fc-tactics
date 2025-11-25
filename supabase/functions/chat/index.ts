@@ -11,7 +11,7 @@ const tools = [
     type: "function",
     function: {
       name: "search_players",
-      description: "Tìm kiếm cầu thủ trong database theo các tiêu chí như tên, vị trí, rating, câu lạc bộ, quốc tịch, chân thuận, skill moves, weak foot, traits, v.v. Chỉ sử dụng dữ liệu từ database, không tìm thông tin bên ngoài.",
+      description: "Tìm kiếm cầu thủ trong database theo các tiêu chí như tên, vị trí, rating, câu lạc bộ, quốc tịch, chân thuận, skill moves, weak foot, traits, chiều cao, cân nặng, work rates, v.v. Chỉ sử dụng dữ liệu từ database, không tìm thông tin bên ngoài.",
       parameters: {
         type: "object",
         properties: {
@@ -31,6 +31,22 @@ const tools = [
             type: "number",
             description: "Rating tối đa"
           },
+          min_height: {
+            type: "number",
+            description: "Chiều cao tối thiểu (cm)"
+          },
+          max_height: {
+            type: "number",
+            description: "Chiều cao tối đa (cm)"
+          },
+          min_weight: {
+            type: "number",
+            description: "Cân nặng tối thiểu (kg)"
+          },
+          max_weight: {
+            type: "number",
+            description: "Cân nặng tối đa (kg)"
+          },
           club: {
             type: "string",
             description: "Tên câu lạc bộ"
@@ -38,6 +54,10 @@ const tools = [
           nation: {
             type: "string",
             description: "Quốc tịch"
+          },
+          league: {
+            type: "string",
+            description: "Tên giải đấu"
           },
           foot: {
             type: "string",
@@ -51,6 +71,14 @@ const tools = [
           min_weak_foot: {
             type: "number",
             description: "Weak foot tối thiểu (1-5)"
+          },
+          work_rate_att: {
+            type: "number",
+            description: "Work rate tấn công (1=Low, 2=Medium, 3=High)"
+          },
+          work_rate_def: {
+            type: "number",
+            description: "Work rate phòng ngự (1=Low, 2=Medium, 3=High)"
           },
           trait: {
             type: "string",
@@ -85,12 +113,32 @@ async function searchPlayers(supabase: any, params: any) {
     query = query.lte('rating', params.max_rating);
   }
   
+  if (params.min_height) {
+    query = query.gte('height', params.min_height);
+  }
+  
+  if (params.max_height) {
+    query = query.lte('height', params.max_height);
+  }
+  
+  if (params.min_weight) {
+    query = query.gte('weight', params.min_weight);
+  }
+  
+  if (params.max_weight) {
+    query = query.lte('weight', params.max_weight);
+  }
+  
   if (params.club) {
     query = query.ilike('club->>displayName', `%${params.club}%`);
   }
   
   if (params.nation) {
     query = query.ilike('nation->>displayName', `%${params.nation}%`);
+  }
+  
+  if (params.league) {
+    query = query.ilike('league->>displayName', `%${params.league}%`);
   }
   
   if (params.foot) {
@@ -104,6 +152,14 @@ async function searchPlayers(supabase: any, params: any) {
   
   if (params.min_weak_foot) {
     query = query.gte('weakFoot', params.min_weak_foot);
+  }
+  
+  if (params.work_rate_att) {
+    query = query.eq('workRateAtt', params.work_rate_att);
+  }
+  
+  if (params.work_rate_def) {
+    query = query.eq('workRateDef', params.work_rate_def);
   }
   
   if (params.trait) {
@@ -126,6 +182,7 @@ async function searchPlayers(supabase: any, params: any) {
     position: player.position,
     club: player.club?.displayName,
     nation: player.nation?.displayName,
+    league: player.league?.displayName,
     foot: player.foot === 0 ? "Trái" : "Phải",
     skillMoves: player.skillMovesLevel,
     weakFoot: player.weakFoot,
