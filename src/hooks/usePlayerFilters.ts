@@ -3,7 +3,7 @@ import { FilterState } from "@/components/PlayerFilters";
 
 export const usePlayerFilters = (initialPosition?: string) => {
   const [filters, setFilters] = useState<FilterState>({
-    ratingRange: [40, 125],
+    ratingRange: [0, 125],
     positionFilter: initialPosition || "all",
     positions: [],
     positionType: "all",
@@ -11,8 +11,8 @@ export const usePlayerFilters = (initialPosition?: string) => {
     clubs: [],
     nations: [],
     programs: [],
-    heightRange: [150, 210],
-    weightRange: [50, 110],
+    heightRange: [0, 250],
+    weightRange: [0, 150],
     skillMovesLevel: 0,
     weakFoot: 0,
     strongFoot: "all",
@@ -23,7 +23,7 @@ export const usePlayerFilters = (initialPosition?: string) => {
 
   const resetFilters = () => {
     setFilters({
-      ratingRange: [40, 125],
+      ratingRange: [0, 125],
       positionFilter: initialPosition || "all",
       positions: [],
       positionType: "all",
@@ -31,8 +31,8 @@ export const usePlayerFilters = (initialPosition?: string) => {
       clubs: [],
       nations: [],
       programs: [],
-      heightRange: [150, 210],
-      weightRange: [50, 110],
+      heightRange: [0, 250],
+      weightRange: [0, 150],
       skillMovesLevel: 0,
       weakFoot: 0,
       strongFoot: "all",
@@ -46,9 +46,11 @@ export const usePlayerFilters = (initialPosition?: string) => {
     let filtered = [...players];
 
     // Rating filter
-    filtered = filtered.filter(p =>
-      p.rating >= filters.ratingRange[0] && p.rating <= filters.ratingRange[1]
-    );
+    if (filters.ratingRange[0] > 0 || filters.ratingRange[1] < 125) {
+      filtered = filtered.filter(p =>
+        p.rating >= filters.ratingRange[0] && p.rating <= filters.ratingRange[1]
+      );
+    }
 
     // Position filter - old single position filter (kept for backward compatibility)
     if (filters.positionFilter !== "all") {
@@ -97,14 +99,20 @@ export const usePlayerFilters = (initialPosition?: string) => {
     }
 
     // Height filter
-    filtered = filtered.filter(p =>
-      (p.height || 175) >= filters.heightRange[0] && (p.height || 175) <= filters.heightRange[1]
-    );
+    if (filters.heightRange[0] > 0 || filters.heightRange[1] < 250) {
+      filtered = filtered.filter(p => {
+        const height = p.height || 0;
+        return height >= filters.heightRange[0] && height <= filters.heightRange[1];
+      });
+    }
 
     // Weight filter
-    filtered = filtered.filter(p =>
-      (p.weight || 75) >= filters.weightRange[0] && (p.weight || 75) <= filters.weightRange[1]
-    );
+    if (filters.weightRange[0] > 0 || filters.weightRange[1] < 150) {
+      filtered = filtered.filter(p => {
+        const weight = p.weight || 0;
+        return weight >= filters.weightRange[0] && weight <= filters.weightRange[1];
+      });
+    }
 
     // Skill moves filter
     if (filters.skillMovesLevel > 0) {
