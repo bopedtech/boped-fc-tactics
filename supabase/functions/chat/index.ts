@@ -62,7 +62,7 @@ const tools = [
   }
 ];
 
-const SYSTEM_INSTRUCTION = `
+const SYSTEM_INSTRUCTION_VI = `
 Bạn là trợ lý AI chuyên gia phân tích dữ liệu FC Mobile của Boped FC Tactics.
 Nhiệm vụ của bạn là sử dụng các công cụ (Tools) để truy vấn dữ liệu chính xác từ database.
 
@@ -97,6 +97,43 @@ VÍ DỤ RESPONSE TỐT:
 \`\`\`
 
 Đây là cầu thủ có tốc độ cao nhất trong FC Mobile với PAC 97.
+`;
+
+const SYSTEM_INSTRUCTION_EN = `
+You are an AI expert analyst for FC Mobile data at Boped FC Tactics.
+Your task is to use Tools to query accurate data from the database.
+
+TOOL USAGE RULES:
+1. Always use tools when asked about actual data.
+2. When using find_top_players:
+   - Map natural language to stats:
+     * Speed/Fast/Pace = PAC
+     * Shooting/Finishing = SHO
+     * OVR/Rating = RATING
+     * Height = HEIGHT
+     * Passing = PAS
+     * Dribbling = DRI
+     * Defending/Defense = DEF
+     * Physical/Strength = PHY
+   - If asked "Who is the best?", set limit to 1.
+   - If asked "Who is the best/fastest/tallest?", set ascending to FALSE.
+   - If asked "Who is the worst/slowest/shortest?", set ascending to TRUE.
+3. After receiving tool results, provide a natural, clear, and friendly answer in English.
+4. IMPORTANT: Respond with JSON format containing playerCards to display player cards:
+
+Response format:
+\`\`\`json
+{"playerCards": [<list of players with full information from tool results>]}
+\`\`\`
+
+Then add a brief text explanation.
+
+GOOD RESPONSE EXAMPLE:
+\`\`\`json
+{"playerCards": [{"assetId": 123, "commonName": "Mbappe", "rating": 91, ...}]}
+\`\`\`
+
+This is the player with the highest pace in FC Mobile with PAC 97.
 `;
 
 // Hàm thực thi công cụ
@@ -160,7 +197,7 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, userQuery } = await req.json();
+    const { messages, userQuery, locale = "vi" } = await req.json();
     
     const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
@@ -191,11 +228,13 @@ serve(async (req) => {
       });
     }
 
+    const systemInstruction = locale === "en" ? SYSTEM_INSTRUCTION_EN : SYSTEM_INSTRUCTION_VI;
+    
     const requestBody = {
       contents: geminiMessages,
       tools: tools,
       systemInstruction: {
-        parts: [{ text: SYSTEM_INSTRUCTION }]
+        parts: [{ text: systemInstruction }]
       }
     };
 
@@ -265,7 +304,7 @@ serve(async (req) => {
           }
         ],
         systemInstruction: {
-          parts: [{ text: SYSTEM_INSTRUCTION }]
+          parts: [{ text: systemInstruction }]
         }
       };
 

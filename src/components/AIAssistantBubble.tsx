@@ -9,6 +9,7 @@ import logoImage from "@/assets/bopedfctactics-logo.png";
 import PlayerCard from "@/components/PlayerCard";
 import PlayerDetailDialog from "@/components/PlayerDetailDialog";
 import { TEXT } from "@/constants/text";
+import { useT } from "@/contexts/LocalizationContext";
 
 interface Player {
   assetId: number;
@@ -43,17 +44,19 @@ interface Message {
   players?: Player[];
 }
 
-const randomGreetings = [
-  "Tìm cầu thủ có tốc độ nhanh nhất FC Mobile",
-  "Bấm để nhận gợi ý về chiến thuật giả lập xếp hạng",
-  "Tìm cầu thủ phù hợp với đội hình Tiki-Taka",
-  "Gợi ý cầu thủ có giá trị tốt nhất theo vị trí",
-  "Chiến thuật phòng ngự phản công hiệu quả",
-  "So sánh 2 cầu thủ bất kỳ trong FC Mobile",
-  "Xây dựng đội hình hoàn hảo cho budget của bạn",
-];
-
 const AIAssistantBubble = () => {
+  const { t, locale } = useT();
+  
+  const randomGreetings = [
+    t("aiAssistant.greeting1", "Tìm cầu thủ có tốc độ nhanh nhất FC Mobile"),
+    t("aiAssistant.greeting2", "Bấm để nhận gợi ý về chiến thuật giả lập xếp hạng"),
+    t("aiAssistant.greeting3", "Tìm cầu thủ phù hợp với đội hình Tiki-Taka"),
+    t("aiAssistant.greeting4", "Gợi ý cầu thủ có giá trị tốt nhất theo vị trí"),
+    t("aiAssistant.greeting5", "Chiến thuật phòng ngự phản công hiệu quả"),
+    t("aiAssistant.greeting6", "So sánh 2 cầu thủ bất kỳ trong FC Mobile"),
+    t("aiAssistant.greeting7", "Xây dựng đội hình hoàn hảo cho budget của bạn"),
+  ];
+  
   const [isOpen, setIsOpen] = useState(false);
   const [showGreeting, setShowGreeting] = useState(false);
   const [greeting, setGreeting] = useState("");
@@ -101,7 +104,7 @@ const AIAssistantBubble = () => {
       setMessages([
         {
           role: "assistant",
-          content: "Xin chào! Tôi là trợ lý AI của Boped FC Tactics. Tôi có thể giúp bạn tìm cầu thủ, tư vấn đội hình, hoặc trả lời các câu hỏi về FC Mobile. Bạn cần giúp gì?"
+          content: t("aiAssistant.welcome", "Xin chào! Tôi là trợ lý AI của Boped FC Tactics. Tôi có thể giúp bạn tìm cầu thủ, tư vấn đội hình, hoặc trả lời các câu hỏi về FC Mobile. Bạn cần giúp gì?")
         }
       ]);
     }
@@ -124,17 +127,18 @@ const AIAssistantBubble = () => {
         },
         body: JSON.stringify({ 
           messages: [...messages, userMessage],
-          userQuery: inputValue
+          userQuery: inputValue,
+          locale: locale
         }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Lỗi kết nối");
+        throw new Error(errorData.error || t("aiAssistant.connectionError", "Lỗi kết nối"));
       }
 
       const data = await response.json();
-      const responseText = data.response || "Xin lỗi, tôi không thể trả lời.";
+      const responseText = data.response || t("aiAssistant.cannotAnswer", "Xin lỗi, tôi không thể trả lời.");
       
       // Parse player cards from JSON blocks (both with and without markdown)
       let players: Player[] | undefined = undefined;
@@ -197,7 +201,7 @@ const AIAssistantBubble = () => {
 
     } catch (error) {
       console.error("Chat error:", error);
-      toast.error(error instanceof Error ? error.message : "Lỗi khi gửi tin nhắn");
+      toast.error(error instanceof Error ? error.message : t("aiAssistant.sendError", "Lỗi khi gửi tin nhắn"));
     } finally {
       setIsLoading(false);
     }
@@ -253,8 +257,8 @@ const AIAssistantBubble = () => {
                   <img src={logoImage} alt="Boped FC Tactics" className="w-full h-full object-contain" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg">AI Trợ lý FC Tactics</h3>
-                  <p className="text-sm text-muted-foreground">Tìm kiếm & phân tích cầu thủ</p>
+                  <h3 className="font-bold text-lg">{t("aiAssistant.title", "AI Trợ lý FC Tactics")}</h3>
+                  <p className="text-sm text-muted-foreground">{t("aiAssistant.subtitle", "Tìm kiếm & phân tích cầu thủ")}</p>
                 </div>
               </div>
               <Button
@@ -313,7 +317,7 @@ const AIAssistantBubble = () => {
                 {isLoading && (
                   <div className="flex justify-start">
                     <div className="rounded-2xl px-5 py-3 bg-muted">
-                      <p className="text-sm">Đang tìm kiếm...</p>
+                      <p className="text-sm">{t("aiAssistant.searching", "Đang tìm kiếm...")}</p>
                     </div>
                   </div>
                 )}
@@ -334,7 +338,7 @@ const AIAssistantBubble = () => {
                   <Input
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
-                    placeholder="Hỏi về cầu thủ, chiến thuật, đội hình..."
+                    placeholder={t("aiAssistant.inputPlaceholder", "Hỏi về cầu thủ, chiến thuật, đội hình...")}
                     className="flex-1 h-12 text-base"
                     autoFocus
                   />
