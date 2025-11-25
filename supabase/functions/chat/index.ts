@@ -6,235 +6,152 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Enum cho các chỉ số cầu thủ
+enum PlayerStat {
+  RATING = "RATING",
+  HEIGHT = "HEIGHT",
+  PACE = "PAC",
+  SHOOTING = "SHO",
+  PASSING = "PAS",
+  DRIBBLING = "DRI",
+  DEFENDING = "DEF",
+  PHYSICAL = "PHY",
+}
+
+// Tool definitions cho Gemini
 const tools = [
   {
-    type: "function",
-    function: {
-      name: "search_players",
-      description: "Tìm kiếm cầu thủ trong database theo các tiêu chí như tên, vị trí, rating, câu lạc bộ, quốc tịch, chân thuận, skill moves, weak foot, traits, chiều cao, cân nặng, work rates, v.v. Chỉ sử dụng dữ liệu từ database, không tìm thông tin bên ngoài.",
-      parameters: {
-        type: "object",
-        properties: {
-          name: {
-            type: "string",
-            description: "Tên cầu thủ (tìm kiếm gần đúng)"
+    functionDeclarations: [
+      {
+        name: "find_top_players",
+        description: "Tìm kiếm các cầu thủ hàng đầu (Top N) dựa trên một chỉ số. Dùng khi hỏi ai giỏi nhất, nhanh nhất, cao nhất, hoặc tệ nhất, chậm nhất.",
+        parameters: {
+          type: "OBJECT",
+          properties: {
+            stat: {
+              type: "STRING",
+              enum: Object.values(PlayerStat),
+              description: "Chỉ số dùng để xếp hạng: RATING (OVR), HEIGHT (chiều cao), PAC (tốc độ), SHO (sút), PAS (chuyền), DRI (rê bóng), DEF (phòng thủ), PHY (thể chất)",
+            },
+            limit: {
+              type: "INTEGER",
+              description: "Số lượng cầu thủ trả về (Mặc định 5). Dùng 1 nếu hỏi 'Ai nhất?'.",
+            },
+            ascending: {
+              type: "BOOLEAN",
+              description: "Sắp xếp tăng dần. FALSE (mặc định) cho giỏi nhất. TRUE cho tệ nhất.",
+            }
           },
-          position: {
-            type: "string",
-            description: "Vị trí (ST, CF, LW, RW, CAM, CM, CDM, LB, RB, CB, GK, etc.)"
+          required: ["stat"],
+        },
+      },
+      {
+        name: "get_player_count",
+        description: "Đếm tổng số lượng cầu thủ trong database, có thể lọc theo vị trí.",
+        parameters: {
+          type: "OBJECT",
+          properties: {
+            filterPosition: {
+              type: "STRING",
+              description: "Vị trí cụ thể (ví dụ: 'GK', 'ST', 'CM'). Nếu bỏ trống, đếm tất cả.",
+            },
           },
-          min_rating: {
-            type: "number",
-            description: "Rating tối thiểu"
-          },
-          max_rating: {
-            type: "number",
-            description: "Rating tối đa"
-          },
-          min_height: {
-            type: "number",
-            description: "Chiều cao tối thiểu (cm)"
-          },
-          max_height: {
-            type: "number",
-            description: "Chiều cao tối đa (cm)"
-          },
-          min_weight: {
-            type: "number",
-            description: "Cân nặng tối thiểu (kg)"
-          },
-          max_weight: {
-            type: "number",
-            description: "Cân nặng tối đa (kg)"
-          },
-          club: {
-            type: "string",
-            description: "Tên câu lạc bộ"
-          },
-          nation: {
-            type: "string",
-            description: "Quốc tịch"
-          },
-          league: {
-            type: "string",
-            description: "Tên giải đấu"
-          },
-          foot: {
-            type: "string",
-            enum: ["Left", "Right"],
-            description: "Chân thuận (Left hoặc Right)"
-          },
-          min_skill_moves: {
-            type: "number",
-            description: "Skill moves tối thiểu (1-5)"
-          },
-          min_weak_foot: {
-            type: "number",
-            description: "Weak foot tối thiểu (1-5)"
-          },
-          work_rate_att: {
-            type: "number",
-            description: "Work rate tấn công (1=Low, 2=Medium, 3=High)"
-          },
-          work_rate_def: {
-            type: "number",
-            description: "Work rate phòng ngự (1=Low, 2=Medium, 3=High)"
-          },
-          trait: {
-            type: "string",
-            description: "Trait đặc biệt của cầu thủ"
-          },
-          limit: {
-            type: "number",
-            description: "Số lượng kết quả trả về (mặc định 20, tối đa 200)"
-          }
-        }
+        },
       }
-    }
+    ]
   }
 ];
 
-async function searchPlayers(supabase: any, params: any) {
-  // Optimize: Only select necessary fields for better performance
-  let query = supabase
-    .from('players')
-    .select(`
-      assetId,
-      playerId,
-      rating,
-      position,
-      commonName,
-      firstName,
-      lastName,
-      cardName,
-      club,
-      nation,
-      league,
-      images,
-      stats,
-      avgStats,
-      avgGkStats,
-      foot,
-      skillMovesLevel,
-      weakFoot,
-      height,
-      weight,
-      workRates,
-      traits,
-      source,
-      auctionable
-    `)
-    .eq('is_visible', true);
+const SYSTEM_INSTRUCTION = `
+Bạn là trợ lý AI chuyên gia phân tích dữ liệu FC Mobile của Boped FC Tactics.
+Nhiệm vụ của bạn là sử dụng các công cụ (Tools) để truy vấn dữ liệu chính xác từ database.
+
+QUY TẮC SỬ DỤNG CÔNG CỤ:
+1. Luôn sử dụng công cụ khi hỏi về dữ liệu thực tế.
+2. Khi sử dụng find_top_players:
+   - Ánh xạ ngôn ngữ tự nhiên sang chỉ số:
+     * Tốc độ/Chạy nhanh/Pace = PAC
+     * Sút/Dứt điểm/Shooting = SHO
+     * OVR/Rating = RATING
+     * Chiều cao = HEIGHT
+     * Chuyền bóng/Passing = PAS
+     * Rê bóng/Dribbling = DRI
+     * Phòng thủ/Defending = DEF
+     * Thể chất/Sức mạnh/Physical = PHY
+   - Nếu hỏi "Ai nhất?", đặt limit là 1.
+   - Nếu hỏi "Ai giỏi nhất/nhanh nhất/cao nhất?", đặt ascending là FALSE.
+   - Nếu hỏi "Ai chậm nhất/thấp nhất/tệ nhất?", đặt ascending là TRUE.
+3. Sau khi nhận kết quả từ công cụ, hãy tổng hợp câu trả lời tự nhiên, rõ ràng và thân thiện bằng tiếng Việt.
+4. QUAN TRỌNG: Trả lời với format JSON có playerCards để hiển thị thẻ cầu thủ:
+
+Format response:
+\`\`\`json
+{"playerCards": [<danh sách cầu thủ với đầy đủ thông tin từ kết quả công cụ>]}
+\`\`\`
+
+Sau đó thêm phần giải thích văn bản ngắn gọn.
+
+VÍ DỤ RESPONSE TỐT:
+\`\`\`json
+{"playerCards": [{"assetId": 123, "commonName": "Mbappe", "rating": 91, ...}]}
+\`\`\`
+
+Đây là cầu thủ có tốc độ cao nhất trong FC Mobile với PAC 97.
+`;
+
+// Hàm thực thi công cụ
+async function executeGetPlayerCount(supabase: any, args: { filterPosition?: string }) {
+  let query = supabase.from('players').select('*', { count: 'estimated', head: true }).eq('is_visible', true);
   
-  if (params.name) {
-    query = query.or(`firstName.ilike.%${params.name}%,lastName.ilike.%${params.name}%,commonName.ilike.%${params.name}%,cardName.ilike.%${params.name}%`);
+  if (args.filterPosition) {
+    query = query.eq('position', args.filterPosition.toUpperCase());
+  }
+
+  const { count, error } = await query;
+  
+  if (error || count === null) {
+    console.error("Count error:", error);
+    return { error: error?.message || "Không thể đếm số lượng." };
   }
   
-  if (params.position) {
-    query = query.eq('position', params.position);
-  }
-  
-  if (params.min_rating) {
-    query = query.gte('rating', params.min_rating);
-  }
-  
-  if (params.max_rating) {
-    query = query.lte('rating', params.max_rating);
-  }
-  
-  if (params.min_height) {
-    query = query.gte('height', params.min_height);
-  }
-  
-  if (params.max_height) {
-    query = query.lte('height', params.max_height);
-  }
-  
-  if (params.min_weight) {
-    query = query.gte('weight', params.min_weight);
-  }
-  
-  if (params.max_weight) {
-    query = query.lte('weight', params.max_weight);
-  }
-  
-  if (params.club) {
-    query = query.ilike('club->>displayName', `%${params.club}%`);
-  }
-  
-  if (params.nation) {
-    query = query.ilike('nation->>displayName', `%${params.nation}%`);
-  }
-  
-  if (params.league) {
-    query = query.ilike('league->>displayName', `%${params.league}%`);
-  }
-  
-  if (params.foot) {
-    const footValue = params.foot === "Left" ? 0 : 1;
-    query = query.eq('foot', footValue);
-  }
-  
-  if (params.min_skill_moves) {
-    query = query.gte('skillMovesLevel', params.min_skill_moves);
-  }
-  
-  if (params.min_weak_foot) {
-    query = query.gte('weakFoot', params.min_weak_foot);
-  }
-  
-  if (params.work_rate_att) {
-    query = query.eq('workRateAtt', params.work_rate_att);
-  }
-  
-  if (params.work_rate_def) {
-    query = query.eq('workRateDef', params.work_rate_def);
-  }
-  
-  if (params.trait) {
-    query = query.contains('traits', [{ displayName: params.trait }]);
-  }
-  
-  // Optimize: Reduce default limit for faster response
-  const limit = Math.min(params.limit || 15, 50);
-  query = query.limit(limit);
-  
-  const { data, error } = await query;
-  
+  return { total_players: count };
+}
+
+async function executeFindTopPlayers(supabase: any, args: { stat: string, limit?: number, ascending?: boolean }) {
+  const limit = args.limit || 5;
+  const ascending = args.ascending || false;
+  const stat = args.stat;
+
+  console.log(`Gọi RPC: stat=${stat}, limit=${limit}, ascending=${ascending}`);
+
+  const { data, error } = await supabase.rpc('get_top_players_by_stat', {
+    stat_key: stat,
+    limit_count: limit,
+    sort_asc: ascending
+  });
+
   if (error) {
-    console.error("Database error:", error);
+    console.error("RPC Error:", error);
     return { error: error.message };
   }
-  
-  return {
-    players: data.map((player: any) => ({
-      assetId: player.assetId,
-      playerId: player.playerId,
-      rating: player.rating,
-      position: player.position,
-      commonName: player.commonName || player.cardName || `${player.firstName || ''} ${player.lastName || ''}`.trim(),
-      firstName: player.firstName,
-      lastName: player.lastName,
-      cardName: player.cardName,
-      club: player.club,
-      nation: player.nation,
-      league: player.league,
-      images: player.images,
-      stats: player.stats,
-      avgStats: player.avgStats,
-      avgGkStats: player.avgGkStats,
-      foot: player.foot,
-      skillMovesLevel: player.skillMovesLevel,
-      weakFoot: player.weakFoot,
-      height: player.height,
-      weight: player.weight,
-      workRates: player.workRates,
-      traits: player.traits,
-      auctionable: player.auctionable,
-      source: player.source
-    })),
-    count: data.length
-  };
+
+  // Transform data để match với PlayerCard component
+  const players = data.map((p: any) => ({
+    assetId: p.assetId,
+    playerId: p.assetId,
+    commonName: p.commonName,
+    rating: p.rating,
+    position: p.position,
+    club: p.club,
+    nation: p.nation,
+    league: p.league,
+    images: p.images,
+    stats: p.stats,
+    avgStats: p.avgStats,
+    avgGkStats: p.avgGkStats,
+  }));
+
+  return { players, stat_name: stat, stat_value_key: args.stat };
 }
 
 serve(async (req) => {
@@ -243,148 +160,149 @@ serve(async (req) => {
   }
 
   try {
-    const { messages } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const { messages, userQuery } = await req.json();
+    
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
-    }
 
+    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY không được cấu hình");
+    
     const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
+
+    // Gọi Gemini với tool support
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`;
     
-    let conversationMessages = [
-      { 
-        role: "system", 
-        content: `Bạn là trợ lý AI của Boped FC Tactics, chuyên về FC Mobile. Bạn có quyền truy cập TRỰC TIẾP vào database với 47,681 cầu thủ.
+    const conversationHistory = messages || [];
+    const query = userQuery || (conversationHistory.length > 0 ? conversationHistory[conversationHistory.length - 1].content : "");
 
-QUAN TRỌNG - CƠ CHẾ HOẠT ĐỘNG:
-- Bạn TÌM KIẾM TRỰC TIẾP trong database thời gian thực, KHÔNG cần training hay embedding
-- Khi user hỏi, bạn GỌI tool search_players với các tham số phù hợp để tìm trong database
-- Database luôn cập nhật real-time, khi có cầu thủ mới, bạn tự động có thể tìm thấy
-- Bạn có thể tìm tối đa 200 cầu thủ mỗi lần query
-- Nếu cần nhiều kết quả hơn, hãy sử dụng các filter thông minh (rating, position, club, nation, v.v.)
-
-QUAN TRỌNG - FORMAT RESPONSE:
-- Khi trả lời về cầu thủ, LUÔN bao gồm một JSON block với TOÀN BỘ dữ liệu cầu thủ từ database
-- Format JSON: \`\`\`json\n{"playerCards": [<toàn bộ object cầu thủ từ search_players>]}\n\`\`\`
-- JSON block này phải đứng TRƯỚC phần text mô tả
-- Bao gồm TẤT CẢ các trường: assetId, playerId, rating, position, commonName, firstName, lastName, cardName, club, nation, league, images, stats, avgStats, avgGkStats, foot, skillMovesLevel, weakFoot, height, weight, workRates, traits
-- Chỉ trả lời dựa trên dữ liệu có trong database
-- Trả lời ngắn gọn, hữu ích và thân thiện bằng tiếng Việt
-
-VÍ DỤ RESPONSE:
-\`\`\`json
-{"playerCards": [{...toàn bộ dữ liệu cầu thủ từ kết quả search_players...}]}
-\`\`\`
-
-Đây là top 20 cầu thủ cao nhất trong database...` 
-      },
-      ...messages,
+    // First call to Gemini
+    let geminiMessages = [
+      ...conversationHistory.map((msg: any) => ({
+        role: msg.role === "assistant" ? "model" : "user",
+        parts: [{ text: msg.content }]
+      }))
     ];
 
-    while (true) {
-      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    if (userQuery) {
+      geminiMessages.push({
+        role: "user",
+        parts: [{ text: userQuery }]
+      });
+    }
+
+    const requestBody = {
+      contents: geminiMessages,
+      tools: tools,
+      systemInstruction: {
+        parts: [{ text: SYSTEM_INSTRUCTION }]
+      }
+    };
+
+    console.log("Gọi Gemini lần 1...");
+    const response1 = await fetch(geminiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(requestBody),
+    });
+
+    if (!response1.ok) {
+      const errorText = await response1.text();
+      console.error("Gemini error:", errorText);
+      throw new Error("Lỗi khi gọi Gemini API");
+    }
+
+    const data1 = await response1.json();
+    const candidate = data1.candidates?.[0];
+    
+    if (!candidate) {
+      throw new Error("Không nhận được phản hồi từ Gemini");
+    }
+
+    // Kiểm tra xem có tool calls không
+    const functionCalls = candidate.content?.parts?.filter((part: any) => part.functionCall);
+
+    if (functionCalls && functionCalls.length > 0) {
+      console.log("Phát hiện tool calls:", functionCalls.length);
+      
+      // Thực thi các tool calls
+      const functionResponses = [];
+      
+      for (const call of functionCalls) {
+        const functionName = call.functionCall.name;
+        const args = call.functionCall.args;
+        
+        console.log(`Thực thi: ${functionName}`, args);
+        
+        let result;
+        if (functionName === "find_top_players") {
+          result = await executeFindTopPlayers(supabase, args);
+        } else if (functionName === "get_player_count") {
+          result = await executeGetPlayerCount(supabase, args);
+        }
+        
+        functionResponses.push({
+          functionResponse: {
+            name: functionName,
+            response: result
+          }
+        });
+      }
+
+      // Gọi Gemini lần 2 với kết quả từ tools
+      console.log("Gọi Gemini lần 2 với kết quả tools...");
+      
+      const requestBody2 = {
+        contents: [
+          ...geminiMessages,
+          {
+            role: "model",
+            parts: functionCalls
+          },
+          {
+            role: "user",
+            parts: functionResponses
+          }
+        ],
+        systemInstruction: {
+          parts: [{ text: SYSTEM_INSTRUCTION }]
+        }
+      };
+
+      const response2 = await fetch(geminiUrl, {
         method: "POST",
-        headers: {
-          "Authorization": `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
-          messages: conversationMessages,
-          tools: tools,
-          stream: false,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestBody2),
       });
 
-      if (!response.ok) {
-        if (response.status === 429) {
-          return new Response(
-            JSON.stringify({ error: "Đã vượt quá giới hạn, vui lòng thử lại sau." }), 
-            {
-              status: 429,
-              headers: { ...corsHeaders, "Content-Type": "application/json" },
-            }
-          );
-        }
-        if (response.status === 402) {
-          return new Response(
-            JSON.stringify({ error: "Cần nạp thêm credits để sử dụng AI." }), 
-            {
-              status: 402,
-              headers: { ...corsHeaders, "Content-Type": "application/json" },
-            }
-          );
-        }
-        const errorText = await response.text();
-        console.error("AI gateway error:", response.status, errorText);
-        return new Response(
-          JSON.stringify({ error: "Lỗi kết nối AI gateway" }), 
-          {
-            status: 500,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          }
-        );
+      if (!response2.ok) {
+        const errorText = await response2.text();
+        console.error("Gemini error (call 2):", errorText);
+        throw new Error("Lỗi khi gọi Gemini API lần 2");
       }
 
-      const data = await response.json();
-      const message = data.choices[0].message;
+      const data2 = await response2.json();
+      const finalText = data2.candidates?.[0]?.content?.parts?.[0]?.text || "Xin lỗi, tôi không thể trả lời câu hỏi này.";
       
-      // If no tool calls, return the final response
-      if (!message.tool_calls || message.tool_calls.length === 0) {
-        // Stream the final response
-        const streamResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${LOVABLE_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: "google/gemini-2.5-flash",
-            messages: conversationMessages,
-            stream: true,
-          }),
-        });
-
-        return new Response(streamResponse.body, {
-          headers: { 
-            ...corsHeaders, 
-            "Content-Type": "text/event-stream",
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
-          },
-        });
-      }
-
-      // Handle tool calls
-      conversationMessages.push(message);
+      return new Response(
+        JSON.stringify({ response: finalText }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    } else {
+      // Không có tool calls, trả về trực tiếp
+      const finalText = candidate.content?.parts?.[0]?.text || "Xin lỗi, tôi không thể trả lời câu hỏi này.";
       
-      for (const toolCall of message.tool_calls) {
-        if (toolCall.function.name === "search_players") {
-          const params = JSON.parse(toolCall.function.arguments);
-          console.log("Searching players with params:", params);
-          const results = await searchPlayers(supabase, params);
-          
-          conversationMessages.push({
-            role: "tool",
-            tool_call_id: toolCall.id,
-            content: JSON.stringify(results),
-          });
-        }
-      }
+      return new Response(
+        JSON.stringify({ response: finalText }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
+
   } catch (error) {
     console.error("Chat error:", error);
     return new Response(
-      JSON.stringify({ 
-        error: error instanceof Error ? error.message : "Lỗi không xác định" 
-      }), 
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      JSON.stringify({ error: error instanceof Error ? error.message : "Lỗi không xác định" }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 });

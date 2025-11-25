@@ -594,6 +594,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_top_players_by_stat: {
+        Args: { limit_count?: number; sort_asc?: boolean; stat_key: string }
+        Returns: {
+          assetId: number
+          avgGkStats: Json
+          avgStats: Json
+          club: Json
+          commonName: string
+          images: Json
+          league: Json
+          nation: Json
+          position: string
+          rating: number
+          statName: string
+          stats: Json
+          statValue: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

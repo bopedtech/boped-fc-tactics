@@ -113,18 +113,18 @@ const AIAssistantBubble = () => {
     setMessages(prev => [...prev, userMessage]);
     setInputValue("");
     setIsLoading(true);
-
-    let assistantContent = "";
     
     try {
-      const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
+      const CHAT_URL = `https://nhdmgiyoienkixokcoue.supabase.co/functions/v1/chat`;
       const response = await fetch(CHAT_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({ messages: [...messages, userMessage] }),
+        body: JSON.stringify({ 
+          messages: [...messages, userMessage],
+          userQuery: inputValue
+        }),
       });
 
       if (!response.ok) {
@@ -132,82 +132,39 @@ const AIAssistantBubble = () => {
         throw new Error(errorData.error || "Lỗi kết nối");
       }
 
-      if (!response.body) throw new Error("No response body");
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let textBuffer = "";
-      let streamDone = false;
-
-      // Add initial assistant message
-      setMessages(prev => [...prev, { role: "assistant", content: "" }]);
-
-      while (!streamDone) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        
-        textBuffer += decoder.decode(value, { stream: true });
-
-        let newlineIndex: number;
-        while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
-          let line = textBuffer.slice(0, newlineIndex);
-          textBuffer = textBuffer.slice(newlineIndex + 1);
-
-          if (line.endsWith("\r")) line = line.slice(0, -1);
-          if (line.startsWith(":") || line.trim() === "") continue;
-          if (!line.startsWith("data: ")) continue;
-
-          const jsonStr = line.slice(6).trim();
-          if (jsonStr === "[DONE]") {
-            streamDone = true;
-            break;
+      const data = await response.json();
+      const responseText = data.response || "Xin lỗi, tôi không thể trả lời.";
+      
+      // Parse player cards from JSON blocks
+      const jsonMatch = responseText.match(/```json\s*(\{[\s\S]*?\})\s*```/);
+      let players: Player[] | undefined = undefined;
+      let displayContent = responseText;
+      
+      if (jsonMatch) {
+        try {
+          const jsonData = JSON.parse(jsonMatch[1]);
+          if (jsonData.playerCards && Array.isArray(jsonData.playerCards)) {
+            players = jsonData.playerCards;
           }
-
-          try {
-            const parsed = JSON.parse(jsonStr);
-            const content = parsed.choices?.[0]?.delta?.content as string | undefined;
-            if (content) {
-              assistantContent += content;
-              
-              // Parse player cards from JSON blocks
-              const jsonMatch = assistantContent.match(/```json\s*(\{[\s\S]*?\})\s*```/);
-              let players: Player[] | undefined = undefined;
-              let displayContent = assistantContent;
-              
-              if (jsonMatch) {
-                try {
-                  const jsonData = JSON.parse(jsonMatch[1]);
-                  if (jsonData.playerCards && Array.isArray(jsonData.playerCards)) {
-                    players = jsonData.playerCards;
-                  }
-                  // Remove JSON block from display
-                  displayContent = assistantContent.replace(/```json\s*\{[\s\S]*?\}\s*```/, '').trim();
-                } catch {
-                  // Invalid JSON, keep original content
-                }
-              }
-              
-              setMessages(prev => {
-                const newMessages = [...prev];
-                const lastMessage = newMessages[newMessages.length - 1];
-                if (lastMessage.role === "assistant") {
-                  lastMessage.content = displayContent;
-                  lastMessage.players = players;
-                }
-                return newMessages;
-              });
-            }
-          } catch {
-            textBuffer = line + "\n" + textBuffer;
-            break;
-          }
+          // Remove JSON block from display
+          displayContent = responseText.replace(/```json\s*\{[\s\S]*?\}\s*```/, '').trim();
+        } catch (e) {
+          console.error("Failed to parse player cards:", e);
         }
       }
+      
+      // Remove markdown formatting
+      displayContent = displayContent.replace(/\*\*/g, '').replace(/\*/g, '');
+      
+      setMessages(prev => [...prev, { 
+        role: "assistant", 
+        content: displayContent,
+        players: players 
+      }]);
 
     } catch (error) {
       console.error("Chat error:", error);
       toast.error(error instanceof Error ? error.message : "Lỗi khi gửi tin nhắn");
-      setMessages(prev => prev.slice(0, -1)); // Remove empty assistant message
     } finally {
       setIsLoading(false);
     }
