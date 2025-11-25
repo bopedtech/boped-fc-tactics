@@ -3,8 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Database, Trophy, TrendingUp, Activity, Shield } from "lucide-react";
 import { toast } from "sonner";
+import { useT } from "@/contexts/LocalizationContext";
 
 export default function AdminDashboard() {
+  const { t } = useT();
   const [stats, setStats] = useState({
     totalPlayers: 0,
     totalUsers: 0,
@@ -50,7 +52,7 @@ export default function AdminDashboard() {
       });
     } catch (error) {
       console.error("Error fetching stats:", error);
-      toast.error("Không thể tải thống kê");
+      toast.error(t("admin.dashboard.toast.error", "Không thể tải thống kê"));
     } finally {
       setLoading(false);
     }
@@ -58,44 +60,44 @@ export default function AdminDashboard() {
 
   const statCards = [
     {
-      title: "Tổng Cầu Thủ",
+      title: t("admin.dashboard.totalPlayers.title", "Tổng Cầu Thủ"),
       value: stats.totalPlayers.toLocaleString(),
-      description: "Cầu thủ trong database",
+      description: t("admin.dashboard.totalPlayers.description", "Cầu thủ trong database"),
       icon: Users,
       color: "text-blue-500",
     },
     {
-      title: "Người Dùng",
+      title: t("admin.dashboard.totalUsers.title", "Người Dùng"),
       value: stats.totalUsers.toLocaleString(),
-      description: "Tài khoản đã đăng ký",
+      description: t("admin.dashboard.totalUsers.description", "Tài khoản đã đăng ký"),
       icon: Shield,
       color: "text-green-500",
     },
     {
-      title: "Đội Hình",
+      title: t("admin.dashboard.totalSquads.title", "Đội Hình"),
       value: stats.totalSquads.toLocaleString(),
-      description: "Đội hình đã tạo",
+      description: t("admin.dashboard.totalSquads.description", "Đội hình đã tạo"),
       icon: Activity,
       color: "text-purple-500",
     },
     {
-      title: "Giải Đấu",
+      title: t("admin.dashboard.totalLeagues.title", "Giải Đấu"),
       value: stats.totalLeagues.toLocaleString(),
-      description: "Giải đấu trong hệ thống",
+      description: t("admin.dashboard.totalLeagues.description", "Giải đấu trong hệ thống"),
       icon: Trophy,
       color: "text-yellow-500",
     },
     {
-      title: "Câu Lạc Bộ",
+      title: t("admin.dashboard.totalTeams.title", "Câu Lạc Bộ"),
       value: stats.totalTeams.toLocaleString(),
-      description: "CLB trong database",
+      description: t("admin.dashboard.totalTeams.description", "CLB trong database"),
       icon: Database,
       color: "text-red-500",
     },
     {
-      title: "Quốc Gia",
+      title: t("admin.dashboard.totalNations.title", "Quốc Gia"),
       value: stats.totalNations.toLocaleString(),
-      description: "Quốc gia trong hệ thống",
+      description: t("admin.dashboard.totalNations.description", "Quốc gia trong hệ thống"),
       icon: TrendingUp,
       color: "text-orange-500",
     },
@@ -104,9 +106,9 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-4xl font-bold mb-2">Dashboard</h1>
+        <h1 className="text-4xl font-bold mb-2">{t("admin.dashboard.title", "Dashboard")}</h1>
         <p className="text-muted-foreground">
-          Tổng quan hệ thống và thống kê nhanh
+          {t("admin.dashboard.subtitle", "Tổng quan hệ thống và thống kê nhanh")}
         </p>
       </div>
 
@@ -135,9 +137,12 @@ export default function AdminDashboard() {
       {/* Recent Activity */}
       <Card>
         <CardHeader>
-          <CardTitle>Hoạt Động Gần Đây</CardTitle>
+          <CardTitle>{t("admin.dashboard.recentActivity.title", "Hoạt Động Gần Đây")}</CardTitle>
           <CardDescription>
-            Theo dõi các hoạt động quan trọng trong hệ thống
+            {t(
+              "admin.dashboard.recentActivity.subtitle",
+              "Theo dõi các hoạt động quan trọng trong hệ thống"
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -145,16 +150,16 @@ export default function AdminDashboard() {
             <div className="flex items-center gap-4 p-3 rounded-lg bg-muted/50">
               <Activity className="h-5 w-5 text-blue-500" />
               <div className="flex-1">
-                <p className="text-sm font-medium">Hệ thống đang hoạt động bình thường</p>
-                <p className="text-xs text-muted-foreground">Tất cả dịch vụ đang online</p>
+                <p className="text-sm font-medium">{t("admin.dashboard.recentActivity.systemStatus.title", "Hệ thống đang hoạt động bình thường")}</p>
+                <p className="text-xs text-muted-foreground">{t("admin.dashboard.recentActivity.systemStatus.subtitle", "Tất cả dịch vụ đang online")}</p>
               </div>
             </div>
             
             <div className="flex items-center gap-4 p-3 rounded-lg bg-muted/50">
               <Database className="h-5 w-5 text-green-500" />
               <div className="flex-1">
-                <p className="text-sm font-medium">Database đã được cập nhật</p>
-                <p className="text-xs text-muted-foreground">Dữ liệu cầu thủ mới nhất</p>
+                <p className="text-sm font-medium">{t("admin.dashboard.recentActivity.databaseUpdated.title", "Database đã được cập nhật")}</p>
+                <p className="text-xs text-muted-foreground">{t("admin.dashboard.recentActivity.databaseUpdated.subtitle", "Dữ liệu cầu thủ mới nhất")}</p>
               </div>
             </div>
           </div>
