@@ -73,7 +73,7 @@ export default function Database() {
   const [searchParams] = useSearchParams();
   const [searchName, setSearchName] = useState("");
   const [showFilters, setShowFilters] = useState(true);
-  const [sortBy, setSortBy] = useState("newest");
+  const [sortBy, setSortBy] = useState("rating_desc");
   const [countriesData, setCountriesData] = useState<any[]>([]);
   const [teamsData, setTeamsData] = useState<Array<{ id: number; displayName: string; image?: string }>>([]);
   const [leaguesData, setLeaguesData] = useState<Array<{ id: number; displayName: string; image?: string }>>([]);
