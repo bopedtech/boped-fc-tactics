@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Calendar, Search } from "lucide-react";
+import { useT } from "@/contexts/LocalizationContext";
 
 // Mock news data
 const allNews = [
@@ -76,10 +77,19 @@ const allNews = [
 ];
 
 const News = () => {
+  const { t } = useT();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  const categories = ["Tất cả", "Tin tức", "Cập nhật", "Hướng dẫn", "Tính năng mới", "Sự kiện", "Phân tích"];
+  const categories = [
+    t("news.categories.all", "Tất cả"), 
+    t("news.categories.news", "Tin tức"), 
+    t("news.categories.updates", "Cập nhật"), 
+    t("news.categories.guides", "Hướng dẫn"), 
+    t("news.categories.newFeatures", "Tính năng mới"), 
+    t("news.categories.events", "Sự kiện"), 
+    t("news.categories.analysis", "Phân tích")
+  ];
 
   const filteredNews = allNews.filter((item) => {
     const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -99,17 +109,17 @@ const News = () => {
           <div className="container relative z-10 mx-auto px-4">
             <div className="max-w-3xl mx-auto text-center space-y-4">
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold">
-                Bảng tin FC Mobile
+                {t("news.title", "Bảng tin FC Mobile")}
               </h1>
               <p className="text-lg text-muted-foreground">
-                Tin tức, cập nhật và hướng dẫn mới nhất về FC Mobile
+                {t("news.subtitle", "Tin tức, cập nhật và hướng dẫn mới nhất về FC Mobile")}
               </p>
 
               {/* Search Bar */}
               <div className="relative max-w-xl mx-auto">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
-                  placeholder="Tìm kiếm tin tức..."
+                  placeholder={t("news.search", "Tìm kiếm tin tức...")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-12 h-12"
@@ -126,9 +136,9 @@ const News = () => {
               {categories.map((category) => (
                 <Badge
                   key={category}
-                  variant={selectedCategory === category || (!selectedCategory && category === "Tất cả") ? "default" : "outline"}
+                  variant={selectedCategory === category || (!selectedCategory && category === t("news.categories.all", "Tất cả")) ? "default" : "outline"}
                   className="cursor-pointer px-4 py-2"
-                  onClick={() => setSelectedCategory(category === "Tất cả" ? null : category)}
+                  onClick={() => setSelectedCategory(category === t("news.categories.all", "Tất cả") ? null : category)}
                 >
                   {category}
                 </Badge>
@@ -142,7 +152,7 @@ const News = () => {
           <div className="container mx-auto px-4">
             {filteredNews.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-muted-foreground">Không tìm thấy bài viết nào</p>
+                <p className="text-muted-foreground">{t("news.noResults", "Không tìm thấy bài viết nào")}</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

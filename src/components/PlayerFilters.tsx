@@ -9,6 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
+import { useT } from "@/contexts/LocalizationContext";
 
 export interface FilterState {
   ratingRange: [number, number];
@@ -69,6 +70,7 @@ const footNames: Record<string, string> = {
 };
 
 export default function PlayerFilters({ filters, onFilterChange, onReset }: PlayerFiltersProps) {
+  const { t } = useT();
   const [leagues, setLeagues] = useState<Array<{ id: number; displayName: string; image?: string }>>([]);
   const [nations, setNations] = useState<Array<{ id: number; displayName: string; image?: string }>>([]);
   const [teams, setTeams] = useState<Array<{ id: number; displayName: string; image?: string }>>([]);
@@ -210,7 +212,7 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
       <ScrollArea className="h-full">
         <div className="p-4 space-y-1 pr-4">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-sm uppercase text-muted-foreground">Bộ lọc</h3>
+          <h3 className="font-semibold text-sm uppercase text-muted-foreground">{t("filters.title", "Bộ lọc")}</h3>
           <Button
             onClick={onReset}
             variant="outline"
@@ -218,14 +220,14 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
             className="h-8 text-xs"
           >
             <X className="h-3 w-3 mr-1" />
-            Đặt lại tất cả
+            {t("filters.reset", "Đặt lại tất cả")}
           </Button>
         </div>
 
         {/* Ratings */}
         <Collapsible open={openSections.rating} onOpenChange={() => toggleSection('rating')}>
           <CollapsibleTrigger className="flex items-center justify-between w-full py-2.5 px-3 hover:bg-muted/50 rounded-md transition-colors">
-            <span className="font-medium text-sm">Chỉ số (OVR)</span>
+            <span className="font-medium text-sm">{t("filters.rating", "Chỉ số (OVR)")}</span>
             {openSections.rating ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </CollapsibleTrigger>
           <CollapsibleContent className="px-3 py-3 space-y-3">
@@ -247,28 +249,28 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
         {/* Position */}
         <Collapsible open={openSections.position} onOpenChange={() => toggleSection('position')}>
           <CollapsibleTrigger className="flex items-center justify-between w-full py-2.5 px-3 hover:bg-muted/50 rounded-md transition-colors">
-            <span className="font-medium text-sm">Vị trí</span>
+            <span className="font-medium text-sm">{t("filters.position", "Vị trí")}</span>
             {openSections.position ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </CollapsibleTrigger>
           <CollapsibleContent className="px-3 py-2 space-y-3">
             {/* Position Type Selector */}
             <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">Loại vị trí</Label>
+              <Label className="text-xs text-muted-foreground">{t("filters.position.type", "Loại vị trí")}</Label>
               <Select value={filters.positionType} onValueChange={(val: "all" | "primary" | "alternate") => updateFilter('positionType', val)}>
                 <SelectTrigger className="h-9 text-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-popover z-50">
-                  <SelectItem value="all">Cả vị trí chính và phụ</SelectItem>
-                  <SelectItem value="primary">Chỉ vị trí chính</SelectItem>
-                  <SelectItem value="alternate">Chỉ vị trí phụ</SelectItem>
+                  <SelectItem value="all">{t("filters.position.type.all", "Cả vị trí chính và phụ")}</SelectItem>
+                  <SelectItem value="primary">{t("filters.position.type.primary", "Chỉ vị trí chính")}</SelectItem>
+                  <SelectItem value="alternate">{t("filters.position.type.alternate", "Chỉ vị trí phụ")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             {/* Position Checkboxes */}
             <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">Chọn vị trí</Label>
+              <Label className="text-xs text-muted-foreground">{t("filters.position.select", "Chọn vị trí")}</Label>
               <ScrollArea className="h-[200px]">
                 <div className="space-y-2 pr-4">
                   {positions.map((pos) => (

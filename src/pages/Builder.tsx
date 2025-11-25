@@ -178,7 +178,7 @@ const calculateFormationLayout = (positions: string[]): Array<{ top: string; lef
 };
 
 export default function Builder() {
-  const { t } = useT();
+  const { t, locale } = useT();
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const [squadName, setSquadName] = useState("");
@@ -370,7 +370,9 @@ export default function Builder() {
             <Card className="p-6 bg-gradient-to-br from-card/95 to-card/80 backdrop-blur-sm border-2">
               <div className="text-center mb-6">
                 <h3 className="text-2xl font-bold gradient-primary bg-clip-text text-transparent">
-                  {selectedFormation?.name || t("builder.selectFormation", "Chọn sơ đồ")}
+                  {selectedFormation 
+                    ? (locale === 'en' ? selectedFormation.nameEn : selectedFormation.name)
+                    : t("builder.selectFormation", "Chọn sơ đồ")}
                 </h3>
               </div>
 

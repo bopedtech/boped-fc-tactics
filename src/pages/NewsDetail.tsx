@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Calendar, ArrowLeft, Share2 } from "lucide-react";
 import { toast } from "sonner";
+import { useT } from "@/contexts/LocalizationContext";
 
 // Mock news data - same as in News.tsx
 const allNews = [
@@ -194,6 +195,7 @@ const allNews = [
 ];
 
 const NewsDetail = () => {
+  const { t } = useT();
   const { id } = useParams();
   const navigate = useNavigate();
   const newsItem = allNews.find((item) => item.id === Number(id));
@@ -204,10 +206,10 @@ const NewsDetail = () => {
         <Header />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center space-y-4">
-            <h1 className="text-2xl font-bold">Không tìm thấy bài viết</h1>
+            <h1 className="text-2xl font-bold">{t("news.notFound", "Không tìm thấy bài viết")}</h1>
             <Button onClick={() => navigate("/news")}>
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Quay lại bảng tin
+              {t("news.backToNews", "Quay lại bảng tin")}
             </Button>
           </div>
         </main>
@@ -222,7 +224,7 @@ const NewsDetail = () => {
 
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
-    toast.success("Đã copy link bài viết");
+    toast.success(t("news.linkCopied", "Đã copy link bài viết"));
   };
 
   return (
@@ -235,7 +237,7 @@ const NewsDetail = () => {
           <div className="container mx-auto px-4">
             <Button variant="ghost" onClick={() => navigate("/news")}>
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Quay lại bảng tin
+              {t("news.backToNews", "Quay lại bảng tin")}
             </Button>
           </div>
         </section>
@@ -264,7 +266,7 @@ const NewsDetail = () => {
                 
                 <Button variant="outline" size="sm" onClick={handleShare}>
                   <Share2 className="h-4 w-4 mr-2" />
-                  Chia sẻ
+                  {t("news.share", "Chia sẻ")}
                 </Button>
               </div>
             </div>
@@ -302,7 +304,7 @@ const NewsDetail = () => {
         {relatedNews.length > 0 && (
           <section className="py-12 border-t border-border/40">
             <div className="container mx-auto px-4">
-              <h2 className="text-2xl font-bold mb-6">Bài viết liên quan</h2>
+              <h2 className="text-2xl font-bold mb-6">{t("news.relatedArticles", "Bài viết liên quan")}</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {relatedNews.map((item) => (
                   <Link key={item.id} to={`/news/${item.id}`}>
