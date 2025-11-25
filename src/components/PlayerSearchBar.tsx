@@ -182,13 +182,13 @@ const PlayerSearchBar = () => {
 
         {/* Results dropdown */}
         {isOpen && players.length > 0 && (
-          <div className="absolute top-full mt-4 w-full z-50 max-h-[70vh] overflow-y-auto">
-            <div className="rounded-2xl border-2 border-primary/20 shadow-2xl bg-card/95 backdrop-blur-sm p-6">
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="fixed left-0 right-0 top-[280px] z-50 px-4">
+            <div className="rounded-2xl border-2 border-primary/20 shadow-2xl bg-card/95 backdrop-blur-sm p-6 max-w-[95vw] mx-auto">
+              <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
                 {players.map((player) => (
                   <div 
                     key={player.assetId}
-                    className="cursor-pointer hover:scale-105 transition-transform w-full"
+                    className="cursor-pointer hover:scale-105 transition-transform flex-shrink-0 w-[200px]"
                     onClick={() => handlePlayerClick(player.assetId)}
                   >
                     <PlayerCard player={player} />
@@ -196,8 +196,8 @@ const PlayerSearchBar = () => {
                 ))}
               </div>
               {players.length === 8 && (
-                <div className="mt-6 pt-4 text-center text-sm text-muted-foreground border-t border-border/50">
-                  Hiển thị 8 kết quả đầu tiên
+                <div className="mt-4 pt-4 text-center text-sm text-muted-foreground border-t border-border/50">
+                  Hiển thị 8 kết quả đầu tiên - Cuộn ngang để xem thêm
                 </div>
               )}
             </div>
