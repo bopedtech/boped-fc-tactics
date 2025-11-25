@@ -7,8 +7,10 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { useT } from "@/contexts/LocalizationContext";
 
 export default function Auth() {
+  const { t } = useT();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
@@ -37,9 +39,9 @@ export default function Auth() {
 
       if (error) throw error;
 
-      toast.success("Đăng ký thành công! Vui lòng kiểm tra email để xác nhận.");
+      toast.success(t("auth.signupSuccess", "Đăng ký thành công! Vui lòng kiểm tra email để xác nhận."));
     } catch (error: any) {
-      toast.error(error.message || "Có lỗi xảy ra khi đăng ký");
+      toast.error(error.message || t("auth.signupError", "Có lỗi xảy ra khi đăng ký"));
     } finally {
       setLoading(false);
     }
@@ -57,10 +59,10 @@ export default function Auth() {
 
       if (error) throw error;
 
-      toast.success("Đăng nhập thành công!");
+      toast.success(t("auth.signinSuccess", "Đăng nhập thành công!"));
       navigate("/");
     } catch (error: any) {
-      toast.error(error.message || "Email hoặc mật khẩu không đúng");
+      toast.error(error.message || t("auth.signinError", "Email hoặc mật khẩu không đúng"));
     } finally {
       setLoading(false);
     }
@@ -77,7 +79,7 @@ export default function Auth() {
 
       if (error) throw error;
     } catch (error: any) {
-      toast.error(error.message || "Có lỗi xảy ra khi đăng nhập với Google");
+      toast.error(error.message || t("auth.googleError", "Có lỗi xảy ra khi đăng nhập với Google"));
     }
   };
 
@@ -89,20 +91,20 @@ export default function Auth() {
             BopedFCTactics
           </CardTitle>
           <CardDescription className="text-center">
-            Xây dựng đội hình và chiến thuật tối ưu
+            {t("auth.description", "Xây dựng đội hình và chiến thuật tối ưu")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Đăng nhập</TabsTrigger>
-              <TabsTrigger value="signup">Đăng ký</TabsTrigger>
+              <TabsTrigger value="signin">{t("auth.signin", "Đăng nhập")}</TabsTrigger>
+              <TabsTrigger value="signup">{t("auth.signup", "Đăng ký")}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="signin">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signin-email">Email</Label>
+                  <Label htmlFor="signin-email">{t("auth.email", "Email")}</Label>
                   <Input
                     id="signin-email"
                     type="email"
@@ -113,7 +115,7 @@ export default function Auth() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signin-password">Mật khẩu</Label>
+                  <Label htmlFor="signin-password">{t("auth.password", "Mật khẩu")}</Label>
                   <Input
                     id="signin-password"
                     type="password"
@@ -127,7 +129,7 @@ export default function Auth() {
                   className="w-full gradient-primary"
                   disabled={loading}
                 >
-                  {loading ? "Đang đăng nhập..." : "Đăng nhập"}
+                  {loading ? t("auth.signingIn", "Đang đăng nhập...") : t("auth.signin", "Đăng nhập")}
                 </Button>
               </form>
 
@@ -137,7 +139,7 @@ export default function Auth() {
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
                   <span className="bg-card px-2 text-muted-foreground">
-                    Hoặc tiếp tục với
+                    {t("auth.orContinueWith", "Hoặc tiếp tục với")}
                   </span>
                 </div>
               </div>
@@ -173,7 +175,7 @@ export default function Auth() {
             <TabsContent value="signup">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
+                  <Label htmlFor="signup-email">{t("auth.email", "Email")}</Label>
                   <Input
                     id="signup-email"
                     type="email"
@@ -184,11 +186,11 @@ export default function Auth() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-password">Mật khẩu</Label>
+                  <Label htmlFor="signup-password">{t("auth.password", "Mật khẩu")}</Label>
                   <Input
                     id="signup-password"
                     type="password"
-                    placeholder="Tối thiểu 6 ký tự"
+                    placeholder={t("auth.passwordPlaceholder", "Tối thiểu 6 ký tự")}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -200,7 +202,7 @@ export default function Auth() {
                   className="w-full gradient-primary"
                   disabled={loading}
                 >
-                  {loading ? "Đang đăng ký..." : "Đăng ký"}
+                  {loading ? t("auth.signingUp", "Đang đăng ký...") : t("auth.signup", "Đăng ký")}
                 </Button>
               </form>
 
@@ -210,7 +212,7 @@ export default function Auth() {
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
                   <span className="bg-card px-2 text-muted-foreground">
-                    Hoặc tiếp tục với
+                    {t("auth.orContinueWith", "Hoặc tiếp tục với")}
                   </span>
                 </div>
               </div>

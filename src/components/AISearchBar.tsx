@@ -4,15 +4,17 @@ import { Input } from "@/components/ui/input";
 import { Search, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useT } from "@/contexts/LocalizationContext";
 
 const AISearchBar = () => {
+  const { t } = useT();
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) {
-      toast.error("Vui lòng nhập câu hỏi");
+      toast.error(t("aiSearch.pleaseEnterQuestion", "Vui lòng nhập câu hỏi"));
       return;
     }
     
@@ -21,13 +23,13 @@ const AISearchBar = () => {
     
     if (lowerQuery.includes("cầu thủ") || lowerQuery.includes("player")) {
       navigate("/database");
-      toast.success("Đang tìm kiếm cầu thủ...");
+      toast.success(t("aiSearch.searchingPlayers", "Đang tìm kiếm cầu thủ..."));
     } else if (lowerQuery.includes("đội hình") || lowerQuery.includes("squad")) {
       navigate("/builder");
-      toast.success("Mở Squad Builder...");
+      toast.success(t("aiSearch.openingBuilder", "Mở Squad Builder..."));
     } else {
       navigate("/database");
-      toast.success("Đang tìm kiếm...");
+      toast.success(t("aiSearch.searching", "Đang tìm kiếm..."));
     }
     
     setQuery("");
@@ -38,9 +40,9 @@ const AISearchBar = () => {
       {/* Title */}
       <div className="text-center space-y-2">
         <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary via-purple-500 to-primary bg-clip-text text-transparent">
-          Boped FC Tactics
+          {t("hero.title", "Boped FC Tactics")}
         </h1>
-        <p className="text-muted-foreground text-lg">AI trợ lý thông minh cho FC Mobile</p>
+        <p className="text-muted-foreground text-lg">{t("aiSearch.subtitle", "AI trợ lý thông minh cho FC Mobile")}</p>
       </div>
 
       {/* AI Search Input */}
@@ -52,7 +54,7 @@ const AISearchBar = () => {
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Hỏi AI: 'Tìm tiền đạo có pace trên 90', 'Gợi ý đội hình Tiki-Taka'..."
+              placeholder={t("aiSearch.placeholder", "Hỏi AI: 'Tìm tiền đạo có pace trên 90', 'Gợi ý đội hình Tiki-Taka'...")}
               className="flex-1 border-0 bg-transparent text-base focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/70"
             />
             <Button type="submit" size="sm" className="gradient-primary">

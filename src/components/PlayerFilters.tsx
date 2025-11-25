@@ -299,12 +299,12 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
         {/* Leagues Filter */}
         <Collapsible open={openSections.league} onOpenChange={() => toggleSection('league')}>
           <CollapsibleTrigger className="flex items-center justify-between w-full py-2.5 px-3 hover:bg-muted/50 rounded-md transition-colors">
-            <span className="font-medium text-sm">Giải đấu</span>
+            <span className="font-medium text-sm">{t("filters.league", "Giải đấu")}</span>
             {openSections.league ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </CollapsibleTrigger>
           <CollapsibleContent className="px-3 py-2 space-y-2">
             <Input
-              placeholder="Tìm giải đấu..."
+              placeholder={t("filters.searchLeague", "Tìm giải đấu...")}
               value={leagueSearch}
               onChange={(e) => setLeagueSearch(e.target.value)}
               className="h-8 text-xs"
@@ -339,12 +339,12 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
         {/* Clubs Filter */}
         <Collapsible open={openSections.clubs} onOpenChange={() => toggleSection('clubs')}>
           <CollapsibleTrigger className="flex items-center justify-between w-full py-2.5 px-3 hover:bg-muted/50 rounded-md transition-colors">
-            <span className="font-medium text-sm">Câu lạc bộ</span>
+            <span className="font-medium text-sm">{t("filters.club", "Câu lạc bộ")}</span>
             {openSections.clubs ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </CollapsibleTrigger>
           <CollapsibleContent className="px-3 py-2 space-y-2">
             <Input
-              placeholder="Tìm câu lạc bộ..."
+              placeholder={t("filters.searchClub", "Tìm câu lạc bộ...")}
               value={clubSearch}
               onChange={(e) => setClubSearch(e.target.value)}
               className="h-8 text-xs"
@@ -379,12 +379,12 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
         {/* Nations Filter */}
         <Collapsible open={openSections.nations} onOpenChange={() => toggleSection('nations')}>
           <CollapsibleTrigger className="flex items-center justify-between w-full py-2.5 px-3 hover:bg-muted/50 rounded-md transition-colors">
-            <span className="font-medium text-sm">Quốc tịch</span>
+            <span className="font-medium text-sm">{t("filters.nation", "Quốc tịch")}</span>
             {openSections.nations ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </CollapsibleTrigger>
           <CollapsibleContent className="px-3 py-2 space-y-2">
             <Input
-              placeholder="Tìm quốc tịch..."
+              placeholder={t("filters.searchNation", "Tìm quốc tịch...")}
               value={nationSearch}
               onChange={(e) => setNationSearch(e.target.value)}
               className="h-8 text-xs"
@@ -419,12 +419,12 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
         {/* Programs Filter */}
         <Collapsible open={openSections.program} onOpenChange={() => toggleSection('program')}>
           <CollapsibleTrigger className="flex items-center justify-between w-full py-2.5 px-3 hover:bg-muted/50 rounded-md transition-colors">
-            <span className="font-medium text-sm">Chương trình/Sự kiện</span>
+            <span className="font-medium text-sm">{t("filters.program", "Chương trình/Sự kiện")}</span>
             {openSections.program ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </CollapsibleTrigger>
           <CollapsibleContent className="px-3 py-2 space-y-2">
             <Input
-              placeholder="Tìm chương trình..."
+              placeholder={t("filters.searchProgram", "Tìm chương trình...")}
               value={programSearch}
               onChange={(e) => setProgramSearch(e.target.value)}
               className="h-8 text-xs"

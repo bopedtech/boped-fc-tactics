@@ -14,6 +14,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, TrendingUp, Shield, Zap } from "lucide-react";
 import { toast } from "sonner";
+import { useT } from "@/contexts/LocalizationContext";
 
 interface AIAnalysis {
   playstyle: string;
@@ -42,20 +43,21 @@ interface AIAdvisorProps {
 }
 
 export default function AIAdvisor({ onClose, squadData }: AIAdvisorProps) {
+  const { t } = useT();
   const [selectedPlaystyle, setSelectedPlaystyle] = useState<string>("");
   const [analysis, setAnalysis] = useState<AIAnalysis | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
 
   const playstyles = [
-    { value: "control", label: "Kiểm soát bóng (Possession)", icon: TrendingUp },
-    { value: "counter", label: "Phản công nhanh (Counter)", icon: Zap },
-    { value: "gegenpressing", label: "Ép sân cao (High Press)", icon: Shield },
-    { value: "defensive", label: "Phòng thủ chặt chẽ (Defensive)", icon: Shield },
+    { value: "control", label: t("aiAdvisor.playstyle.control", "Kiểm soát bóng (Possession)"), icon: TrendingUp },
+    { value: "counter", label: t("aiAdvisor.playstyle.counter", "Phản công nhanh (Counter)"), icon: Zap },
+    { value: "gegenpressing", label: t("aiAdvisor.playstyle.pressing", "Ép sân cao (High Press)"), icon: Shield },
+    { value: "defensive", label: t("aiAdvisor.playstyle.defensive", "Phòng thủ chặt chẽ (Defensive)"), icon: Shield },
   ];
 
   const handleAnalyze = async () => {
     if (!selectedPlaystyle) {
-      toast.error("Vui lòng chọn lối chơi mong muốn");
+      toast.error(t("aiAdvisor.selectPlaystyle", "Vui lòng chọn lối chơi mong muốn"));
       return;
     }
 
@@ -101,7 +103,7 @@ export default function AIAdvisor({ onClose, squadData }: AIAdvisorProps) {
 
     setAnalysis(mockAnalysis);
     setAnalyzing(false);
-    toast.success("Phân tích hoàn tất!");
+    toast.success(t("aiAdvisor.analysisComplete", "Phân tích hoàn tất!"));
   };
 
   return (
@@ -113,14 +115,14 @@ export default function AIAdvisor({ onClose, squadData }: AIAdvisorProps) {
               <Sparkles className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold">Trợ lý AI Chiến thuật</h1>
+              <h1 className="text-3xl font-bold">{t("aiAdvisor.title", "Trợ lý AI Chiến thuật")}</h1>
               <p className="text-muted-foreground">
-                Gợi ý thiết lập Manager Mode FC Mobile thông minh cho đội hình của bạn
+                {t("aiAdvisor.description", "Gợi ý thiết lập Manager Mode FC Mobile thông minh cho đội hình của bạn")}
               </p>
             </div>
           </div>
           <Button variant="outline" onClick={onClose}>
-            Đóng
+            {t("aiAdvisor.close", "Đóng")}
           </Button>
         </div>
 
@@ -131,14 +133,14 @@ export default function AIAdvisor({ onClose, squadData }: AIAdvisorProps) {
                 <div className="w-20 h-20 rounded-full gradient-primary mx-auto mb-4 flex items-center justify-center">
                   <Sparkles className="h-10 w-10 text-white animate-pulse" />
                 </div>
-                <h2 className="text-2xl font-bold mb-2">Chọn lối chơi mong muốn</h2>
+                <h2 className="text-2xl font-bold mb-2">{t("aiAdvisor.selectTitle", "Chọn lối chơi mong muốn")}</h2>
                 <p className="text-muted-foreground">
-                  AI sẽ phân tích và đề xuất thiết lập Manager Mode tối ưu cho FC Mobile
+                  {t("aiAdvisor.selectDescription", "AI sẽ phân tích và đề xuất thiết lập Manager Mode tối ưu cho FC Mobile")}
                 </p>
               </div>
 
               <div className="space-y-4">
-                <Label className="text-lg">Lối chơi</Label>
+                <Label className="text-lg">{t("aiAdvisor.playstyleLabel", "Lối chơi")}</Label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {playstyles.map((style) => (
                     <Card
@@ -181,12 +183,12 @@ export default function AIAdvisor({ onClose, squadData }: AIAdvisorProps) {
                 {analyzing ? (
                   <>
                     <Sparkles className="mr-2 h-5 w-5 animate-pulse" />
-                    Đang phân tích...
+                    {t("aiAdvisor.analyzing", "Đang phân tích...")}
                   </>
                 ) : (
                   <>
                     <Sparkles className="mr-2 h-5 w-5" />
-                    Phân tích với AI
+                    {t("aiAdvisor.analyzeButton", "Phân tích với AI")}
                   </>
                 )}
               </Button>

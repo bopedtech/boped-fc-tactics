@@ -13,6 +13,7 @@ import {
 import PlayerCard from "@/components/PlayerCard";
 import PlayerDetailDialog from "@/components/PlayerDetailDialog";
 import { TEXT } from "@/constants/text";
+import { useT } from "@/contexts/LocalizationContext";
 
 interface PlayerStats {
   pace?: number;
@@ -57,6 +58,7 @@ interface Player {
 }
 
 const PlayerSearchBar = () => {
+  const { t } = useT();
   const [query, setQuery] = useState("");
   const [players, setPlayers] = useState<Player[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -154,9 +156,9 @@ const PlayerSearchBar = () => {
       {/* Title */}
       <div className="text-center space-y-2">
         <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary via-purple-500 to-primary bg-clip-text text-transparent">
-          Boped FC Tactics
+          {t("hero.title", "Boped FC Tactics")}
         </h1>
-        <p className="text-muted-foreground text-lg">Tìm kiếm cầu thủ FC Mobile</p>
+        <p className="text-muted-foreground text-lg">{t("hero.subtitle", "Tìm kiếm cầu thủ FC Mobile")}</p>
       </div>
 
       {/* Search Input */}
@@ -168,7 +170,7 @@ const PlayerSearchBar = () => {
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Tìm kiếm cầu thủ theo tên..."
+              placeholder={t("hero.searchPlaceholder", "Tìm kiếm cầu thủ theo tên...")}
               className="flex-1 border-0 bg-transparent text-base focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/70"
               onFocus={() => query.length >= 2 && setIsOpen(true)}
             />
@@ -213,7 +215,7 @@ const PlayerSearchBar = () => {
                     variant="outline"
                     className="w-full"
                   >
-                    Xem thêm kết quả tìm kiếm
+                    {t("hero.viewMore", "Xem thêm kết quả tìm kiếm")}
                   </Button>
                 </div>
               )}
@@ -225,7 +227,7 @@ const PlayerSearchBar = () => {
           <div className="mt-4 w-full">
             <div className="rounded-2xl border-2 border-primary/20 shadow-2xl bg-card/95 backdrop-blur-sm p-6">
               <p className="text-center text-muted-foreground">
-                Không tìm thấy cầu thủ
+                {t("hero.noPlayers", "Không tìm thấy cầu thủ")}
               </p>
             </div>
           </div>
