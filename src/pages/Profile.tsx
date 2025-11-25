@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useT } from "@/contexts/LocalizationContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -36,6 +37,7 @@ interface Squad {
 
 export default function Profile() {
   const navigate = useNavigate();
+  const { t } = useT();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -62,7 +64,7 @@ export default function Profile() {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
-        toast.error("Vui lòng đăng nhập để truy cập trang này");
+        toast.error(t("profile.toast.loginRequired"));
         navigate("/auth");
         return;
       }
@@ -99,7 +101,7 @@ export default function Profile() {
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
-      toast.error("Không thể tải thông tin profile");
+      toast.error(t("profile.toast.loadError"));
     } finally {
       setLoading(false);
     }
@@ -117,7 +119,7 @@ export default function Profile() {
       if (error) throw error;
       setSquads(data || []);
     } catch (error: any) {
-      toast.error("Không thể tải đội hình");
+      toast.error(t("profile.toast.loadError"));
       console.error(error);
     } finally {
       setSquadsLoading(false);
@@ -131,9 +133,9 @@ export default function Profile() {
       if (error) throw error;
 
       setSquads(squads.filter((s) => s.id !== id));
-      toast.success("Đã xóa đội hình");
+      toast.success(t("profile.toast.squadDeleted"));
     } catch (error: any) {
-      toast.error("Không thể xóa đội hình");
+      toast.error(t("profile.toast.squadDeleteError"));
       console.error(error);
     }
   };
@@ -192,12 +194,12 @@ export default function Profile() {
       if (updateError) throw updateError;
 
       setAvatarUrl(finalUrl);
-      toast.success("Đã cập nhật avatar!");
+      toast.success(t("profile.toast.avatarUpdated"));
       
       // Trigger event to update avatar in Header
       window.dispatchEvent(new CustomEvent('avatarUpdated', { detail: { avatarUrl: finalUrl } }));
     } catch (error: any) {
-      toast.error("Không thể tải avatar lên");
+      toast.error(t("profile.toast.avatarError"));
       console.error(error);
     } finally {
       setUploading(false);
@@ -245,7 +247,7 @@ export default function Profile() {
         if (error) throw error;
       }
 
-      toast.success("Đã cập nhật profile thành công!");
+      toast.success(t("profile.toast.updateSuccess"));
     } catch (error) {
       if (error instanceof z.ZodError) {
         error.errors.forEach((err) => {
@@ -253,7 +255,7 @@ export default function Profile() {
         });
       } else {
         console.error("Error updating profile:", error);
-        toast.error("Không thể cập nhật profile");
+        toast.error(t("profile.toast.updateError"));
       }
     } finally {
       setSaving(false);
@@ -286,8 +288,8 @@ export default function Profile() {
       <div className="container mx-auto py-8 max-w-4xl">
         <Tabs defaultValue="profile" className="space-y-6">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="profile">Thông tin cá nhân</TabsTrigger>
-            <TabsTrigger value="squads">Đội hình của tôi</TabsTrigger>
+            <TabsTrigger value="profile">{t("profile.tabs.profile")}</TabsTrigger>
+            <TabsTrigger value="squads">{t("profile.tabs.squads")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="profile">
@@ -296,11 +298,11 @@ export default function Profile() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <User className="h-6 w-6" />
-                    <CardTitle>Thông tin cá nhân</CardTitle>
+                    <CardTitle>{t("profile.card.title")}</CardTitle>
                   </div>
                 </div>
                 <CardDescription>
-                  Cập nhật thông tin profile của bạn
+                  {t("profile.card.description")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -332,12 +334,12 @@ export default function Profile() {
                           {uploading ? (
                             <>
                               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              Đang tải...
+                              {t("profile.uploading")}
                             </>
                           ) : (
                             <>
                               <Upload className="mr-2 h-4 w-4" />
-                              Tải avatar lên
+                              {t("profile.uploadAvatar")}
                             </>
                           )}
                         </Button>
@@ -346,40 +348,40 @@ export default function Profile() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="display_name">Tên hiển thị</Label>
+                    <Label htmlFor="display_name">{t("profile.displayName")}</Label>
                     <Input
                       id="display_name"
                       value={formData.display_name || ""}
                       onChange={handleChange}
-                      placeholder="Tên hiển thị trong ứng dụng"
+                      placeholder={t("profile.displayName.placeholder")}
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="full_name">Tên đầy đủ</Label>
+                      <Label htmlFor="full_name">{t("profile.fullName")}</Label>
                       <Input
                         id="full_name"
                         value={formData.full_name || ""}
                         onChange={handleChange}
-                        placeholder="Nhập tên đầy đủ"
+                        placeholder={t("profile.fullName.placeholder")}
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="age">Tuổi</Label>
+                      <Label htmlFor="age">{t("profile.age")}</Label>
                       <Input
                         id="age"
                         type="number"
                         value={formData.age || ""}
                         onChange={handleChange}
-                        placeholder="Tuổi"
+                        placeholder={t("profile.age.placeholder")}
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="fc_mobile_experience">Kinh nghiệm FC Mobile</Label>
+                    <Label htmlFor="fc_mobile_experience">{t("profile.experience")}</Label>
                     <Select
                       value={formData.fc_mobile_experience}
                       onValueChange={(value) =>
@@ -390,21 +392,21 @@ export default function Profile() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Người mới">Người mới</SelectItem>
-                        <SelectItem value="Trung bình">Trung bình</SelectItem>
-                        <SelectItem value="Có kinh nghiệm">Có kinh nghiệm</SelectItem>
-                        <SelectItem value="Chuyên nghiệp">Chuyên nghiệp</SelectItem>
+                        <SelectItem value="Người mới">{t("profile.experience.beginner")}</SelectItem>
+                        <SelectItem value="Trung bình">{t("profile.experience.intermediate")}</SelectItem>
+                        <SelectItem value="Có kinh nghiệm">{t("profile.experience.experienced")}</SelectItem>
+                        <SelectItem value="Chuyên nghiệp">{t("profile.experience.professional")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="bio">Giới thiệu</Label>
+                    <Label htmlFor="bio">{t("profile.bio")}</Label>
                     <Textarea
                       id="bio"
                       value={formData.bio || ""}
                       onChange={handleChange}
-                      placeholder="Viết một vài dòng về bản thân..."
+                      placeholder={t("profile.bio.placeholder")}
                       rows={3}
                     />
                   </div>
@@ -418,12 +420,12 @@ export default function Profile() {
                       {saving ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Đang lưu...
+                          {t("profile.saving")}
                         </>
                       ) : (
                         <>
                           <Save className="mr-2 h-4 w-4" />
-                          Lưu thay đổi
+                          {t("profile.saveChanges")}
                         </>
                       )}
                     </Button>
@@ -432,7 +434,7 @@ export default function Profile() {
                       variant="outline"
                       onClick={() => navigate("/")}
                     >
-                      Hủy
+                      {t("profile.cancel")}
                     </Button>
                   </div>
                 </form>
@@ -444,9 +446,9 @@ export default function Profile() {
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl font-bold">Đội hình của tôi</h2>
+                  <h2 className="text-2xl font-bold">{t("profile.squads.title")}</h2>
                   <p className="text-muted-foreground">
-                    Quản lý các đội hình bạn đã tạo
+                    {t("profile.squads.description")}
                   </p>
                 </div>
                 <Button
@@ -454,7 +456,7 @@ export default function Profile() {
                   onClick={() => navigate("/builder")}
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  Tạo đội hình mới
+                  {t("profile.squads.createNew")}
                 </Button>
               </div>
 
@@ -468,16 +470,16 @@ export default function Profile() {
                 <Card className="p-16">
                   <div className="text-center">
                     <div className="mb-4 text-6xl">⚽</div>
-                    <h3 className="text-2xl font-bold mb-2">Chưa có đội hình nào</h3>
+                    <h3 className="text-2xl font-bold mb-2">{t("profile.squads.empty")}</h3>
                     <p className="text-muted-foreground mb-6">
-                      Bắt đầu xây dựng đội hình đầu tiên của bạn
+                      {t("profile.squads.empty.subtitle")}
                     </p>
                     <Button
                       className="gradient-primary"
                       onClick={() => navigate("/builder")}
                     >
                       <Plus className="h-4 w-4 mr-2" />
-                      Tạo đội hình
+                      {t("profile.squads.empty.create")}
                     </Button>
                   </div>
                 </Card>
@@ -488,11 +490,11 @@ export default function Profile() {
                       <div className="mb-4">
                         <h3 className="text-xl font-bold mb-1">{squad.squadName}</h3>
                         <p className="text-sm text-muted-foreground">
-                          Sơ đồ: {squad.formation}
+                          {t("profile.squads.formation")} {squad.formation}
                         </p>
                         {squad.playstyle && (
                           <p className="text-sm text-muted-foreground">
-                            Phong cách: {squad.playstyle}
+                            {t("profile.squads.playstyle")} {squad.playstyle}
                           </p>
                         )}
                       </div>
@@ -503,7 +505,7 @@ export default function Profile() {
                           className="flex-1"
                           onClick={() => navigate(`/builder?squad=${squad.id}`)}
                         >
-                          Chỉnh sửa
+                          {t("profile.squads.edit")}
                         </Button>
                         <Button
                           variant="outline"
