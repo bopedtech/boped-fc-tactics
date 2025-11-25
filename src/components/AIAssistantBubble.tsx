@@ -6,10 +6,21 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import logoImage from "@/assets/bopedfctactics-logo.png";
+import ChatPlayerCard from "@/components/ChatPlayerCard";
+import PlayerDetailDialog from "@/components/PlayerDetailDialog";
+
+interface PlayerCard {
+  assetId: number;
+  name: string;
+  rating: number;
+  position: string;
+  images?: any;
+}
 
 interface Message {
   role: "user" | "assistant";
   content: string;
+  playerCards?: PlayerCard[];
 }
 
 const randomGreetings = [
@@ -29,6 +40,7 @@ const AIAssistantBubble = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedPlayer, setSelectedPlayer] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -132,11 +144,31 @@ const AIAssistantBubble = () => {
             const content = parsed.choices?.[0]?.delta?.content as string | undefined;
             if (content) {
               assistantContent += content;
+              
+              // Parse player cards from JSON blocks
+              const jsonMatch = assistantContent.match(/```json\s*(\{[\s\S]*?\})\s*```/);
+              let playerCards: PlayerCard[] | undefined = undefined;
+              let displayContent = assistantContent;
+              
+              if (jsonMatch) {
+                try {
+                  const jsonData = JSON.parse(jsonMatch[1]);
+                  if (jsonData.playerCards && Array.isArray(jsonData.playerCards)) {
+                    playerCards = jsonData.playerCards;
+                  }
+                  // Remove JSON block from display
+                  displayContent = assistantContent.replace(/```json\s*\{[\s\S]*?\}\s*```/, '').trim();
+                } catch {
+                  // Invalid JSON, keep original content
+                }
+              }
+              
               setMessages(prev => {
                 const newMessages = [...prev];
                 const lastMessage = newMessages[newMessages.length - 1];
                 if (lastMessage.role === "assistant") {
-                  lastMessage.content = assistantContent;
+                  lastMessage.content = displayContent;
+                  lastMessage.playerCards = playerCards;
                 }
                 return newMessages;
               });
@@ -233,20 +265,36 @@ const AIAssistantBubble = () => {
                   <div
                     key={index}
                     className={cn(
-                      "flex",
-                      message.role === "user" ? "justify-end" : "justify-start"
+                      "flex flex-col gap-2",
+                      message.role === "user" ? "items-end" : "items-start"
                     )}
                   >
-                    <div
-                      className={cn(
-                        "rounded-2xl px-4 py-2 max-w-[80%]",
-                        message.role === "user"
-                          ? "gradient-primary text-white"
-                          : "bg-muted"
-                      )}
-                    >
-                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                    </div>
+                    {/* Player Cards */}
+                    {message.playerCards && message.playerCards.length > 0 && (
+                      <div className="flex flex-wrap gap-2 max-w-[90%]">
+                        {message.playerCards.map((player) => (
+                          <ChatPlayerCard
+                            key={player.assetId}
+                            player={player}
+                            onClick={() => setSelectedPlayer(player.assetId)}
+                          />
+                        ))}
+                      </div>
+                    )}
+                    
+                    {/* Text Message */}
+                    {message.content && (
+                      <div
+                        className={cn(
+                          "rounded-2xl px-4 py-2 max-w-[80%]",
+                          message.role === "user"
+                            ? "gradient-primary text-white"
+                            : "bg-muted"
+                        )}
+                      >
+                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                      </div>
+                    )}
                   </div>
                 ))}
                 {isLoading && (
@@ -288,6 +336,13 @@ const AIAssistantBubble = () => {
           </div>
         )}
       </div>
+
+      {/* Player Detail Dialog */}
+      <PlayerDetailDialog
+        assetId={selectedPlayer}
+        open={!!selectedPlayer}
+        onOpenChange={(open) => !open && setSelectedPlayer(null)}
+      />
     </>
   );
 };
