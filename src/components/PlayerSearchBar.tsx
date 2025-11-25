@@ -66,6 +66,9 @@ const PlayerSearchBar = () => {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      // Khi đang mở popup chi tiết cầu thủ thì không ẩn danh sách tìm kiếm
+      if (selectedPlayer) return;
+
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
@@ -73,7 +76,7 @@ const PlayerSearchBar = () => {
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [selectedPlayer]);
 
   useEffect(() => {
     const searchPlayers = async () => {
