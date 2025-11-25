@@ -18,8 +18,10 @@ import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import logoImage from "@/assets/bopedfctactics-logo.png";
+import { useT } from "@/contexts/LocalizationContext";
 
 export default function Header() {
+  const { t } = useT();
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -97,7 +99,7 @@ export default function Header() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    toast.success("Đăng xuất thành công");
+    toast.success(t("header.toast.logoutSuccess", "Đăng xuất thành công"));
     navigate("/");
   };
 
@@ -106,10 +108,10 @@ export default function Header() {
   };
 
   const navItems = [
-    { path: "/", label: "Trang chủ" },
-    { path: "/database", label: "Danh sách cầu thủ" },
-    { path: "/builder", label: "Xây dựng đội hình" },
-    { path: "/news", label: "Bảng tin" },
+    { path: "/", label: t("header.nav.home", "Trang chủ") },
+    { path: "/database", label: t("header.nav.database", "Danh sách cầu thủ") },
+    { path: "/builder", label: t("header.nav.builder", "Xây dựng đội hình") },
+    { path: "/news", label: t("header.nav.news", "Bảng tin") },
   ];
 
   return (
@@ -202,7 +204,7 @@ export default function Header() {
                   onClick={() => navigate("/profile")}
                 >
                   <UserIcon className="mr-2 h-4 w-4" />
-                  <span>Cá nhân</span>
+                  <span>{t("header.user.profile", "Cá nhân")}</span>
                 </DropdownMenuItem>
                 
                 {isAdmin && (
@@ -213,7 +215,7 @@ export default function Header() {
                       onClick={() => navigate("/admin")}
                     >
                       <Shield className="mr-2 h-4 w-4" />
-                      <span>Quản trị hệ thống</span>
+                      <span>{t("header.user.admin", "Quản trị hệ thống")}</span>
                     </DropdownMenuItem>
                   </>
                 )}
@@ -225,17 +227,17 @@ export default function Header() {
                   onClick={handleLogout}
                 >
                   <LogOut className="mr-2 h-4 w-4" />
-                  <span>Đăng xuất</span>
+                  <span>{t("header.user.logout", "Đăng xuất")}</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
             <>
               <Button variant="ghost" asChild>
-                <Link to="/auth">Đăng nhập</Link>
+                <Link to="/auth">{t("header.auth.login", "Đăng nhập")}</Link>
               </Button>
               <Button className="gradient-primary" asChild>
-                <Link to="/auth">Đăng ký</Link>
+                <Link to="/auth">{t("header.auth.signup", "Đăng ký")}</Link>
               </Button>
             </>
           )}

@@ -19,6 +19,7 @@ import {
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Save, Sparkles, Trash2, Calculator } from "lucide-react";
+import { useT } from "@/contexts/LocalizationContext";
 
 interface Player {
   assetId: number;
@@ -177,6 +178,7 @@ const calculateFormationLayout = (positions: string[]): Array<{ top: string; lef
 };
 
 export default function Builder() {
+  const { t } = useT();
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const [squadName, setSquadName] = useState("");
@@ -200,7 +202,7 @@ export default function Builder() {
       data: { session },
     } = await supabase.auth.getSession();
     if (!session) {
-      toast.error("Vui lòng đăng nhập để sử dụng Squad Builder");
+      toast.error(t("builder.toast.loginRequired", "Vui lòng đăng nhập để sử dụng Squad Builder"));
       navigate("/auth");
       return;
     }
@@ -227,7 +229,7 @@ export default function Builder() {
       }
     } catch (error: any) {
       console.error(error);
-      toast.error("Không thể tải sơ đồ chiến thuật");
+      toast.error(t("builder.toast.formationLoadError", "Không thể tải sơ đồ chiến thuật"));
     }
   };
 
@@ -241,7 +243,10 @@ export default function Builder() {
       const newLineup = [...lineup];
       newLineup[selectedSlotIndex] = { ...player, rank, training };
       setLineup(newLineup);
-      toast.success(`Đã thêm ${player.commonName} (Rank ${rank}, Training ${training}) vào đội hình`);
+      toast.success(t("builder.toast.playerAdded", "Đã thêm {player} (Rank {rank}, Training {training}) vào đội hình")
+        .replace("{player}", player.commonName)
+        .replace("{rank}", String(rank))
+        .replace("{training}", String(training)));
     }
   };
 
@@ -253,7 +258,7 @@ export default function Builder() {
 
   const clearLineup = () => {
     setLineup(Array(11).fill(null));
-    toast.success("Đã xóa toàn bộ đội hình");
+    toast.success(t("builder.toast.squadCleared", "Đã xóa toàn bộ đội hình"));
   };
 
   const handleFormationChange = (formationId: string) => {
@@ -267,18 +272,18 @@ export default function Builder() {
 
   const handleSave = async () => {
     if (!squadName.trim()) {
-      toast.error("Vui lòng nhập tên đội hình");
+      toast.error(t("builder.toast.nameRequired", "Vui lòng nhập tên đội hình"));
       return;
     }
 
     const filledPositions = lineup.filter((p) => p !== null).length;
     if (filledPositions < 11) {
-      toast.error(`Đội hình chưa đủ 11 cầu thủ (${filledPositions}/11)`);
+      toast.error(t("builder.toast.incomplete", "Đội hình chưa đủ 11 cầu thủ ({filled}/11)").replace("{filled}", String(filledPositions)));
       return;
     }
 
     if (!user) {
-      toast.error("Vui lòng đăng nhập");
+      toast.error(t("builder.toast.loginFirst", "Vui lòng đăng nhập"));
       navigate("/auth");
       return;
     }
@@ -305,10 +310,10 @@ export default function Builder() {
 
       if (error) throw error;
 
-      toast.success("Đã lưu đội hình!");
+      toast.success(t("builder.toast.saveSuccess", "Đã lưu đội hình!"));
       navigate("/my-squads");
     } catch (error: any) {
-      toast.error("Không thể lưu đội hình");
+      toast.error(t("builder.toast.saveError", "Không thể lưu đội hình"));
       console.error(error);
     } finally {
       setSaving(false);
@@ -352,10 +357,10 @@ export default function Builder() {
       <div className="container mx-auto py-8 px-4">
         <div className="mb-8 animate-fade-in">
           <h1 className="text-4xl font-bold gradient-primary bg-clip-text text-transparent mb-2">
-            Xây dựng đội hình FC Mobile
+            {t("builder.title", "Xây dựng đội hình FC Mobile")}
           </h1>
           <p className="text-muted-foreground">
-            Tạo đội hình tối ưu cho FC Mobile ({filledCount}/11 cầu thủ)
+            {t("builder.subtitle", "Tạo đội hình tối ưu cho FC Mobile")} ({filledCount}/11 {t("database.players", "cầu thủ")})
           </p>
         </div>
 
@@ -365,7 +370,7 @@ export default function Builder() {
             <Card className="p-6 bg-gradient-to-br from-card/95 to-card/80 backdrop-blur-sm border-2">
               <div className="text-center mb-6">
                 <h3 className="text-2xl font-bold gradient-primary bg-clip-text text-transparent">
-                  {selectedFormation?.name || "Chọn sơ đồ"}
+                  {selectedFormation?.name || t("builder.selectFormation", "Chọn sơ đồ")}
                 </h3>
               </div>
 
@@ -403,7 +408,7 @@ export default function Builder() {
 
               <div className="mt-6 text-center">
                 <p className="text-sm text-muted-foreground">
-                  💡 Nhấp vào vị trí để thêm cầu thủ vào đội hình
+                  {t("builder.clickToAdd", "💡 Nhấp vào vị trí để thêm cầu thủ vào đội hình")}
                 </p>
               </div>
             </Card>
@@ -413,7 +418,7 @@ export default function Builder() {
           <div className="space-y-4 animate-fade-in">
             <Card className="p-6 bg-gradient-to-br from-card/95 to-primary/5 backdrop-blur-sm border-2 sticky top-4">
               <h3 className="text-xl font-bold mb-6 gradient-primary bg-clip-text text-transparent">
-                Thông tin đội hình
+                {t("builder.squadInfo", "Thông tin đội hình")}
               </h3>
 
               {/* Team OVR */}
@@ -422,18 +427,18 @@ export default function Builder() {
                   {totalOVR || 0}
                 </div>
                 <div className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                  Chỉ số tổng OVR
+                  {t("builder.totalOvr", "Chỉ số tổng OVR")}
                 </div>
               </div>
 
               {/* Squad Name */}
               <div className="space-y-2 mb-4">
                 <Label htmlFor="squad-name" className="text-sm font-semibold">
-                  Tên đội hình
+                  {t("builder.squadName", "Tên đội hình")}
                 </Label>
                 <Input
                   id="squad-name"
-                  placeholder="Đội hình của tôi..."
+                  placeholder={t("builder.squadNamePlaceholder", "Đội hình của tôi...")}
                   value={squadName}
                   onChange={(e) => setSquadName(e.target.value)}
                   className="bg-background/50"
@@ -442,13 +447,13 @@ export default function Builder() {
 
               {/* Formation Select */}
               <div className="space-y-2 mb-6">
-                <Label className="text-sm font-semibold">Sơ đồ chiến thuật</Label>
+                <Label className="text-sm font-semibold">{t("builder.formation", "Sơ đồ chiến thuật")}</Label>
                 <Select 
                   value={selectedFormation?.id.toString()} 
                   onValueChange={handleFormationChange}
                 >
                   <SelectTrigger className="bg-background/50">
-                    <SelectValue placeholder="Chọn sơ đồ..." />
+                    <SelectValue placeholder={t("builder.formationPlaceholder", "Chọn sơ đồ...")} />
                   </SelectTrigger>
                   <SelectContent className="max-h-[400px]">
                     {formations.reduce((acc: any[], formation) => {
@@ -484,7 +489,7 @@ export default function Builder() {
                   disabled={filledCount === 0}
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
-                  Xóa đội hình
+                  {t("builder.clearSquad", "Xóa đội hình")}
                 </Button>
 
                 <Button
@@ -493,7 +498,7 @@ export default function Builder() {
                   className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg shadow-purple-500/20"
                 >
                   <Sparkles className="mr-2 h-4 w-4" />
-                  Phân tích AI
+                  {t("builder.aiAdvice", "Phân tích AI")}
                 </Button>
 
                 <Button
@@ -503,13 +508,13 @@ export default function Builder() {
                   size="lg"
                 >
                   <Save className="mr-2 h-5 w-5" />
-                  {saving ? "Đang lưu..." : "Lưu đội hình"}
+                  {saving ? "Đang lưu..." : t("builder.saveSquad", "Lưu đội hình")}
                 </Button>
               </div>
 
               {filledCount < 11 && (
                 <p className="text-xs text-center text-muted-foreground mt-4">
-                  Cần thêm {11 - filledCount} cầu thủ để hoàn thành đội hình
+                  Cần thêm {11 - filledCount} {t("database.players", "cầu thủ")} để hoàn thành đội hình
                 </p>
               )}
             </Card>

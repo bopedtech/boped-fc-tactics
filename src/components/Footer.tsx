@@ -2,8 +2,11 @@ import { Link } from "react-router-dom";
 import { Facebook, Twitter, Youtube, Mail, MapPin, Phone, MessageCircle } from "lucide-react";
 import bopedLogo from "@/assets/bopedfctactics-logo.png";
 import bopedDevLogo from "@/assets/boped-developer-logo.png";
+import { useT } from "@/contexts/LocalizationContext";
 
 const Footer = () => {
+  const { t } = useT();
+  
   return (
     <footer className="border-t border-border/40 bg-card/30 backdrop-blur-sm">
       <div className="container mx-auto px-4 py-12">
@@ -14,42 +17,41 @@ const Footer = () => {
               <img src={bopedLogo} alt="Boped FC Tactics" className="h-12 w-12 rounded-full object-cover" />
               <div>
                 <h3 className="font-bold text-foreground">Boped FC Tactics</h3>
-                <p className="text-xs text-muted-foreground">Đồng hành cùng FC Mobile</p>
+                <p className="text-xs text-muted-foreground">{t("footer.company.tagline", "Đồng hành cùng FC Mobile")}</p>
               </div>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Nền tảng hàng đầu về cơ sở dữ liệu cầu thủ, công cụ xây dựng đội hình và tin tức FC Mobile. 
-              Giúp game thủ tối ưu đội hình và nâng cao trải nghiệm chơi game.
+              {t("footer.company.description", "Nền tảng hàng đầu về cơ sở dữ liệu cầu thủ, công cụ xây dựng đội hình và tin tức FC Mobile. Giúp game thủ tối ưu đội hình và nâng cao trải nghiệm chơi game.")}
             </p>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h3 className="font-bold mb-4 text-foreground">Liên Kết Nhanh</h3>
+            <h3 className="font-bold mb-4 text-foreground">{t("footer.quickLinks.title", "Liên Kết Nhanh")}</h3>
             <ul className="space-y-2">
               <li>
                 <Link to="/database" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Cơ sở dữ liệu cầu thủ
+                  {t("footer.quickLinks.database", "Cơ sở dữ liệu cầu thủ")}
                 </Link>
               </li>
               <li>
                 <Link to="/builder" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Squad Builder
+                  {t("footer.quickLinks.builder", "Squad Builder")}
                 </Link>
               </li>
               <li>
                 <Link to="/my-squads" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Đội hình của tôi
+                  {t("footer.quickLinks.mySquads", "Đội hình của tôi")}
                 </Link>
               </li>
               <li>
                 <Link to="/news" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Bảng tin
+                  {t("footer.quickLinks.news", "Bảng tin")}
                 </Link>
               </li>
               <li>
                 <Link to="/profile" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Trang cá nhân
+                  {t("footer.quickLinks.profile", "Trang cá nhân")}
                 </Link>
               </li>
             </ul>
@@ -57,7 +59,7 @@ const Footer = () => {
 
           {/* Contact Info */}
           <div>
-            <h3 className="font-bold mb-4 text-foreground">Thông Tin Liên Hệ</h3>
+            <h3 className="font-bold mb-4 text-foreground">{t("footer.contact.title", "Thông Tin Liên Hệ")}</h3>
             <ul className="space-y-3">
               <li>
                 <div className="flex items-start gap-2 text-sm text-muted-foreground">
@@ -67,7 +69,7 @@ const Footer = () => {
               </li>
               <li>
                 <div className="text-sm">
-                  <span className="text-muted-foreground">Hotline:</span>
+                  <span className="text-muted-foreground">{t("footer.contact.hotline", "Hotline:")}</span>
                   <div className="flex items-center gap-2 mt-1">
                     <Phone className="h-4 w-4 text-primary" />
                     <a href="tel:+84942225766" className="text-foreground hover:text-primary transition-colors">
@@ -78,7 +80,7 @@ const Footer = () => {
               </li>
               <li>
                 <div className="text-sm">
-                  <span className="text-muted-foreground">Email liên hệ:</span>
+                  <span className="text-muted-foreground">{t("footer.contact.email", "Email liên hệ:")}</span>
                   <div className="flex items-center gap-2 mt-1">
                     <Mail className="h-4 w-4 text-primary" />
                     <a href="mailto:contact@boped.com" className="text-foreground hover:text-primary transition-colors">
@@ -92,7 +94,7 @@ const Footer = () => {
 
           {/* Social Connect */}
           <div>
-            <h3 className="font-bold mb-4 text-foreground">Kết Nối Với Chúng Tôi</h3>
+            <h3 className="font-bold mb-4 text-foreground">{t("footer.social.title", "Kết Nối Với Chúng Tôi")}</h3>
             <div className="space-y-3">
               <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" 
                  className="flex items-center gap-3 p-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors group">
@@ -117,7 +119,7 @@ const Footer = () => {
               </a>
             </div>
             <p className="text-xs text-muted-foreground mt-4 leading-relaxed">
-              Theo dõi chúng tôi để cập nhật thông tin mới nhất về FC Mobile và các chương trình ưu đãi.
+              {t("footer.social.description", "Theo dõi chúng tôi để cập nhật thông tin mới nhất về FC Mobile và các chương trình ưu đãi.")}
             </p>
           </div>
         </div>
@@ -128,12 +130,12 @@ const Footer = () => {
             <div className="flex items-center gap-3">
               <img src={bopedDevLogo} alt="Boped" className="h-10 w-10 rounded-full object-cover" />
               <span className="text-sm text-muted-foreground">
-                Website được phát triển bởi <span className="text-primary font-semibold">Boped</span>
+                {t("footer.developer", "Website được phát triển bởi")} <span className="text-primary font-semibold">Boped</span>
               </span>
             </div>
           </div>
           <p className="text-center text-sm text-muted-foreground mt-4">
-            © 2025 Boped FC Tactics. All Rights Reserved.
+            © 2025 Boped FC Tactics. {t("footer.copyright", "All Rights Reserved.")}
           </p>
         </div>
       </div>
