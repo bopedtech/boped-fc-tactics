@@ -468,12 +468,12 @@ export default function Builder() {
                       return acc;
                     }, []).map((group) => (
                       <div key={group.category}>
-                        <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-muted/50">
+                       <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-muted/50">
                           {group.category}
                         </div>
                         {group.items.map((f: Formation) => (
                           <SelectItem key={f.id} value={f.id.toString()}>
-                            {f.name}
+                            {locale === "en" ? f.nameEn : f.name}
                           </SelectItem>
                         ))}
                       </div>
@@ -510,13 +510,18 @@ export default function Builder() {
                   size="lg"
                 >
                   <Save className="mr-2 h-5 w-5" />
-                  {saving ? "Đang lưu..." : t("builder.saveSquad", "Lưu đội hình")}
+                  {saving
+                    ? t("builder.saving", "Saving...")
+                    : t("builder.saveSquad", "Lưu đội hình")}
                 </Button>
               </div>
 
               {filledCount < 11 && (
                 <p className="text-xs text-center text-muted-foreground mt-4">
-                  Cần thêm {11 - filledCount} {t("database.players", "cầu thủ")} để hoàn thành đội hình
+                  {t(
+                    "builder.needMorePlayers",
+                    "Cần thêm {remaining} cầu thủ để hoàn thành đội hình"
+                  ).replace("{remaining}", String(11 - filledCount))}
                 </p>
               )}
             </Card>
