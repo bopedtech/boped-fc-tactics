@@ -8,24 +8,58 @@ import {
   Command,
   CommandEmpty,
   CommandGroup,
-  CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import PlayerCard from "@/components/PlayerCard";
+import PlayerDetailDialog from "@/components/PlayerDetailDialog";
+
+interface PlayerStats {
+  pace?: number;
+  shooting?: number;
+  passing?: number;
+  dribbling?: number;
+  defense?: number;
+  physicality?: number;
+  diving?: number;
+  handling?: number;
+  kicking?: number;
+  reflexes?: number;
+  speed?: number;
+  positioning?: number;
+}
 
 interface Player {
   assetId: number;
+  playerId?: number;
   commonName: string | null;
   firstName: string | null;
   lastName: string | null;
   rating: number;
   position: string | null;
   images: any;
+  stats: PlayerStats;
+  club?: any;
+  nation?: any;
+  league?: any;
+  cardName?: string | null;
+  avgStats?: any;
+  avgGkStats?: any;
+  foot?: number;
+  skillMovesLevel?: number;
+  weakFoot?: number;
+  height?: number;
+  weight?: number;
+  workRates?: any;
+  traits?: any[];
+  source?: string;
+  auctionable?: boolean;
 }
 
 const PlayerSearchBar = () => {
   const [query, setQuery] = useState("");
   const [players, setPlayers] = useState<Player[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [selectedPlayer, setSelectedPlayer] = useState<number | null>(null);
   const navigate = useNavigate();
   const searchRef = useRef<HTMLDivElement>(null);
 
@@ -50,14 +84,39 @@ const PlayerSearchBar = () => {
 
       const { data, error } = await supabase
         .from("players")
-        .select("assetId, commonName, firstName, lastName, rating, position, images")
+        .select("*")
         .or(`commonName.ilike.%${query}%,firstName.ilike.%${query}%,lastName.ilike.%${query}%`)
         .eq("is_visible", true)
         .order("rating", { ascending: false })
         .limit(8);
 
       if (!error && data) {
-        setPlayers(data);
+        setPlayers(data.map(p => ({
+          assetId: p.assetId,
+          playerId: p.playerId,
+          commonName: p.commonName,
+          firstName: p.firstName,
+          lastName: p.lastName,
+          rating: p.rating,
+          position: p.position,
+          images: p.images,
+          stats: (p.stats || {}) as PlayerStats,
+          club: p.club,
+          nation: p.nation,
+          league: p.league,
+          cardName: p.cardName,
+          avgStats: p.avgStats,
+          avgGkStats: p.avgGkStats,
+          foot: p.foot,
+          skillMovesLevel: p.skillMovesLevel,
+          weakFoot: p.weakFoot,
+          height: p.height,
+          weight: p.weight,
+          workRates: p.workRates,
+          traits: Array.isArray(p.traits) ? p.traits : [],
+          source: p.source,
+          auctionable: p.auctionable
+        })));
         setIsOpen(data.length > 0);
       }
     };
@@ -67,9 +126,8 @@ const PlayerSearchBar = () => {
   }, [query]);
 
   const handlePlayerClick = (assetId: number) => {
-    setQuery("");
+    setSelectedPlayer(assetId);
     setIsOpen(false);
-    navigate(`/database?player=${assetId}`);
   };
 
   const getPlayerImage = (player: Player) => {
@@ -125,63 +183,44 @@ const PlayerSearchBar = () => {
         {/* Results dropdown */}
         {isOpen && players.length > 0 && (
           <div className="absolute top-full mt-4 w-full z-50">
-            <Command className="rounded-2xl border-2 border-primary/20 shadow-2xl bg-card/95 backdrop-blur-sm">
-              <CommandList>
-                <CommandGroup>
-                  {players.map((player) => (
-                    <CommandItem
-                      key={player.assetId}
-                      onSelect={() => handlePlayerClick(player.assetId)}
-                      className="flex items-center gap-4 p-4 cursor-pointer hover:bg-primary/10 rounded-lg m-2"
-                    >
-                      <div className="w-14 h-20 flex-shrink-0 bg-gradient-to-b from-amber-400 to-amber-600 rounded-lg overflow-hidden shadow-lg">
-                        {getPlayerImage(player) ? (
-                          <img
-                            src={getPlayerImage(player)!}
-                            alt={getPlayerName(player)}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-white font-bold text-xl">
-                            {player.rating}
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-bold text-base truncate">
-                          {getPlayerName(player)}
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                          <span className="font-bold text-primary text-lg">{player.rating}</span>
-                          <span>•</span>
-                          <span className="font-medium">{player.position || "N/A"}</span>
-                        </div>
-                      </div>
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-                {players.length === 8 && (
-                  <div className="p-3 text-center text-sm text-muted-foreground border-t border-border/50">
-                    Hiển thị 8 kết quả đầu tiên
+            <div className="rounded-2xl border-2 border-primary/20 shadow-2xl bg-card/95 backdrop-blur-sm p-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {players.map((player) => (
+                  <div 
+                    key={player.assetId}
+                    className="cursor-pointer hover:scale-105 transition-transform"
+                    onClick={() => handlePlayerClick(player.assetId)}
+                  >
+                    <PlayerCard player={player} />
                   </div>
-                )}
-              </CommandList>
-            </Command>
+                ))}
+              </div>
+              {players.length === 8 && (
+                <div className="mt-4 pt-4 text-center text-sm text-muted-foreground border-t border-border/50">
+                  Hiển thị 8 kết quả đầu tiên
+                </div>
+              )}
+            </div>
           </div>
         )}
 
         {isOpen && query.length >= 2 && players.length === 0 && (
           <div className="absolute top-full mt-4 w-full z-50">
-            <Command className="rounded-2xl border-2 border-primary/20 shadow-2xl bg-card/95 backdrop-blur-sm">
-              <CommandList>
-                <CommandEmpty className="py-6 text-center text-muted-foreground">
-                  Không tìm thấy cầu thủ
-                </CommandEmpty>
-              </CommandList>
-            </Command>
+            <div className="rounded-2xl border-2 border-primary/20 shadow-2xl bg-card/95 backdrop-blur-sm p-6">
+              <p className="text-center text-muted-foreground">
+                Không tìm thấy cầu thủ
+              </p>
+            </div>
           </div>
         )}
       </div>
+
+      {/* Player Detail Dialog */}
+      <PlayerDetailDialog
+        assetId={selectedPlayer}
+        open={!!selectedPlayer}
+        onOpenChange={(open) => !open && setSelectedPlayer(null)}
+      />
     </div>
   );
 };
