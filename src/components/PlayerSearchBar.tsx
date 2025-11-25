@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/command";
 import PlayerCard from "@/components/PlayerCard";
 import PlayerDetailDialog from "@/components/PlayerDetailDialog";
+import { TEXT } from "@/constants/text";
 
 interface PlayerStats {
   pace?: number;
@@ -198,7 +199,10 @@ const PlayerSearchBar = () => {
                     className="cursor-pointer hover:scale-105 transition-transform"
                     onClick={() => handlePlayerClick(player.assetId)}
                   >
-                    <PlayerCard player={player} />
+                    <PlayerCard 
+                      player={player} 
+                      variant="medium"
+                    />
                   </div>
                 ))}
               </div>

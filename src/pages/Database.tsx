@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import PlayerCard from "@/components/PlayerCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { TEXT } from "@/constants/text";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Filter, X, Loader2, ArrowUpDown } from "lucide-react";
 import { toast } from "sonner";
