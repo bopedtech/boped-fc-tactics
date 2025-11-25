@@ -2,8 +2,10 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useT } from "@/contexts/LocalizationContext";
 
 const NewsSection = () => {
+  const { t, locale } = useT();
   // Mock news data - in production this would come from an API or database
   const news = [
     {
@@ -41,12 +43,16 @@ const NewsSection = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-2xl md:text-3xl font-bold mb-2">Bảng tin FC Mobile</h2>
-            <p className="text-muted-foreground">Tin tức và cập nhật mới nhất</p>
+            <h2 className="text-2xl md:text-3xl font-bold mb-2">
+              {t("newsSection.title", "Bảng tin FC Mobile")}
+            </h2>
+            <p className="text-muted-foreground">
+              {t("newsSection.subtitle", "Tin tức và cập nhật mới nhất")}
+            </p>
           </div>
           <Button variant="outline" asChild>
             <Link to="/news">
-              Xem tất cả
+              {t("newsSection.viewAll", "Xem tất cả")}
             </Link>
           </Button>
         </div>
@@ -68,7 +74,7 @@ const NewsSection = () => {
               </p>
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Calendar className="h-3 w-3" />
-                <span>{new Date(item.date).toLocaleDateString("vi-VN")}</span>
+                <span>{new Date(item.date).toLocaleDateString(locale === "en" ? "en-US" : "vi-VN")}</span>
               </div>
               </Card>
             </Link>
