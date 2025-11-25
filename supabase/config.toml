@@ -1,5 +1,8 @@
 project_id = "nhdmgiyoienkixokcoue"
 
+[functions.chat]
+verify_jwt = false
+
 [functions.sync-players]
 verify_jwt = false
 
