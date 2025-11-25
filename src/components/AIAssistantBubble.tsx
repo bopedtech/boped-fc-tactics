@@ -255,46 +255,46 @@ const AIAssistantBubble = () => {
             <Sparkles className="h-4 w-4 absolute -bottom-0.5 -right-0.5 text-primary bg-white rounded-full p-0.5 shadow-lg animate-pulse" />
           </div>
         ) : (
-          <div className="bg-card border-2 border-primary/30 rounded-2xl shadow-2xl w-[90vw] md:w-[400px] h-[600px] flex flex-col animate-in slide-in-from-bottom duration-300">
+          <div className="fixed inset-0 bg-background z-50 flex flex-col animate-in fade-in duration-300">
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-border">
-              <div className="flex items-center gap-2">
-                <div className="h-10 w-10 rounded-full bg-white border border-border flex items-center justify-center p-1.5">
+            <div className="flex items-center justify-between p-4 border-b border-border bg-card/80 backdrop-blur-sm">
+              <div className="flex items-center gap-3">
+                <div className="h-12 w-12 rounded-full bg-white border-2 border-primary/30 flex items-center justify-center p-2">
                   <img src={logoImage} alt="Boped FC Tactics" className="w-full h-full object-contain" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-sm">AI Trợ lý</h3>
-                  <p className="text-xs text-muted-foreground">Boped FC Tactics</p>
+                  <h3 className="font-bold text-lg">AI Trợ lý FC Tactics</h3>
+                  <p className="text-sm text-muted-foreground">Tìm kiếm & phân tích cầu thủ</p>
                 </div>
               </div>
               <Button
                 variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0"
+                size="lg"
+                className="h-10 w-10 p-0 rounded-full hover:bg-destructive/10 hover:text-destructive"
                 onClick={() => setIsOpen(false)}
               >
-                <X className="h-4 w-4" />
+                <X className="h-6 w-6" />
               </Button>
             </div>
 
             {/* Messages */}
-            <ScrollArea className="flex-1 p-4">
-              <div className="space-y-4">
+            <ScrollArea className="flex-1 p-6">
+              <div className="max-w-5xl mx-auto space-y-6">
                 {messages.map((message, index) => (
                   <div
                     key={index}
                     className={cn(
-                      "flex flex-col gap-2",
+                      "flex flex-col gap-3",
                       message.role === "user" ? "items-end" : "items-start"
                     )}
                   >
                     {/* Player Cards */}
                     {message.players && message.players.length > 0 && (
-                      <div className="flex flex-wrap gap-2 max-w-full">
+                      <div className="flex flex-wrap gap-3 max-w-full">
                         {message.players.map((player) => (
                           <div 
                             key={player.assetId}
-                            className="w-[120px] cursor-pointer"
+                            className="w-[160px] cursor-pointer hover:scale-105 transition-transform"
                             onClick={() => setSelectedPlayer(player.assetId)}
                           >
                             <PlayerCard player={player} />
@@ -307,21 +307,23 @@ const AIAssistantBubble = () => {
                     {message.content && (
                       <div
                         className={cn(
-                          "rounded-2xl px-4 py-2 max-w-[80%]",
+                          "rounded-2xl px-5 py-3 max-w-[85%]",
                           message.role === "user"
                             ? "gradient-primary text-white"
                             : "bg-muted"
                         )}
                       >
-                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                        <p className="text-sm leading-relaxed" style={{ whiteSpace: 'pre-wrap' }}>
+                          {message.content.replace(/\*\*/g, '').replace(/\*/g, '')}
+                        </p>
                       </div>
                     )}
                   </div>
                 ))}
                 {isLoading && (
                   <div className="flex justify-start">
-                    <div className="rounded-2xl px-4 py-2 bg-muted">
-                      <p className="text-sm">Đang trả lời...</p>
+                    <div className="rounded-2xl px-5 py-3 bg-muted">
+                      <p className="text-sm">Đang tìm kiếm...</p>
                     </div>
                   </div>
                 )}
@@ -330,29 +332,32 @@ const AIAssistantBubble = () => {
             </ScrollArea>
 
             {/* Input */}
-            <div className="p-4 border-t border-border">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  handleSend();
-                }}
-                className="flex items-center gap-2"
-              >
-                <Input
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  placeholder="Nhập câu hỏi..."
-                  className="flex-1"
-                />
-                <Button
-                  type="submit"
-                  size="sm"
-                  className="gradient-primary"
-                  disabled={!inputValue.trim() || isLoading}
+            <div className="p-6 border-t border-border bg-card/80 backdrop-blur-sm">
+              <div className="max-w-5xl mx-auto">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSend();
+                  }}
+                  className="flex items-center gap-3"
                 >
-                  <Send className="h-4 w-4" />
-                </Button>
-              </form>
+                  <Input
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    placeholder="Hỏi về cầu thủ, chiến thuật, đội hình..."
+                    className="flex-1 h-12 text-base"
+                    autoFocus
+                  />
+                  <Button
+                    type="submit"
+                    size="lg"
+                    className="gradient-primary h-12 px-6"
+                    disabled={!inputValue.trim() || isLoading}
+                  >
+                    <Send className="h-5 w-5" />
+                  </Button>
+                </form>
+              </div>
             </div>
           </div>
         )}

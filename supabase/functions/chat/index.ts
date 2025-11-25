@@ -95,7 +95,36 @@ const tools = [
 ];
 
 async function searchPlayers(supabase: any, params: any) {
-  let query = supabase.from('players').select('*');
+  // Optimize: Only select necessary fields for better performance
+  let query = supabase
+    .from('players')
+    .select(`
+      assetId,
+      playerId,
+      rating,
+      position,
+      commonName,
+      firstName,
+      lastName,
+      cardName,
+      club,
+      nation,
+      league,
+      images,
+      stats,
+      avgStats,
+      avgGkStats,
+      foot,
+      skillMovesLevel,
+      weakFoot,
+      height,
+      weight,
+      workRates,
+      traits,
+      source,
+      auctionable
+    `)
+    .eq('is_visible', true);
   
   if (params.name) {
     query = query.or(`firstName.ilike.%${params.name}%,lastName.ilike.%${params.name}%,commonName.ilike.%${params.name}%,cardName.ilike.%${params.name}%`);
@@ -166,7 +195,8 @@ async function searchPlayers(supabase: any, params: any) {
     query = query.contains('traits', [{ displayName: params.trait }]);
   }
   
-  const limit = Math.min(params.limit || 20, 200);
+  // Optimize: Reduce default limit for faster response
+  const limit = Math.min(params.limit || 15, 50);
   query = query.limit(limit);
   
   const { data, error } = await query;
