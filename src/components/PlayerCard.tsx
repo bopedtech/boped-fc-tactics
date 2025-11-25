@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Plus, X } from "lucide-react";
 import { useT } from "@/contexts/LocalizationContext";
+import React from "react";
 
 interface PlayerStats {
   pace?: number;
@@ -91,7 +92,7 @@ export default function PlayerCard({
   ovrPenalty = 0,
   isSelected = false,
 }: PlayerCardProps) {
-  const { t } = useT();
+  const { t, locale } = useT();
   
   // Empty slot for small variant
   if (!player && variant === "small") {
@@ -146,23 +147,27 @@ export default function PlayerCard({
     avgGkStatsObj.avg5 || 0
   ];
 
-  const statLabels = isGK 
-    ? [
-        t("stats.diving"),
-        t("stats.positioning"),
-        t("stats.handling"),
-        t("stats.reflexes"),
-        t("stats.kicking"),
-        t("stats.physicality")
-      ]
-    : [
-        t("stats.pace"),
-        t("stats.shooting"),
-        t("stats.passing"),
-        t("stats.dribbling"),
-        t("stats.defense"),
-        t("stats.physicality")
-      ];
+  // Memoize statLabels to recalculate when locale changes
+  const statLabels = React.useMemo(() => {
+    console.log(`🔄 Recalculating statLabels for locale: ${locale}, isGK: ${isGK}`);
+    return isGK 
+      ? [
+          t("stats.diving"),
+          t("stats.positioning"),
+          t("stats.handling"),
+          t("stats.reflexes"),
+          t("stats.kicking"),
+          t("stats.physicality")
+        ]
+      : [
+          t("stats.pace"),
+          t("stats.shooting"),
+          t("stats.passing"),
+          t("stats.dribbling"),
+          t("stats.defense"),
+          t("stats.physicality")
+        ];
+  }, [locale, isGK, t]);
   
   const statsToShow = isGK ? avgGkStats : avgStats;
   const displayStats = statLabels.map((label, index) => ({
