@@ -54,43 +54,74 @@ export default function PlayerCardSlot({ player, position, onClick, onRemove }: 
   return (
     <div className="relative group">
       <Card className={`w-24 h-32 bg-gradient-to-br ${rankColorClass} border-2 cursor-pointer hover:scale-105 transition-all hover:shadow-lg overflow-hidden`}>
-        {/* Player Image Background */}
-        {player.images?.playerCardImage && (
-          <div 
-            className="absolute inset-0 bg-cover bg-center opacity-40"
-            style={{ backgroundImage: `url(${player.images.playerCardImage})` }}
-          />
+        {/* Card Background or Player Image */}
+        {player.images?.playerCardBackground ? (
+          <>
+            <img 
+              src={player.images.playerCardBackground} 
+              alt="Card background"
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60" />
+          </>
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-amber-600 via-yellow-500 to-amber-700 opacity-80" />
         )}
         
-        <div className="relative h-full p-2 flex flex-col">
-          {/* OVR and Position - Top Left */}
-          <div className="absolute top-1 left-1">
-            <div className="text-xl font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
-              {player.rating}
+        <div className="relative h-full flex flex-col">
+          {/* Player Image - Full Coverage */}
+          {player.images?.playerCardImage && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <img
+                src={player.images.playerCardImage}
+                alt={player.commonName}
+                className="w-full h-full object-cover object-center drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)]"
+              />
             </div>
-            <Badge variant="secondary" className="text-[9px] px-1 py-0 bg-black/60 text-white border-none">
-              {player.position}
-            </Badge>
+          )}
+
+          {/* OVR and Position - Top Left (matching PlayerCard) */}
+          <div className="absolute top-2 left-2 z-20">
+            <div className="flex flex-col items-start">
+              <div className="text-xl font-black text-white leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,1)]">
+                {player.rating}
+              </div>
+              <div className="text-[10px] font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,1)] mt-0.5">
+                {player.position}
+              </div>
+            </div>
           </div>
 
-          {/* Player Name - Bottom */}
-          <div className="absolute bottom-1 left-0 right-0 px-1">
-            <div className="text-center bg-black/60 rounded px-1 py-0.5">
-              <div className="text-[10px] font-bold text-white line-clamp-1 drop-shadow">
-                {player.commonName.toUpperCase()}
+          {/* Player Name - Bottom (matching PlayerCard) */}
+          <div className="absolute bottom-8 left-0 right-0 px-1 z-10">
+            <div className="text-center">
+              <div className="text-[10px] font-black text-white line-clamp-1 drop-shadow-[0_2px_4px_rgba(0,0,0,1)] uppercase tracking-wide">
+                {player.commonName}
               </div>
-              {/* Nation and Club */}
-              <div className="flex items-center justify-center gap-1 mt-0.5">
-                {player.nation?.name && (
-                  <span className="text-[8px] text-white/90">{player.nation.name}</span>
-                )}
-                {player.club?.name && player.nation?.name && (
-                  <span className="text-white/60">•</span>
-                )}
-                {player.club?.name && (
-                  <span className="text-[8px] text-white/90 line-clamp-1">{player.club.name}</span>
-                )}
-              </div>
+            </div>
+          </div>
+
+          {/* Nation and Club Icons - Bottom (matching PlayerCard) */}
+          <div className="absolute bottom-1 left-0 right-0 px-2 z-10">
+            <div className="flex items-center justify-center gap-2">
+              {player.nation?.image && (
+                <div className="w-5 h-4 rounded overflow-hidden shadow-lg">
+                  <img 
+                    src={player.nation.image} 
+                    alt="Nation"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+              {player.club?.image && (
+                <div className="w-4 h-4 rounded-full overflow-hidden shadow-lg">
+                  <img 
+                    src={player.club.image} 
+                    alt="Club"
+                    className="w-full h-full object-contain bg-white/80"
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>

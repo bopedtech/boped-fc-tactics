@@ -279,30 +279,57 @@ export default function PlayerSelectionDialog({
                         onClick={() => !isSelected && handleSelectPlayer(player)}
                       >
                         <div className="flex items-center gap-4">
+                          {/* OVR and Position - Consistent with PlayerCard */}
                           <div className="text-center shrink-0">
-                            <div className="text-3xl font-bold gradient-primary bg-clip-text text-transparent">
-                              {displayOvr}
-                              {ovrPenalty > 0 && (
-                                <span className="text-xs text-destructive ml-1">-{ovrPenalty}</span>
+                            <div className="flex flex-col items-center">
+                              <div className="text-3xl font-black gradient-primary bg-clip-text text-transparent leading-none">
+                                {displayOvr}
+                                {ovrPenalty > 0 && (
+                                  <span className="text-xs text-destructive ml-1">-{ovrPenalty}</span>
+                                )}
+                              </div>
+                              <div className="text-sm font-black text-foreground mt-1">
+                                {player.position}
+                              </div>
+                              {isAlternativePosition && (
+                                <div className="text-[10px] text-orange-500 font-semibold mt-1">Vị trí phụ</div>
                               )}
                             </div>
-                            <Badge variant={isAlternativePosition ? "outline" : "secondary"} className="text-xs mt-1">
-                              {player.position}
-                            </Badge>
-                            {isAlternativePosition && (
-                              <div className="text-[10px] text-orange-500 font-semibold mt-0.5">Vị trí phụ</div>
-                            )}
                           </div>
 
+                          {/* Player Info - Center */}
                           <div className="flex-1 min-w-0">
-                            <div className={`font-bold text-base truncate transition-colors ${!isSelected && 'group-hover:text-primary'}`}>
+                            {/* Player Name - Bold and prominent */}
+                            <div className={`font-black text-base uppercase truncate transition-colors tracking-wide ${!isSelected && 'group-hover:text-primary'}`}>
                               {player.commonName}
-                              {isSelected && <span className="ml-2 text-xs text-muted-foreground">(Đã chọn)</span>}
+                              {isSelected && <span className="ml-2 text-xs text-muted-foreground normal-case">(Đã chọn)</span>}
                             </div>
-                            <div className="text-sm text-muted-foreground truncate flex items-center gap-2">
-                              <span>{getClubName(player.club)}</span>
-                              {getClubName(player.club) && getNationName(player.nation) && <span>•</span>}
-                              <span>{getNationName(player.nation)}</span>
+                            
+                            {/* Nation and Club Icons - Below name */}
+                            <div className="flex items-center gap-2 mt-2">
+                              {player.nation?.image && (
+                                <div className="w-8 h-6 rounded overflow-hidden shadow-sm border border-border/50">
+                                  <img 
+                                    src={player.nation.image} 
+                                    alt="Nation"
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                              )}
+                              {player.club?.image && (
+                                <div className="w-6 h-6 rounded-full overflow-hidden shadow-sm border border-border/50 bg-white/10 p-0.5">
+                                  <img 
+                                    src={player.club.image} 
+                                    alt="Club"
+                                    className="w-full h-full object-contain"
+                                  />
+                                </div>
+                              )}
+                              <div className="text-xs text-muted-foreground truncate flex items-center gap-1.5">
+                                <span>{getClubName(player.club)}</span>
+                                {getClubName(player.club) && getNationName(player.nation) && <span>•</span>}
+                                <span>{getNationName(player.nation)}</span>
+                              </div>
                             </div>
                             
                             {/* Player attributes */}
