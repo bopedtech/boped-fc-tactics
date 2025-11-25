@@ -179,21 +179,29 @@ async function searchPlayers(supabase: any, params: any) {
   return {
     players: data.map((player: any) => ({
       assetId: player.assetId,
-      name: player.commonName || player.cardName || `${player.firstName} ${player.lastName}`,
+      playerId: player.playerId,
       rating: player.rating,
       position: player.position,
-      club: player.club?.displayName,
-      nation: player.nation?.displayName,
-      league: player.league?.displayName,
-      foot: player.foot === 0 ? "Trái" : "Phải",
-      skillMoves: player.skillMovesLevel,
+      commonName: player.commonName || player.cardName || `${player.firstName || ''} ${player.lastName || ''}`.trim(),
+      firstName: player.firstName,
+      lastName: player.lastName,
+      cardName: player.cardName,
+      club: player.club,
+      nation: player.nation,
+      league: player.league,
+      images: player.images,
+      stats: player.stats,
+      avgStats: player.avgStats,
+      avgGkStats: player.avgGkStats,
+      foot: player.foot,
+      skillMovesLevel: player.skillMovesLevel,
       weakFoot: player.weakFoot,
       height: player.height,
       weight: player.weight,
       workRates: player.workRates,
-      traits: player.traits?.map((t: any) => t.displayName) || [],
-      stats: player.stats,
-      images: player.images
+      traits: player.traits,
+      auctionable: player.auctionable,
+      source: player.source
     })),
     count: data.length
   };
@@ -222,17 +230,19 @@ serve(async (req) => {
         content: `Bạn là trợ lý AI của Boped FC Tactics, chuyên về FC Mobile. Bạn có quyền truy cập vào database cầu thủ của hệ thống. 
 
 QUAN TRỌNG - FORMAT RESPONSE:
-- Khi trả lời về cầu thủ, LUÔN bao gồm một JSON block với format: \`\`\`json\n{"playerCards": [{"assetId": <số>, "name": "<tên>", "rating": <số>, "position": "<vị trí>", "images": {...}}]}\n\`\`\`
+- Khi trả lời về cầu thủ, LUÔN bao gồm một JSON block với TOÀN BỘ dữ liệu cầu thủ từ database
+- Format JSON: \`\`\`json\n{"playerCards": [<toàn bộ object cầu thủ từ search_players>]}\n\`\`\`
 - JSON block này phải đứng TRƯỚC phần text mô tả
+- Bao gồm TẤT CẢ các trường: assetId, playerId, rating, position, commonName, firstName, lastName, cardName, club, nation, league, images, stats, foot, skillMovesLevel, weakFoot, height, weight, workRates, traits
 - Chỉ trả lời dựa trên dữ liệu có trong database
 - Trả lời ngắn gọn, hữu ích và thân thiện bằng tiếng Việt
 
 VÍ DỤ RESPONSE:
 \`\`\`json
-{"playerCards": [{"assetId": 123456, "name": "Mbappe", "rating": 94, "position": "ST", "images": {...}}]}
+{"playerCards": [{...toàn bộ dữ liệu cầu thủ từ kết quả search_players...}]}
 \`\`\`
 
-Đây là cầu thủ Mbappe với rating 94, là tiền đạo cắm hàng đầu...` 
+Đây là cầu thủ cao nhất trong database...` 
       },
       ...messages,
     ];
