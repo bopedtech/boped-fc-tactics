@@ -86,7 +86,7 @@ const tools = [
           },
           limit: {
             type: "number",
-            description: "Số lượng kết quả trả về (mặc định 10, tối đa 50)"
+            description: "Số lượng kết quả trả về (mặc định 20, tối đa 200)"
           }
         }
       }
@@ -166,7 +166,7 @@ async function searchPlayers(supabase: any, params: any) {
     query = query.contains('traits', [{ displayName: params.trait }]);
   }
   
-  const limit = Math.min(params.limit || 10, 50);
+  const limit = Math.min(params.limit || 20, 200);
   query = query.limit(limit);
   
   const { data, error } = await query;
@@ -227,13 +227,20 @@ serve(async (req) => {
     let conversationMessages = [
       { 
         role: "system", 
-        content: `Bạn là trợ lý AI của Boped FC Tactics, chuyên về FC Mobile. Bạn có quyền truy cập vào database cầu thủ của hệ thống. 
+        content: `Bạn là trợ lý AI của Boped FC Tactics, chuyên về FC Mobile. Bạn có quyền truy cập TRỰC TIẾP vào database với 47,681 cầu thủ.
+
+QUAN TRỌNG - CƠ CHẾ HOẠT ĐỘNG:
+- Bạn TÌM KIẾM TRỰC TIẾP trong database thời gian thực, KHÔNG cần training hay embedding
+- Khi user hỏi, bạn GỌI tool search_players với các tham số phù hợp để tìm trong database
+- Database luôn cập nhật real-time, khi có cầu thủ mới, bạn tự động có thể tìm thấy
+- Bạn có thể tìm tối đa 200 cầu thủ mỗi lần query
+- Nếu cần nhiều kết quả hơn, hãy sử dụng các filter thông minh (rating, position, club, nation, v.v.)
 
 QUAN TRỌNG - FORMAT RESPONSE:
 - Khi trả lời về cầu thủ, LUÔN bao gồm một JSON block với TOÀN BỘ dữ liệu cầu thủ từ database
 - Format JSON: \`\`\`json\n{"playerCards": [<toàn bộ object cầu thủ từ search_players>]}\n\`\`\`
 - JSON block này phải đứng TRƯỚC phần text mô tả
-- Bao gồm TẤT CẢ các trường: assetId, playerId, rating, position, commonName, firstName, lastName, cardName, club, nation, league, images, stats, foot, skillMovesLevel, weakFoot, height, weight, workRates, traits
+- Bao gồm TẤT CẢ các trường: assetId, playerId, rating, position, commonName, firstName, lastName, cardName, club, nation, league, images, stats, avgStats, avgGkStats, foot, skillMovesLevel, weakFoot, height, weight, workRates, traits
 - Chỉ trả lời dựa trên dữ liệu có trong database
 - Trả lời ngắn gọn, hữu ích và thân thiện bằng tiếng Việt
 
@@ -242,7 +249,7 @@ VÍ DỤ RESPONSE:
 {"playerCards": [{...toàn bộ dữ liệu cầu thủ từ kết quả search_players...}]}
 \`\`\`
 
-Đây là cầu thủ cao nhất trong database...` 
+Đây là top 20 cầu thủ cao nhất trong database...` 
       },
       ...messages,
     ];

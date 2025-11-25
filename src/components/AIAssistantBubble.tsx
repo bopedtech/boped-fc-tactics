@@ -62,6 +62,11 @@ const AIAssistantBubble = () => {
   const [selectedPlayer, setSelectedPlayer] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Auto scroll to bottom when messages change
+  useEffect(() => {
+    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
   useEffect(() => {
     // Show random greeting every 5 seconds
     const showRandomGreeting = () => {
@@ -198,11 +203,6 @@ const AIAssistantBubble = () => {
           }
         }
       }
-
-      // Scroll to bottom
-      setTimeout(() => {
-        scrollRef.current?.scrollIntoView({ behavior: "smooth" });
-      }, 100);
 
     } catch (error) {
       console.error("Chat error:", error);
