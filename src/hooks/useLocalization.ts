@@ -43,7 +43,7 @@ export function useLocalization() {
   const t = useMemo(() => {
     return (key: string, fallback?: string): string => {
       if (!dictionary[key]) {
-        console.warn(`⚠️ Missing translation key: ${key}`);
+        // Return fallback hoặc key, không log warning nữa để tránh spam
         return fallback || key;
       }
       return dictionary[key][locale] || dictionary[key].en || fallback || key;
@@ -54,6 +54,11 @@ export function useLocalization() {
     console.log(`🌐 Changing locale from ${locale} to ${newLocale}`);
     setLocale(newLocale);
     localStorage.setItem("locale", newLocale);
+    
+    // Force page reload để apply ngôn ngữ mới cho toàn bộ app
+    setTimeout(() => {
+      window.location.reload();
+    }, 100);
   };
 
   // Load saved locale from localStorage
