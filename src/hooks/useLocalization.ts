@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 type LocalizationDictionary = Record<string, { en: string; vi: string }>;
@@ -30,22 +30,28 @@ export function useLocalization() {
         };
       });
 
+      console.log("📚 Localization dictionary loaded:", Object.keys(dict).length, "keys");
       setDictionary(dict);
     } catch (error) {
-      console.error("Error fetching localization dictionary:", error);
+      console.error("❌ Error fetching localization dictionary:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const t = (key: string, fallback?: string): string => {
-    if (!dictionary[key]) {
-      return fallback || key;
-    }
-    return dictionary[key][locale] || dictionary[key].en || fallback || key;
-  };
+  // Memoize t function với dependency là locale để force re-render
+  const t = useMemo(() => {
+    return (key: string, fallback?: string): string => {
+      if (!dictionary[key]) {
+        console.warn(`⚠️ Missing translation key: ${key}`);
+        return fallback || key;
+      }
+      return dictionary[key][locale] || dictionary[key].en || fallback || key;
+    };
+  }, [dictionary, locale]);
 
   const changeLocale = (newLocale: "en" | "vi") => {
+    console.log(`🌐 Changing locale from ${locale} to ${newLocale}`);
     setLocale(newLocale);
     localStorage.setItem("locale", newLocale);
   };
@@ -54,6 +60,7 @@ export function useLocalization() {
   useEffect(() => {
     const savedLocale = localStorage.getItem("locale") as "en" | "vi";
     if (savedLocale) {
+      console.log(`💾 Loaded saved locale: ${savedLocale}`);
       setLocale(savedLocale);
     }
   }, []);
