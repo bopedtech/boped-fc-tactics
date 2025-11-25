@@ -73,7 +73,7 @@ export default function Database() {
   const [searchParams] = useSearchParams();
   const [searchName, setSearchName] = useState("");
   const [showFilters, setShowFilters] = useState(true);
-  const [sortBy, setSortBy] = useState("rating_desc");
+  const [sortBy, setSortBy] = useState("newest");
   const [countriesData, setCountriesData] = useState<any[]>([]);
   const [teamsData, setTeamsData] = useState<Array<{ id: number; displayName: string; image?: string }>>([]);
   const [leaguesData, setLeaguesData] = useState<Array<{ id: number; displayName: string; image?: string }>>([]);
@@ -90,6 +90,31 @@ export default function Database() {
       setSearchName(searchQuery);
     }
   }, [searchParams]);
+
+  // Auto switch to rating_desc when search or filter is active
+  useEffect(() => {
+    const hasSearch = searchName.trim().length > 0;
+    const hasFilters = 
+      filters.ratingRange[0] > 0 || filters.ratingRange[1] < 125 ||
+      filters.positionFilter !== "all" ||
+      filters.positions.length > 0 ||
+      filters.leagues.length > 0 ||
+      filters.clubs.length > 0 ||
+      filters.nations.length > 0 ||
+      filters.programs.length > 0 ||
+      filters.heightRange[0] > 0 || filters.heightRange[1] < 250 ||
+      filters.weightRange[0] > 0 || filters.weightRange[1] < 150 ||
+      filters.skillMovesLevel > 0 ||
+      filters.weakFoot > 0 ||
+      filters.strongFoot !== "all" ||
+      filters.workRateAtt > 0 ||
+      filters.workRateDef > 0 ||
+      filters.traits.length > 0;
+
+    if ((hasSearch || hasFilters) && sortBy === "newest") {
+      setSortBy("rating_desc");
+    }
+  }, [searchName, filters, sortBy]);
 
   const handlePlayerClick = (assetId: number) => {
     setSelectedPlayerAssetId(assetId);
