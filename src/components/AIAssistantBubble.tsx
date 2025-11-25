@@ -6,21 +6,40 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import logoImage from "@/assets/bopedfctactics-logo.png";
-import ChatPlayerCard from "@/components/ChatPlayerCard";
+import PlayerCard from "@/components/PlayerCard";
 import PlayerDetailDialog from "@/components/PlayerDetailDialog";
 
-interface PlayerCard {
+interface Player {
   assetId: number;
-  name: string;
+  playerId?: number;
   rating: number;
   position: string;
+  commonName: string;
+  firstName?: string;
+  lastName?: string;
+  cardName?: string;
+  club?: any;
+  nation?: any;
+  league?: any;
   images?: any;
+  stats: any;
+  foot?: number;
+  skillMovesLevel?: number;
+  weakFoot?: number;
+  height?: number;
+  weight?: number;
+  workRates?: any;
+  traits?: any[];
+  source?: string;
+  auctionable?: boolean;
+  avgStats?: any;
+  avgGkStats?: any;
 }
 
 interface Message {
   role: "user" | "assistant";
   content: string;
-  playerCards?: PlayerCard[];
+  players?: Player[];
 }
 
 const randomGreetings = [
@@ -147,14 +166,14 @@ const AIAssistantBubble = () => {
               
               // Parse player cards from JSON blocks
               const jsonMatch = assistantContent.match(/```json\s*(\{[\s\S]*?\})\s*```/);
-              let playerCards: PlayerCard[] | undefined = undefined;
+              let players: Player[] | undefined = undefined;
               let displayContent = assistantContent;
               
               if (jsonMatch) {
                 try {
                   const jsonData = JSON.parse(jsonMatch[1]);
                   if (jsonData.playerCards && Array.isArray(jsonData.playerCards)) {
-                    playerCards = jsonData.playerCards;
+                    players = jsonData.playerCards;
                   }
                   // Remove JSON block from display
                   displayContent = assistantContent.replace(/```json\s*\{[\s\S]*?\}\s*```/, '').trim();
@@ -168,7 +187,7 @@ const AIAssistantBubble = () => {
                 const lastMessage = newMessages[newMessages.length - 1];
                 if (lastMessage.role === "assistant") {
                   lastMessage.content = displayContent;
-                  lastMessage.playerCards = playerCards;
+                  lastMessage.players = players;
                 }
                 return newMessages;
               });
@@ -270,14 +289,16 @@ const AIAssistantBubble = () => {
                     )}
                   >
                     {/* Player Cards */}
-                    {message.playerCards && message.playerCards.length > 0 && (
-                      <div className="flex flex-wrap gap-2 max-w-[90%]">
-                        {message.playerCards.map((player) => (
-                          <ChatPlayerCard
+                    {message.players && message.players.length > 0 && (
+                      <div className="flex flex-wrap gap-2 max-w-full">
+                        {message.players.map((player) => (
+                          <div 
                             key={player.assetId}
-                            player={player}
+                            className="w-[120px] cursor-pointer"
                             onClick={() => setSelectedPlayer(player.assetId)}
-                          />
+                          >
+                            <PlayerCard player={player} />
+                          </div>
                         ))}
                       </div>
                     )}
