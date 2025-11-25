@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Plus, X } from "lucide-react";
-import { TEXT } from "@/constants/text";
+import { useT } from "@/contexts/LocalizationContext";
 
 interface PlayerStats {
   pace?: number;
@@ -91,6 +91,8 @@ export default function PlayerCard({
   ovrPenalty = 0,
   isSelected = false,
 }: PlayerCardProps) {
+  const { t } = useT();
+  
   // Empty slot for small variant
   if (!player && variant === "small") {
     return (
@@ -146,20 +148,20 @@ export default function PlayerCard({
 
   const statLabels = isGK 
     ? [
-        TEXT.STATS.DIVING,
-        TEXT.STATS.POSITIONING,
-        TEXT.STATS.HANDLING,
-        TEXT.STATS.REFLEXES,
-        TEXT.STATS.KICKING,
-        TEXT.STATS.PHYSICALITY
+        t("stats.diving"),
+        t("stats.positioning"),
+        t("stats.handling"),
+        t("stats.reflexes"),
+        t("stats.kicking"),
+        t("stats.physicality")
       ]
     : [
-        TEXT.STATS.PACE,
-        TEXT.STATS.SHOOTING,
-        TEXT.STATS.PASSING,
-        TEXT.STATS.DRIBBLING,
-        TEXT.STATS.DEFENSE,
-        TEXT.STATS.PHYSICALITY
+        t("stats.pace"),
+        t("stats.shooting"),
+        t("stats.passing"),
+        t("stats.dribbling"),
+        t("stats.defense"),
+        t("stats.physicality")
       ];
   
   const statsToShow = isGK ? avgGkStats : avgStats;
@@ -227,7 +229,7 @@ export default function PlayerCard({
                   <div className="w-5 h-4 rounded overflow-hidden shadow-lg">
                     <img 
                       src={flagImage} 
-                      alt={TEXT.NATION}
+                      alt={t("player.nation")}
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -236,7 +238,7 @@ export default function PlayerCard({
                   <div className="w-4 h-4 rounded-full overflow-hidden shadow-lg">
                     <img 
                       src={teamLogoUrl} 
-                      alt={TEXT.CLUB}
+                      alt={t("player.club")}
                       className="w-full h-full object-contain bg-white/80"
                     />
                   </div>
@@ -356,7 +358,7 @@ export default function PlayerCard({
                         <div className="w-12 h-9 rounded overflow-hidden shadow-lg">
                           <img 
                             src={flagImage} 
-                            alt={TEXT.NATION}
+                            alt={t("player.nation")}
                             className="w-full h-full object-cover"
                           />
                         </div>
@@ -366,7 +368,7 @@ export default function PlayerCard({
                         <div className="w-10 h-10 rounded-full p-1 shadow-lg">
                           <img 
                             src={leagueImage} 
-                            alt={TEXT.LEAGUE}
+                            alt={t("player.league")}
                             className="w-full h-full object-contain"
                             onError={(e) => {
                               e.currentTarget.style.display = 'none';
@@ -379,7 +381,7 @@ export default function PlayerCard({
                         <div className="w-10 h-10 rounded-full p-1 shadow-lg">
                           <img 
                             src={teamLogoUrl} 
-                            alt={TEXT.CLUB}
+                            alt={t("player.club")}
                             className="w-full h-full object-contain"
                             onError={(e) => {
                               e.currentTarget.style.display = 'none';
@@ -489,7 +491,7 @@ export default function PlayerCard({
                 <div className="w-10 h-7 rounded overflow-hidden shadow-lg">
                   <img 
                     src={flagImage} 
-                    alt={TEXT.NATION}
+                    alt={t("player.nation")}
                     className="w-full h-full object-cover"
                   />
                 </div>
@@ -499,7 +501,7 @@ export default function PlayerCard({
                 <div className="w-8 h-8 rounded-full p-0.5 shadow-lg bg-white/10">
                   <img 
                     src={leagueImage} 
-                    alt={TEXT.LEAGUE}
+                    alt={t("player.league")}
                     className="w-full h-full object-contain"
                   />
                 </div>
@@ -509,7 +511,7 @@ export default function PlayerCard({
                 <div className="w-8 h-8 rounded-full p-0.5 shadow-lg bg-white/10">
                   <img 
                     src={teamLogoUrl} 
-                    alt={TEXT.CLUB}
+                    alt={t("player.club")}
                     className="w-full h-full object-contain"
                   />
                 </div>

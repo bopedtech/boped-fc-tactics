@@ -16,6 +16,7 @@ import { LogOut, Settings, User as UserIcon, Shield, Menu } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import logoImage from "@/assets/bopedfctactics-logo.png";
 
 export default function Header() {
@@ -171,6 +172,8 @@ export default function Header() {
         </div>
 
         <div className="flex items-center gap-2 md:gap-4">
+          <LanguageSwitcher />
+          
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
