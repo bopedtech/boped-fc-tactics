@@ -8,13 +8,14 @@ import Footer from "@/components/Footer";
 import PlayerCard from "@/components/PlayerCard";
 import PlayerDetailDialog from "@/components/PlayerDetailDialog";
 import { Button } from "@/components/ui/button";
-import { TEXT } from "@/constants/text";
 import { Card } from "@/components/ui/card";
 import { Database, Users, Zap, TrendingUp, Shield, Gift } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useT } from "@/contexts/LocalizationContext";
 
 const Index = () => {
+  const { t } = useT();
   const [latestPlayers, setLatestPlayers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPlayerAssetId, setSelectedPlayerAssetId] = useState<number | null>(null);
@@ -46,21 +47,25 @@ const Index = () => {
   const widgets = [
     {
       icon: Database,
+      titleKey: "index.widgets.searchPlayer",
       title: "Tìm cầu thủ",
       link: "/database",
     },
     {
       icon: Zap,
+      titleKey: "index.widgets.builder",
       title: "Xây đội hình",
       link: "/builder",
     },
     {
       icon: TrendingUp,
+      titleKey: "index.widgets.mySquads",
       title: "Đội hình của tôi",
       link: "/my-squads",
     },
     {
       icon: Gift,
+      titleKey: "index.widgets.fcmobileCode",
       title: "Code FC Mobile",
       link: "#",
     },
@@ -81,7 +86,7 @@ const Index = () => {
       {/* Widgets */}
       <section className="py-8 border-t border-border/40">
         <div className="container mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl font-bold mb-6">Tiện ích</h2>
+          <h2 className="text-2xl md:text-3xl font-bold mb-6">{t("index.widgets.title", "Tiện ích")}</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {widgets.map((widget, idx) => (
               <Link key={idx} to={widget.link}>
@@ -90,7 +95,7 @@ const Index = () => {
                     <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                       <widget.icon className="h-7 w-7 text-primary" />
                     </div>
-                    <h3 className="font-bold text-sm md:text-base">{widget.title}</h3>
+                    <h3 className="font-bold text-sm md:text-base">{t(widget.titleKey, widget.title)}</h3>
                   </div>
                 </Card>
               </Link>
@@ -102,14 +107,14 @@ const Index = () => {
       {/* Latest Players */}
       <section className="py-12 border-t border-border/40">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-2xl md:text-3xl font-bold mb-2">Cầu thủ mới nhất</h2>
-              <p className="text-muted-foreground">Những cầu thủ được cập nhật gần đây</p>
+              <h2 className="text-2xl md:text-3xl font-bold mb-2">{t("index.latestPlayers.title", "Cầu thủ mới nhất")}</h2>
+              <p className="text-muted-foreground">{t("index.latestPlayers.subtitle", "Những cầu thủ được cập nhật gần đây")}</p>
             </div>
             <Button variant="outline" asChild>
               <Link to="/database">
-                Xem tất cả
+                {t("index.latestPlayers.viewAll", "Xem tất cả")}
                 <Users className="ml-2 h-4 w-4" />
               </Link>
             </Button>

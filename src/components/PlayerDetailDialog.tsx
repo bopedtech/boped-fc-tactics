@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Loader2, X } from "lucide-react";
 import PlayerCard from "@/components/PlayerCard";
 import { FootIcon } from "@/components/FootIcon";
+import { useT } from "@/contexts/LocalizationContext";
 
 interface PlayerStats {
   pace?: number;
@@ -133,6 +134,7 @@ interface PlayerDetailDialogProps {
 }
 
 export default function PlayerDetailDialog({ assetId, open, onOpenChange }: PlayerDetailDialogProps) {
+  const { t } = useT();
   const [player, setPlayer] = useState<Player | null>(null);
   const [loading, setLoading] = useState(false);
   const [nationInfo, setNationInfo] = useState<{ displayName: string; image?: string } | null>(null);
@@ -183,7 +185,7 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
             const traitsWithImages = data.traits.map((trait: any) => ({
               name: traitsMap.get(trait.id) || trait.title || '',
               image: trait.image || '',
-              category: 'Chỉ Số Ẩn'
+              category: t("player.detail.hiddenStats", "Chỉ Số Ẩn"),
             }));
             setTraitsData(traitsWithImages);
           }
@@ -358,8 +360,8 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                 <Card className="p-4">
                   <Tabs defaultValue="info" className="w-full">
                     <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="info">Thông Tin</TabsTrigger>
-                      <TabsTrigger value="stats">Chỉ Số</TabsTrigger>
+                      <TabsTrigger value="info">{t("player.detail.tabs.info", "Thông Tin")}</TabsTrigger>
+                      <TabsTrigger value="stats">{t("player.detail.tabs.stats", "Chỉ Số")}</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="stats" className="mt-6 overflow-y-auto max-h-[60vh] pr-2 scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent hover:scrollbar-thumb-primary/40">
@@ -378,7 +380,7 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                             return (
                               <div key={mainKey} className="flex flex-col space-y-3 p-3 bg-muted/20 rounded-lg min-w-0">
                                 <div className="text-center space-y-2 pb-3 border-b border-border/40">
-                                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide whitespace-nowrap">{statLabels[mainKey]}</h3>
+                                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide whitespace-nowrap">{t(`stats.${mainKey}`, statLabels[mainKey] || String(mainKey))}</h3>
                                   <div 
                                     className="text-4xl font-bold"
                                     style={{ color: getStatColor(mainValue as number) }}
@@ -392,7 +394,7 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                                     const value = playerStats?.[statKey] || 0;
                                     return (
                                       <div key={statKey} className="flex items-center justify-between text-xs gap-2">
-                                        <span className="text-muted-foreground whitespace-nowrap">{statLabels[statKey] || statKey}</span>
+                                        <span className="text-muted-foreground whitespace-nowrap">{t(`stats.${statKey}`, statLabels[statKey] || String(statKey))}</span>
                                         <span 
                                           className="font-semibold tabular-nums"
                                           style={{ color: getStatColor(value) }}
@@ -422,7 +424,7 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                             
                             return (
                               <div key={key} className="flex flex-col items-center justify-center p-4 bg-muted/20 rounded-lg space-y-2">
-                                <span className="text-sm font-semibold text-muted-foreground uppercase">{statLabels[key]}</span>
+                                <span className="text-sm font-semibold text-muted-foreground uppercase">{t(`stats.${key}`, statLabels[key] || String(key))}</span>
                                 <span 
                                   className="text-3xl font-bold"
                                   style={{ color: getStatColor(value as number) }}
@@ -443,7 +445,7 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                           {/* Height */}
                           {player.height && (
                             <div className="space-y-1">
-                              <h3 className="text-xs font-semibold text-muted-foreground uppercase">Chiều Cao</h3>
+                              <h3 className="text-xs font-semibold text-muted-foreground uppercase">{t("player.detail.height", "Chiều Cao")}</h3>
                               <div className="text-2xl font-bold">{player.height} <span className="text-sm text-muted-foreground">cm</span></div>
                             </div>
                           )}
@@ -451,7 +453,7 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                           {/* Weight */}
                           {player.weight && (
                             <div className="space-y-1">
-                              <h3 className="text-xs font-semibold text-muted-foreground uppercase">Cân Nặng</h3>
+                              <h3 className="text-xs font-semibold text-muted-foreground uppercase">{t("player.detail.weight", "Cân Nặng")}</h3>
                               <div className="text-2xl font-bold">{player.weight} <span className="text-sm text-muted-foreground">kg</span></div>
                             </div>
                           )}
@@ -459,7 +461,7 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                           {/* Preferred Foot */}
                           {player.foot && (
                             <div className="space-y-1">
-                              <h3 className="text-xs font-semibold text-muted-foreground uppercase">Chân Thuận</h3>
+                              <h3 className="text-xs font-semibold text-muted-foreground uppercase">{t("player.detail.preferredFoot", "Chân Thuận")}</h3>
                               <div className="flex items-center -space-x-2">
                                 <FootIcon 
                                   isLeft={true} 
@@ -480,7 +482,7 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                           {/* Skill Moves */}
                           {player.skillMovesLevel && (
                             <div className="space-y-1">
-                              <h3 className="text-xs font-semibold text-muted-foreground uppercase">Kỹ Năng</h3>
+                              <h3 className="text-xs font-semibold text-muted-foreground uppercase">{t("player.detail.skillMoves", "Kỹ Năng")}</h3>
                               <div className="flex items-center gap-1">
                                 <span className="text-2xl font-bold">{player.skillMovesLevel}</span>
                                 <div className="flex">
@@ -498,7 +500,7 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                         {/* Team */}
                         {clubInfo && (
                           <div className="space-y-2">
-                            <h3 className="text-sm font-semibold text-muted-foreground">Câu Lạc Bộ</h3>
+                            <h3 className="text-sm font-semibold text-muted-foreground">{t("player.detail.team", "Câu Lạc Bộ")}</h3>
                             <div className="flex items-center gap-2">
                               {clubInfo.image && (
                                 <img src={clubInfo.image} alt={clubInfo.displayName} className="w-8 h-8 object-contain" />
@@ -511,7 +513,7 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                         {/* League */}
                         {player.league && (
                           <div className="space-y-2">
-                            <h3 className="text-sm font-semibold text-muted-foreground">Giải Đấu</h3>
+                            <h3 className="text-sm font-semibold text-muted-foreground">{t("player.detail.league", "Giải Đấu")}</h3>
                             <div className="flex items-center gap-2">
                               {leagueInfo?.image && (
                                 <img 
@@ -531,7 +533,7 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                         {/* Nation */}
                         {nationInfo && (
                           <div className="space-y-2">
-                            <h3 className="text-sm font-semibold text-muted-foreground">Quốc Tịch</h3>
+                            <h3 className="text-sm font-semibold text-muted-foreground">{t("player.detail.nation", "Quốc Tịch")}</h3>
                             <div className="flex items-center gap-2">
                               {nationInfo.image && (
                                 <img 
@@ -553,17 +555,17 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                       {/* Work Rates */}
                       {(player as any).workRates && (
                         <div className="space-y-2 pt-4 border-t">
-                          <h3 className="text-sm font-semibold text-muted-foreground">Tốc Độ Làm Việc</h3>
+                          <h3 className="text-sm font-semibold text-muted-foreground">{t("player.detail.workRates", "Tốc Độ Làm Việc")}</h3>
                           <div className="flex gap-6">
                             {((player as any).workRates as any)?.attWorkRate && (
                               <div>
-                                <span className="text-muted-foreground text-sm">Tấn công: </span>
+                                <span className="text-muted-foreground text-sm">{t("player.detail.workRates.attack", "Tấn công:")} </span>
                                 <span className="font-semibold">{((player as any).workRates as any).attWorkRate}</span>
                               </div>
                             )}
                             {((player as any).workRates as any)?.defWorkRate && (
                               <div>
-                                <span className="text-muted-foreground text-sm">Phòng thủ: </span>
+                                <span className="text-muted-foreground text-sm">{t("player.detail.workRates.defense", "Phòng thủ:")} </span>
                                 <span className="font-semibold">{((player as any).workRates as any).defWorkRate}</span>
                               </div>
                             )}
@@ -574,7 +576,7 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                       {/* Alternative Positions */}
                       {player.potentialPositions && Array.isArray((player as any).potentialPositions) && (player as any).potentialPositions.length > 0 && (
                         <div className="space-y-2 pt-4 border-t">
-                          <h3 className="text-sm font-semibold text-muted-foreground">Vị Trí Thay Thế</h3>
+                          <h3 className="text-sm font-semibold text-muted-foreground">{t("player.detail.altPositions", "Vị Trí Thay Thế")}</h3>
                           <div className="flex flex-wrap gap-2">
                             {((player as any).potentialPositions || []).map((pos: any, idx: number) => (
                               <Badge key={idx} variant="secondary">
@@ -587,7 +589,7 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
 
                       {/* Đặc Điểm */}
                       <div className="space-y-4 pt-4 border-t">
-                        <h3 className="text-sm font-semibold text-muted-foreground">Đặc Điểm</h3>
+                        <h3 className="text-sm font-semibold text-muted-foreground">{t("player.detail.traits", "Đặc Điểm")}</h3>
                         {(skillMoveInfo || celebrationInfo || (player as any).skillMoves?.image || (player as any).celebration?.image || traitsData.length > 0) ? (
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             {/* Skill Moves */}
@@ -602,9 +604,9 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                                 </div>
                                 <div className="text-center">
                                   <div className="text-sm font-semibold">
-                                    {skillMoveInfo?.displayName || (player as any).skillMoves?.title || 'Skill Move'}
+                                    {skillMoveInfo?.displayName || (player as any).skillMoves?.title || t("player.detail.skillMoves.label", "Skill Move")}
                                   </div>
-                                  <div className="text-xs text-muted-foreground">Động Tác Kỹ Thuật</div>
+                                  <div className="text-xs text-muted-foreground">{t("player.detail.skillMoves.label", "Động Tác Kỹ Thuật")}</div>
                                 </div>
                               </div>
                             )}
@@ -621,9 +623,9 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                                 </div>
                                 <div className="text-center">
                                   <div className="text-sm font-semibold">
-                                    {celebrationInfo?.displayName || (player as any).celebration?.title || 'Celebration'}
+                                    {celebrationInfo?.displayName || (player as any).celebration?.title || t("player.detail.celebration.label", "Celebration")}
                                   </div>
-                                  <div className="text-xs text-muted-foreground">Ăn Mừng</div>
+                                  <div className="text-xs text-muted-foreground">{t("player.detail.celebration.label", "Ăn Mừng")}</div>
                                 </div>
                               </div>
                             )}
@@ -646,7 +648,7 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                             ))}
                           </div>
                         ) : (
-                          <div className="text-sm text-muted-foreground">Không có dữ liệu</div>
+                          <div className="text-sm text-muted-foreground">{t("player.detail.noData", "Không có dữ liệu")}</div>
                         )}
                       </div>
                     </TabsContent>
