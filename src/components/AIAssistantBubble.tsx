@@ -135,19 +135,51 @@ const AIAssistantBubble = () => {
       const data = await response.json();
       const responseText = data.response || "Xin lỗi, tôi không thể trả lời.";
       
-      // Parse player cards from JSON blocks
-      const jsonMatch = responseText.match(/```json\s*(\{[\s\S]*?\})\s*```/);
+      // Parse player cards from JSON blocks (both with and without markdown)
       let players: Player[] | undefined = undefined;
       let displayContent = responseText;
+      
+      // Try to find JSON with markdown code block
+      let jsonMatch = responseText.match(/```json\s*(\{[\s\S]*?\})\s*```/);
+      
+      // If not found, try to find raw JSON object
+      if (!jsonMatch) {
+        jsonMatch = responseText.match(/(\{"playerCards":\s*\[[\s\S]*?\]\})/);
+      }
       
       if (jsonMatch) {
         try {
           const jsonData = JSON.parse(jsonMatch[1]);
           if (jsonData.playerCards && Array.isArray(jsonData.playerCards)) {
-            players = jsonData.playerCards;
+            players = jsonData.playerCards.map((p: any) => ({
+              assetId: p.assetId,
+              playerId: p.playerId || p.assetId,
+              rating: p.rating,
+              position: p.position,
+              commonName: p.commonName,
+              firstName: p.firstName,
+              lastName: p.lastName,
+              cardName: p.cardName,
+              club: p.club,
+              nation: p.nation,
+              league: p.league,
+              images: p.images,
+              stats: p.stats,
+              avgStats: p.avgStats,
+              avgGkStats: p.avgGkStats,
+              foot: p.foot,
+              skillMovesLevel: p.skillMovesLevel,
+              weakFoot: p.weakFoot,
+              height: p.height,
+              weight: p.weight,
+              workRates: p.workRates,
+              traits: p.traits,
+              source: p.source,
+              auctionable: p.auctionable
+            }));
           }
           // Remove JSON block from display
-          displayContent = responseText.replace(/```json\s*\{[\s\S]*?\}\s*```/, '').trim();
+          displayContent = responseText.replace(/```json\s*\{[\s\S]*?\}\s*```/, '').replace(/\{"playerCards":\s*\[[\s\S]*?\]\}/, '').trim();
         } catch (e) {
           console.error("Failed to parse player cards:", e);
         }
