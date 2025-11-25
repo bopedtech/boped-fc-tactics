@@ -132,7 +132,6 @@ const PlayerSearchBar = () => {
 
   const handlePlayerClick = (assetId: number) => {
     setSelectedPlayer(assetId);
-    setIsOpen(false);
   };
 
   const getPlayerImage = (player: Player) => {
