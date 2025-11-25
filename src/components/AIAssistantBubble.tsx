@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import logoImage from "@/assets/bopedfctactics-logo.png";
 import PlayerCard from "@/components/PlayerCard";
 import PlayerDetailDialog from "@/components/PlayerDetailDialog";
+import { TEXT } from "@/constants/text";
 
 interface Player {
   assetId: number;

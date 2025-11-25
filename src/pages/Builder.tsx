@@ -4,8 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import AIAdvisor from "@/components/AIAdvisor";
 import PlayerSelectionDialog from "@/components/PlayerSelectionDialog";
-import PlayerCardSlot from "@/components/PlayerCardSlot";
+import PlayerCard from "@/components/PlayerCard";
 import { Button } from "@/components/ui/button";
+import { TEXT } from "@/constants/text";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -388,9 +389,10 @@ export default function Builder() {
                       className="absolute -translate-x-1/2 -translate-y-1/2 transition-all duration-300"
                       style={{ top: pos.top, left: pos.left }}
                     >
-                      <PlayerCardSlot
+                      <PlayerCard
                         player={player}
                         position={pos.position}
+                        variant="small"
                         onClick={() => handleOpenPlayerDialog(index)}
                         onRemove={player ? () => removePlayerFromLineup(index) : undefined}
                       />

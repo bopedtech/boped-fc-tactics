@@ -8,6 +8,7 @@ import Footer from "@/components/Footer";
 import PlayerCard from "@/components/PlayerCard";
 import PlayerDetailDialog from "@/components/PlayerDetailDialog";
 import { Button } from "@/components/ui/button";
+import { TEXT } from "@/constants/text";
 import { Card } from "@/components/ui/card";
 import { Database, Users, Zap, TrendingUp, Shield, Gift } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
