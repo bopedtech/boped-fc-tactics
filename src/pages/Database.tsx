@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import { useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
 import PlayerCard from "@/components/PlayerCard";
 import { Input } from "@/components/ui/input";
@@ -69,6 +70,7 @@ const PAGE_SIZE = 20;
 
 export default function Database() {
   const queryClient = useQueryClient();
+  const [searchParams] = useSearchParams();
   const [searchName, setSearchName] = useState("");
   const [showFilters, setShowFilters] = useState(true);
   const [sortBy, setSortBy] = useState("newest");
@@ -80,6 +82,14 @@ export default function Database() {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   
   const { filters, setFilters, resetFilters: resetFilterState, applyFiltersToQuery } = usePlayerFilters();
+
+  // Get search query from URL parameter
+  useEffect(() => {
+    const searchQuery = searchParams.get("search");
+    if (searchQuery) {
+      setSearchName(searchQuery);
+    }
+  }, [searchParams]);
 
   const handlePlayerClick = (assetId: number) => {
     setSelectedPlayerAssetId(assetId);

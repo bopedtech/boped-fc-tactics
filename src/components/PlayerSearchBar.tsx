@@ -60,6 +60,7 @@ const PlayerSearchBar = () => {
   const [players, setPlayers] = useState<Player[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<number | null>(null);
+  const [hasMoreResults, setHasMoreResults] = useState(false);
   const navigate = useNavigate();
   const searchRef = useRef<HTMLDivElement>(null);
 
@@ -79,19 +80,22 @@ const PlayerSearchBar = () => {
       if (query.trim().length < 2) {
         setPlayers([]);
         setIsOpen(false);
+        setHasMoreResults(false);
         return;
       }
 
-      const { data, error } = await supabase
+      // Get 10 results to check if there are more than 9
+      const { data, error, count } = await supabase
         .from("players")
-        .select("*")
+        .select("*", { count: 'exact' })
         .or(`commonName.ilike.%${query}%,firstName.ilike.%${query}%,lastName.ilike.%${query}%`)
         .eq("is_visible", true)
         .order("rating", { ascending: false })
-        .limit(8);
+        .limit(10);
 
       if (!error && data) {
-        setPlayers(data.map(p => ({
+        const displayPlayers = data.slice(0, 9);
+        setPlayers(displayPlayers.map(p => ({
           assetId: p.assetId,
           playerId: p.playerId,
           commonName: p.commonName,
@@ -117,6 +121,7 @@ const PlayerSearchBar = () => {
           source: p.source,
           auctionable: p.auctionable
         })));
+        setHasMoreResults(data.length > 9 || (count !== null && count > 9));
         setIsOpen(data.length > 0);
       }
     };
@@ -195,9 +200,15 @@ const PlayerSearchBar = () => {
                   </div>
                 ))}
               </div>
-              {players.length === 8 && (
-                <div className="mt-4 pt-4 text-center text-sm text-muted-foreground border-t border-border/50">
-                  Hiển thị 8 kết quả đầu tiên
+              {hasMoreResults && (
+                <div className="mt-6 pt-4 text-center border-t border-border/50">
+                  <Button
+                    onClick={() => navigate(`/database?search=${encodeURIComponent(query)}`)}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    Xem thêm kết quả tìm kiếm
+                  </Button>
                 </div>
               )}
             </div>
