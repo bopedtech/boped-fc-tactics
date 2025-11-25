@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import PlayerFilters from "@/components/PlayerFilters";
 import { usePlayerFilters } from "@/hooks/usePlayerFilters";
 import PlayerDetailDialog from "@/components/PlayerDetailDialog";
+import { useT } from "@/contexts/LocalizationContext";
 
 interface PlayerStats {
   pace?: number;
@@ -70,6 +71,7 @@ interface Player {
 const PAGE_SIZE = 20;
 
 export default function Database() {
+  const { t } = useT();
   const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
   const [searchName, setSearchName] = useState("");
@@ -320,10 +322,10 @@ export default function Database() {
       <div className="container mx-auto py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold gradient-primary bg-clip-text text-transparent mb-2">
-            Danh sách cầu thủ FC Mobile
+            {t("database.title", "Danh sách cầu thủ FC Mobile")}
           </h1>
           <p className="text-muted-foreground">
-            Khám phá và tìm kiếm cầu thủ cho đội hình FC Mobile của bạn
+            {t("database.subtitle", "Khám phá và tìm kiếm cầu thủ cho đội hình FC Mobile của bạn")}
           </p>
         </div>
 
@@ -334,7 +336,7 @@ export default function Database() {
               <div className="p-4 border-b flex items-center justify-between">
                 <h2 className="text-xl font-bold flex items-center gap-2">
                   <Filter className="h-5 w-5" />
-                  Bộ lọc
+                  {t("database.filters", "Bộ lọc")}
                 </h2>
                 <Button
                   variant="ghost"
@@ -351,7 +353,7 @@ export default function Database() {
                 <div className="relative">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Tìm theo tên..."
+                    placeholder={t("database.searchByName", "Tìm theo tên...")}
                     value={searchName}
                     onChange={(e) => setSearchName(e.target.value)}
                     className="pl-10"
@@ -377,31 +379,31 @@ export default function Database() {
                 onClick={() => setShowFilters(true)}
               >
                 <Filter className="h-4 w-4 mr-2" />
-                Bộ lọc
+                {t("database.filters", "Bộ lọc")}
               </Button>
               <p className="text-sm text-muted-foreground">
-                {allPlayers.length} / {totalCount} cầu thủ
+                {allPlayers.length} {t("database.of", "/")} {totalCount} {t("database.players", "cầu thủ")}
               </p>
             </div>
 
             {/* Desktop header with sort */}
             <div className="mb-4 hidden lg:flex justify-between items-center">
               <p className="text-sm text-muted-foreground">
-                Hiển thị {allPlayers.length} / {totalCount} cầu thủ
+                {t("database.showing", "Hiển thị")} {allPlayers.length} {t("database.of", "/")} {totalCount} {t("database.players", "cầu thủ")}
               </p>
               <div className="flex items-center gap-2">
                 <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
                 <Select value={sortBy} onValueChange={setSortBy}>
                   <SelectTrigger className="w-[200px]">
-                    <SelectValue placeholder="Sắp xếp" />
+                    <SelectValue placeholder={t("database.sort", "Sắp xếp")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="newest">Mới nhất</SelectItem>
-                    <SelectItem value="oldest">Cũ nhất</SelectItem>
-                    <SelectItem value="rating_desc">OVR cao → thấp</SelectItem>
-                    <SelectItem value="rating_asc">OVR thấp → cao</SelectItem>
-                    <SelectItem value="name_asc">Tên A → Z</SelectItem>
-                    <SelectItem value="name_desc">Tên Z → A</SelectItem>
+                    <SelectItem value="newest">{t("database.sort.newest", "Mới nhất")}</SelectItem>
+                    <SelectItem value="oldest">{t("database.sort.oldest", "Cũ nhất")}</SelectItem>
+                    <SelectItem value="rating_desc">{t("database.sort.ratingDesc", "OVR cao → thấp")}</SelectItem>
+                    <SelectItem value="rating_asc">{t("database.sort.ratingAsc", "OVR thấp → cao")}</SelectItem>
+                    <SelectItem value="name_asc">{t("database.sort.nameAsc", "Tên A → Z")}</SelectItem>
+                    <SelectItem value="name_desc">{t("database.sort.nameDesc", "Tên Z → A")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -412,15 +414,15 @@ export default function Database() {
               <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger className="flex-1">
-                  <SelectValue placeholder="Sắp xếp" />
+                  <SelectValue placeholder={t("database.sort", "Sắp xếp")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="newest">Mới nhất</SelectItem>
-                  <SelectItem value="oldest">Cũ nhất</SelectItem>
-                  <SelectItem value="rating_desc">OVR cao → thấp</SelectItem>
-                  <SelectItem value="rating_asc">OVR thấp → cao</SelectItem>
-                  <SelectItem value="name_asc">Tên A → Z</SelectItem>
-                  <SelectItem value="name_desc">Tên Z → A</SelectItem>
+                  <SelectItem value="newest">{t("database.sort.newest", "Mới nhất")}</SelectItem>
+                  <SelectItem value="oldest">{t("database.sort.oldest", "Cũ nhất")}</SelectItem>
+                  <SelectItem value="rating_desc">{t("database.sort.ratingDesc", "OVR cao → thấp")}</SelectItem>
+                  <SelectItem value="rating_asc">{t("database.sort.ratingAsc", "OVR thấp → cao")}</SelectItem>
+                  <SelectItem value="name_asc">{t("database.sort.nameAsc", "Tên A → Z")}</SelectItem>
+                  <SelectItem value="name_desc">{t("database.sort.nameDesc", "Tên Z → A")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -434,13 +436,13 @@ export default function Database() {
             ) : isError ? (
               <div className="text-center py-16">
                 <p className="text-xl text-destructive">
-                  Có lỗi xảy ra khi tải dữ liệu
+                  {t("database.error", "Có lỗi xảy ra khi tải dữ liệu")}
                 </p>
               </div>
             ) : allPlayers.length === 0 ? (
               <div className="text-center py-16">
                 <p className="text-xl text-muted-foreground">
-                  Không tìm thấy cầu thủ nào
+                  {t("database.noResults", "Không tìm thấy cầu thủ nào")}
                 </p>
               </div>
             ) : (
@@ -461,7 +463,7 @@ export default function Database() {
                   {isFetchingNextPage ? (
                     <div className="flex items-center justify-center gap-2">
                       <Loader2 className="h-6 w-6 animate-spin" />
-                      <span className="text-muted-foreground">Đang tải thêm...</span>
+                      <span className="text-muted-foreground">{t("database.loadingMore", "Đang tải thêm...")}</span>
                     </div>
                   ) : hasNextPage ? (
                     <Button
@@ -469,11 +471,11 @@ export default function Database() {
                       variant="outline"
                       className="min-w-[200px]"
                     >
-                      Tải thêm cầu thủ
+                      {t("database.loadMore", "Tải thêm cầu thủ")}
                     </Button>
                   ) : (
                     <p className="text-muted-foreground">
-                      Đã hiển thị tất cả {totalCount} cầu thủ
+                      {t("database.allLoaded", "Đã hiển thị tất cả")} {totalCount} {t("database.players", "cầu thủ")}
                     </p>
                   )}
                 </div>

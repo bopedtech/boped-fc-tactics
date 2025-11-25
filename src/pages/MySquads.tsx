@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { useT } from "@/contexts/LocalizationContext";
 
 interface Squad {
   id: string;
@@ -17,6 +18,7 @@ interface Squad {
 }
 
 export default function MySquads() {
+  const { t } = useT();
   const navigate = useNavigate();
   const [squads, setSquads] = useState<Squad[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,7 +50,7 @@ export default function MySquads() {
       if (error) throw error;
       setSquads(data || []);
     } catch (error: any) {
-      toast.error("Không thể tải đội hình");
+      toast.error(t("mySquads.toast.loadError", "Không thể tải đội hình"));
       console.error(error);
     } finally {
       setLoading(false);
@@ -62,9 +64,9 @@ export default function MySquads() {
       if (error) throw error;
 
       setSquads(squads.filter((s) => s.id !== id));
-      toast.success("Đã xóa đội hình");
+      toast.success(t("mySquads.toast.deleteSuccess", "Đã xóa đội hình"));
     } catch (error: any) {
-      toast.error("Không thể xóa đội hình");
+      toast.error(t("mySquads.toast.deleteError", "Không thể xóa đội hình"));
       console.error(error);
     }
   };
@@ -77,10 +79,10 @@ export default function MySquads() {
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-4xl font-bold gradient-primary bg-clip-text text-transparent mb-2">
-              Đội hình của tôi
+              {t("mySquads.title", "Đội hình của tôi")}
             </h1>
             <p className="text-muted-foreground">
-              Quản lý các đội hình bạn đã tạo
+              {t("mySquads.subtitle", "Quản lý các đội hình bạn đã tạo")}
             </p>
           </div>
           <Button
@@ -88,7 +90,7 @@ export default function MySquads() {
             onClick={() => navigate("/builder")}
           >
             <Plus className="h-4 w-4 mr-2" />
-            Tạo đội hình mới
+            {t("mySquads.createNew", "Tạo đội hình mới")}
           </Button>
         </div>
 
@@ -101,16 +103,16 @@ export default function MySquads() {
         ) : squads.length === 0 ? (
           <div className="text-center py-16">
             <div className="mb-4 text-6xl">⚽</div>
-            <h2 className="text-2xl font-bold mb-2">Chưa có đội hình nào</h2>
+            <h2 className="text-2xl font-bold mb-2">{t("mySquads.empty.title", "Chưa có đội hình nào")}</h2>
             <p className="text-muted-foreground mb-6">
-              Bắt đầu xây dựng đội hình đầu tiên của bạn
+              {t("mySquads.empty.subtitle", "Bắt đầu xây dựng đội hình đầu tiên của bạn")}
             </p>
             <Button
               className="gradient-primary"
               onClick={() => navigate("/builder")}
             >
               <Plus className="h-4 w-4 mr-2" />
-              Tạo đội hình
+              {t("mySquads.empty.createButton", "Tạo đội hình")}
             </Button>
           </div>
         ) : (
@@ -120,11 +122,11 @@ export default function MySquads() {
                 <div className="mb-4">
                   <h3 className="text-xl font-bold mb-1">{squad.squadName}</h3>
                   <p className="text-sm text-muted-foreground">
-                    Sơ đồ: {squad.formation}
+                    {t("mySquads.formation", "Sơ đồ:")} {squad.formation}
                   </p>
                   {squad.playstyle && (
                     <p className="text-sm text-accent mt-1">
-                      Lối chơi: {squad.playstyle}
+                      {t("mySquads.playstyle", "Lối chơi:")} {squad.playstyle}
                     </p>
                   )}
                 </div>
@@ -141,7 +143,7 @@ export default function MySquads() {
                     className="flex-1"
                     onClick={() => navigate(`/builder?squad=${squad.id}`)}
                   >
-                    Chỉnh sửa
+                    {t("mySquads.edit", "Chỉnh sửa")}
                   </Button>
                   <Button
                     variant="destructive"

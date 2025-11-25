@@ -101,6 +101,94 @@ const STATIC_DICTIONARY: LocalizationDictionary = {
   "index.latestPlayers.subtitle": { en: "Recently updated players", vi: "Những cầu thủ được cập nhật gần đây" },
   "index.latestPlayers.viewAll": { en: "View all", vi: "Xem tất cả" },
 
+  // Header
+  "header.nav.home": { en: "Home", vi: "Trang chủ" },
+  "header.nav.database": { en: "Player database", vi: "Danh sách cầu thủ" },
+  "header.nav.builder": { en: "Squad builder", vi: "Xây dựng đội hình" },
+  "header.nav.news": { en: "News", vi: "Bảng tin" },
+  "header.user.profile": { en: "Profile", vi: "Cá nhân" },
+  "header.user.admin": { en: "Admin panel", vi: "Quản trị hệ thống" },
+  "header.user.logout": { en: "Logout", vi: "Đăng xuất" },
+  "header.auth.login": { en: "Login", vi: "Đăng nhập" },
+  "header.auth.signup": { en: "Sign up", vi: "Đăng ký" },
+  "header.toast.logoutSuccess": { en: "Logged out successfully", vi: "Đăng xuất thành công" },
+
+  // Footer
+  "footer.company.tagline": { en: "Together with FC Mobile", vi: "Đồng hành cùng FC Mobile" },
+  "footer.company.description": { en: "Leading platform for player database, squad builder tools and FC Mobile news. Help gamers optimize their squads and enhance gaming experience.", vi: "Nền tảng hàng đầu về cơ sở dữ liệu cầu thủ, công cụ xây dựng đội hình và tin tức FC Mobile. Giúp game thủ tối ưu đội hình và nâng cao trải nghiệm chơi game." },
+  "footer.quickLinks.title": { en: "Quick Links", vi: "Liên Kết Nhanh" },
+  "footer.quickLinks.database": { en: "Player database", vi: "Cơ sở dữ liệu cầu thủ" },
+  "footer.quickLinks.builder": { en: "Squad Builder", vi: "Squad Builder" },
+  "footer.quickLinks.mySquads": { en: "My squads", vi: "Đội hình của tôi" },
+  "footer.quickLinks.news": { en: "News", vi: "Bảng tin" },
+  "footer.quickLinks.profile": { en: "Profile", vi: "Trang cá nhân" },
+  "footer.contact.title": { en: "Contact Information", vi: "Thông Tin Liên Hệ" },
+  "footer.contact.hotline": { en: "Hotline:", vi: "Hotline:" },
+  "footer.contact.email": { en: "Contact email:", vi: "Email liên hệ:" },
+  "footer.social.title": { en: "Connect With Us", vi: "Kết Nối Với Chúng Tôi" },
+  "footer.social.description": { en: "Follow us for the latest updates about FC Mobile and promotional programs.", vi: "Theo dõi chúng tôi để cập nhật thông tin mới nhất về FC Mobile và các chương trình ưu đãi." },
+  "footer.developer": { en: "Website developed by", vi: "Website được phát triển bởi" },
+  "footer.copyright": { en: "All Rights Reserved.", vi: "All Rights Reserved." },
+
+  // Database page
+  "database.title": { en: "FC Mobile Player List", vi: "Danh sách cầu thủ FC Mobile" },
+  "database.subtitle": { en: "Discover and search players for your FC Mobile squad", vi: "Khám phá và tìm kiếm cầu thủ cho đội hình FC Mobile của bạn" },
+  "database.filters": { en: "Filters", vi: "Bộ lọc" },
+  "database.searchByName": { en: "Search by name...", vi: "Tìm theo tên..." },
+  "database.showing": { en: "Showing", vi: "Hiển thị" },
+  "database.of": { en: "of", vi: "/" },
+  "database.players": { en: "players", vi: "cầu thủ" },
+  "database.sort": { en: "Sort", vi: "Sắp xếp" },
+  "database.sort.newest": { en: "Newest", vi: "Mới nhất" },
+  "database.sort.oldest": { en: "Oldest", vi: "Cũ nhất" },
+  "database.sort.ratingDesc": { en: "OVR high → low", vi: "OVR cao → thấp" },
+  "database.sort.ratingAsc": { en: "OVR low → high", vi: "OVR thấp → cao" },
+  "database.sort.nameAsc": { en: "Name A → Z", vi: "Tên A → Z" },
+  "database.sort.nameDesc": { en: "Name Z → A", vi: "Tên Z → A" },
+  "database.noResults": { en: "No players found", vi: "Không tìm thấy cầu thủ nào" },
+  "database.error": { en: "Error loading data", vi: "Có lỗi xảy ra khi tải dữ liệu" },
+  "database.loadingMore": { en: "Loading more...", vi: "Đang tải thêm..." },
+  "database.loadMore": { en: "Load more players", vi: "Tải thêm cầu thủ" },
+  "database.allLoaded": { en: "Showing all", vi: "Đã hiển thị tất cả" },
+
+  // Squad Builder
+  "builder.title": { en: "Build FC Mobile Squad", vi: "Xây dựng đội hình FC Mobile" },
+  "builder.subtitle": { en: "Create optimal squad for FC Mobile", vi: "Tạo đội hình tối ưu cho FC Mobile" },
+  "builder.squadInfo": { en: "Squad information", vi: "Thông tin đội hình" },
+  "builder.totalOvr": { en: "Total OVR", vi: "Chỉ số tổng OVR" },
+  "builder.squadName": { en: "Squad name", vi: "Tên đội hình" },
+  "builder.squadNamePlaceholder": { en: "My squad...", vi: "Đội hình của tôi..." },
+  "builder.formation": { en: "Formation", vi: "Sơ đồ chiến thuật" },
+  "builder.formationPlaceholder": { en: "Select formation...", vi: "Chọn sơ đồ..." },
+  "builder.clearSquad": { en: "Clear squad", vi: "Xóa đội hình" },
+  "builder.aiAdvice": { en: "AI Advice", vi: "Tư vấn AI" },
+  "builder.saveSquad": { en: "Save squad", vi: "Lưu đội hình" },
+  "builder.clickToAdd": { en: "💡 Click on positions to add players to squad", vi: "💡 Nhấp vào vị trí để thêm cầu thủ vào đội hình" },
+  "builder.selectFormation": { en: "Select formation", vi: "Chọn sơ đồ" },
+  "builder.toast.loginRequired": { en: "Please login to use Squad Builder", vi: "Vui lòng đăng nhập để sử dụng Squad Builder" },
+  "builder.toast.formationLoadError": { en: "Cannot load formations", vi: "Không thể tải sơ đồ chiến thuật" },
+  "builder.toast.playerAdded": { en: "Added {player} (Rank {rank}, Training {training}) to squad", vi: "Đã thêm {player} (Rank {rank}, Training {training}) vào đội hình" },
+  "builder.toast.squadCleared": { en: "Squad cleared", vi: "Đã xóa toàn bộ đội hình" },
+  "builder.toast.nameRequired": { en: "Please enter squad name", vi: "Vui lòng nhập tên đội hình" },
+  "builder.toast.incomplete": { en: "Squad needs 11 players ({filled}/11)", vi: "Đội hình chưa đủ 11 cầu thủ ({filled}/11)" },
+  "builder.toast.loginFirst": { en: "Please login", vi: "Vui lòng đăng nhập" },
+  "builder.toast.saveError": { en: "Cannot save squad", vi: "Không thể lưu đội hình" },
+  "builder.toast.saveSuccess": { en: "Squad saved!", vi: "Đã lưu đội hình!" },
+
+  // My Squads
+  "mySquads.title": { en: "My Squads", vi: "Đội hình của tôi" },
+  "mySquads.subtitle": { en: "Manage your created squads", vi: "Quản lý các đội hình bạn đã tạo" },
+  "mySquads.createNew": { en: "Create new squad", vi: "Tạo đội hình mới" },
+  "mySquads.formation": { en: "Formation:", vi: "Sơ đồ:" },
+  "mySquads.playstyle": { en: "Playstyle:", vi: "Lối chơi:" },
+  "mySquads.edit": { en: "Edit", vi: "Chỉnh sửa" },
+  "mySquads.empty.title": { en: "No squads yet", vi: "Chưa có đội hình nào" },
+  "mySquads.empty.subtitle": { en: "Start building your first squad", vi: "Bắt đầu xây dựng đội hình đầu tiên của bạn" },
+  "mySquads.empty.createButton": { en: "Create squad", vi: "Tạo đội hình" },
+  "mySquads.toast.loadError": { en: "Cannot load squads", vi: "Không thể tải đội hình" },
+  "mySquads.toast.deleteSuccess": { en: "Squad deleted", vi: "Đã xóa đội hình" },
+  "mySquads.toast.deleteError": { en: "Cannot delete squad", vi: "Không thể xóa đội hình" },
+
   // Admin dashboard
   "admin.dashboard.toast.error": { en: "Failed to load statistics", vi: "Không thể tải thống kê" },
   "admin.dashboard.title": { en: "Dashboard", vi: "Dashboard" },
@@ -123,6 +211,13 @@ const STATIC_DICTIONARY: LocalizationDictionary = {
   "admin.dashboard.recentActivity.systemStatus.subtitle": { en: "All services are online", vi: "Tất cả dịch vụ đang online" },
   "admin.dashboard.recentActivity.databaseUpdated.title": { en: "Database updated", vi: "Database đã được cập nhật" },
   "admin.dashboard.recentActivity.databaseUpdated.subtitle": { en: "Latest player data", vi: "Dữ liệu cầu thủ mới nhất" },
+
+  // AI Assistant
+  "ai.title": { en: "AI FC Tactics Assistant", vi: "AI Trợ lý FC Tactics" },
+  "ai.subtitle": { en: "Search & analyze players", vi: "Tìm kiếm & phân tích cầu thủ" },
+  "ai.placeholder": { en: "Ask about players, tactics, squads...", vi: "Hỏi về cầu thủ, chiến thuật, đội hình..." },
+  "ai.searching": { en: "Searching...", vi: "Đang tìm kiếm..." },
+  "ai.greeting": { en: "Hello! I'm Boped FC Tactics AI assistant. I can help you find players, suggest squads, or answer questions about FC Mobile. How can I help?", vi: "Xin chào! Tôi là trợ lý AI của Boped FC Tactics. Tôi có thể giúp bạn tìm cầu thủ, tư vấn đội hình, hoặc trả lời các câu hỏi về FC Mobile. Bạn cần giúp gì?" },
 };
 
 const FALLBACK_LOCALE = "vi"; // Default to Vietnamese
@@ -183,11 +278,6 @@ export function useLocalization() {
     console.log(`🌐 Changing locale from ${locale} to ${newLocale}`);
     setLocale(newLocale);
     localStorage.setItem("locale", newLocale);
-    
-    // Force page reload để apply ngôn ngữ mới cho toàn bộ app
-    setTimeout(() => {
-      window.location.reload();
-    }, 100);
   };
 
   // Load saved locale from localStorage
