@@ -182,13 +182,13 @@ const PlayerSearchBar = () => {
 
         {/* Results dropdown */}
         {isOpen && players.length > 0 && (
-          <div className="absolute top-full mt-4 w-full z-50">
-            <div className="rounded-2xl border-2 border-primary/20 shadow-2xl bg-card/95 backdrop-blur-sm p-4">
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          <div className="absolute top-full mt-4 w-full z-50 max-h-[70vh] overflow-y-auto">
+            <div className="rounded-2xl border-2 border-primary/20 shadow-2xl bg-card/95 backdrop-blur-sm p-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {players.map((player) => (
                   <div 
                     key={player.assetId}
-                    className="cursor-pointer hover:scale-105 transition-transform"
+                    className="cursor-pointer hover:scale-105 transition-transform w-full"
                     onClick={() => handlePlayerClick(player.assetId)}
                   >
                     <PlayerCard player={player} />
@@ -196,7 +196,7 @@ const PlayerSearchBar = () => {
                 ))}
               </div>
               {players.length === 8 && (
-                <div className="mt-4 pt-4 text-center text-sm text-muted-foreground border-t border-border/50">
+                <div className="mt-6 pt-4 text-center text-sm text-muted-foreground border-t border-border/50">
                   Hiển thị 8 kết quả đầu tiên
                 </div>
               )}
