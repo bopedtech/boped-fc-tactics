@@ -3,7 +3,7 @@ import { FilterState } from "@/components/PlayerFilters";
 
 export const usePlayerFilters = (initialPosition?: string) => {
   const [filters, setFilters] = useState<FilterState>({
-    ratingRange: [0, 125],
+    ratingRange: [40, 125],
     positionFilter: initialPosition || "all",
     positions: [],
     positionType: "all",
@@ -11,8 +11,8 @@ export const usePlayerFilters = (initialPosition?: string) => {
     clubs: [],
     nations: [],
     programs: [],
-    heightRange: [0, 250],
-    weightRange: [0, 150],
+    heightRange: [150, 210],
+    weightRange: [50, 110],
     skillMovesLevel: 0,
     weakFoot: 0,
     strongFoot: "all",
@@ -23,7 +23,7 @@ export const usePlayerFilters = (initialPosition?: string) => {
 
   const resetFilters = () => {
     setFilters({
-      ratingRange: [0, 125],
+      ratingRange: [40, 125],
       positionFilter: initialPosition || "all",
       positions: [],
       positionType: "all",
@@ -31,8 +31,8 @@ export const usePlayerFilters = (initialPosition?: string) => {
       clubs: [],
       nations: [],
       programs: [],
-      heightRange: [0, 250],
-      weightRange: [0, 150],
+      heightRange: [150, 210],
+      weightRange: [50, 110],
       skillMovesLevel: 0,
       weakFoot: 0,
       strongFoot: "all",
@@ -46,7 +46,7 @@ export const usePlayerFilters = (initialPosition?: string) => {
     let filtered = [...players];
 
     // Rating filter
-    if (filters.ratingRange[0] > 0 || filters.ratingRange[1] < 125) {
+    if (filters.ratingRange[0] > 40 || filters.ratingRange[1] < 125) {
       filtered = filtered.filter(p =>
         p.rating >= filters.ratingRange[0] && p.rating <= filters.ratingRange[1]
       );
@@ -99,7 +99,7 @@ export const usePlayerFilters = (initialPosition?: string) => {
     }
 
     // Height filter
-    if (filters.heightRange[0] > 0 || filters.heightRange[1] < 250) {
+    if (filters.heightRange[0] > 150 || filters.heightRange[1] < 210) {
       filtered = filtered.filter(p => {
         const height = p.height || 0;
         return height >= filters.heightRange[0] && height <= filters.heightRange[1];
@@ -107,7 +107,7 @@ export const usePlayerFilters = (initialPosition?: string) => {
     }
 
     // Weight filter
-    if (filters.weightRange[0] > 0 || filters.weightRange[1] < 150) {
+    if (filters.weightRange[0] > 50 || filters.weightRange[1] < 110) {
       filtered = filtered.filter(p => {
         const weight = p.weight || 0;
         return weight >= filters.weightRange[0] && weight <= filters.weightRange[1];
