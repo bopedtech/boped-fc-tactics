@@ -38,36 +38,6 @@ interface PlayerFiltersProps {
 
 const positions = ["GK", "LB", "LWB", "CB", "RB", "RWB", "CDM", "CM", "CAM", "LM", "RM", "LW", "RW", "CF", "ST"];
 
-const positionNames: Record<string, string> = {
-  "GK": "Thủ môn",
-  "LB": "Hậu vệ trái",
-  "LWB": "Tiền vệ cánh trái",
-  "CB": "Trung vệ",
-  "RB": "Hậu vệ phải",
-  "RWB": "Tiền vệ cánh phải",
-  "CDM": "Tiền vệ phòng ngự",
-  "CM": "Tiền vệ trung tâm",
-  "CAM": "Tiền vệ tấn công",
-  "LM": "Tiền vệ trái",
-  "RM": "Tiền vệ phải",
-  "LW": "Tiền đạo cánh trái",
-  "RW": "Tiền đạo cánh phải",
-  "CF": "Tiền đạo ảo",
-  "ST": "Tiền đạo"
-};
-
-const workRateNames: Record<number, string> = {
-  0: "Tất cả",
-  1: "Thấp",
-  2: "Trung bình",
-  3: "Cao"
-};
-
-const footNames: Record<string, string> = {
-  "all": "Tất cả",
-  "1": "Chân phải",
-  "2": "Chân trái"
-};
 
 export default function PlayerFilters({ filters, onFilterChange, onReset }: PlayerFiltersProps) {
   const { t } = useT();
@@ -286,7 +256,7 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
                         }}
                       />
                       <label htmlFor={`pos-${pos}`} className="text-xs cursor-pointer">
-                        {positionNames[pos]} ({pos})
+                        {t(`filters.positions.${pos}`, pos)} ({pos})
                       </label>
                     </div>
                   ))}
@@ -459,12 +429,12 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
         {/* Traits Filter */}
         <Collapsible open={openSections.traits} onOpenChange={() => toggleSection('traits')}>
           <CollapsibleTrigger className="flex items-center justify-between w-full py-2.5 px-3 hover:bg-muted/50 rounded-md transition-colors">
-            <span className="font-medium text-sm">Đặc điểm</span>
+            <span className="font-medium text-sm">{t("filters.traits", "Traits")}</span>
             {openSections.traits ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </CollapsibleTrigger>
           <CollapsibleContent className="px-3 py-2 space-y-2">
             <Input
-              placeholder="Tìm đặc điểm..."
+              placeholder={t("filters.searchTraits", "Search traits...")}
               value={traitSearch}
               onChange={(e) => setTraitSearch(e.target.value)}
               className="h-8 text-xs"
@@ -496,7 +466,7 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
         {/* Height */}
         <Collapsible open={openSections.height} onOpenChange={() => toggleSection('height')}>
           <CollapsibleTrigger className="flex items-center justify-between w-full py-2.5 px-3 hover:bg-muted/50 rounded-md transition-colors">
-            <span className="font-medium text-sm">Chiều cao</span>
+            <span className="font-medium text-sm">{t("filters.height", "Height")}</span>
             {openSections.height ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </CollapsibleTrigger>
           <CollapsibleContent className="px-3 py-3 space-y-3">
@@ -518,7 +488,7 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
         {/* Weight */}
         <Collapsible open={openSections.weight} onOpenChange={() => toggleSection('weight')}>
           <CollapsibleTrigger className="flex items-center justify-between w-full py-2.5 px-3 hover:bg-muted/50 rounded-md transition-colors">
-            <span className="font-medium text-sm">Cân nặng</span>
+            <span className="font-medium text-sm">{t("filters.weight", "Weight")}</span>
             {openSections.weight ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </CollapsibleTrigger>
           <CollapsibleContent className="px-3 py-3 space-y-3">
@@ -540,7 +510,7 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
         {/* Skill Moves Level */}
         <Collapsible open={openSections.skillMoves} onOpenChange={() => toggleSection('skillMoves')}>
           <CollapsibleTrigger className="flex items-center justify-between w-full py-2.5 px-3 hover:bg-muted/50 rounded-md transition-colors">
-            <span className="font-medium text-sm">Kỹ năng rê bóng</span>
+            <span className="font-medium text-sm">{t("filters.skillMoves", "Skill Moves")}</span>
             {openSections.skillMoves ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </CollapsibleTrigger>
           <CollapsibleContent className="px-3 py-2">
@@ -549,10 +519,10 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-popover z-50">
-                <SelectItem value="0">Tất cả</SelectItem>
+                <SelectItem value="0">{t("filters.all", "All")}</SelectItem>
                 {[1, 2, 3, 4, 5].map((level) => (
                   <SelectItem key={level} value={level.toString()}>
-                    {level} sao trở lên
+                    {level} {t("filters.starsAndAbove", "stars and above")}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -563,7 +533,7 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
         {/* Weak Foot */}
         <Collapsible open={openSections.weakFoot} onOpenChange={() => toggleSection('weakFoot')}>
           <CollapsibleTrigger className="flex items-center justify-between w-full py-2.5 px-3 hover:bg-muted/50 rounded-md transition-colors">
-            <span className="font-medium text-sm">Chân thuận</span>
+            <span className="font-medium text-sm">{t("filters.weakFoot", "Weak Foot")}</span>
             {openSections.weakFoot ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </CollapsibleTrigger>
           <CollapsibleContent className="px-3 py-2">
@@ -572,10 +542,10 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-popover z-50">
-                <SelectItem value="0">Tất cả</SelectItem>
+                <SelectItem value="0">{t("filters.all", "All")}</SelectItem>
                 {[1, 2, 3, 4, 5].map((stars) => (
                   <SelectItem key={stars} value={stars.toString()}>
-                    {stars} sao trở lên
+                    {stars} {t("filters.starsAndAbove", "stars and above")}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -586,7 +556,7 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
         {/* Strong Foot */}
         <Collapsible open={openSections.strongFoot} onOpenChange={() => toggleSection('strongFoot')}>
           <CollapsibleTrigger className="flex items-center justify-between w-full py-2.5 px-3 hover:bg-muted/50 rounded-md transition-colors">
-            <span className="font-medium text-sm">Chân mạnh</span>
+            <span className="font-medium text-sm">{t("filters.strongFoot", "Strong Foot")}</span>
             {openSections.strongFoot ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </CollapsibleTrigger>
           <CollapsibleContent className="px-3 py-2">
@@ -595,11 +565,9 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-popover z-50">
-                {Object.entries(footNames).map(([key, name]) => (
-                  <SelectItem key={key} value={key}>
-                    {name}
-                  </SelectItem>
-                ))}
+                <SelectItem value="all">{t("filters.all", "All")}</SelectItem>
+                <SelectItem value="1">{t("filters.rightFoot", "Right Foot")}</SelectItem>
+                <SelectItem value="2">{t("filters.leftFoot", "Left Foot")}</SelectItem>
               </SelectContent>
             </Select>
           </CollapsibleContent>
@@ -608,37 +576,35 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
         {/* Work Rates */}
         <Collapsible open={openSections.workrates} onOpenChange={() => toggleSection('workrates')}>
           <CollapsibleTrigger className="flex items-center justify-between w-full py-2.5 px-3 hover:bg-muted/50 rounded-md transition-colors">
-            <span className="font-medium text-sm">Tốc độ làm việc</span>
+            <span className="font-medium text-sm">{t("filters.workRates", "Work Rates")}</span>
             {openSections.workrates ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </CollapsibleTrigger>
           <CollapsibleContent className="px-3 py-2 space-y-3">
             <div className="space-y-2">
-              <Label className="text-xs">Tấn công</Label>
+              <Label className="text-xs">{t("filters.attacking", "Attacking")}</Label>
               <Select value={filters.workRateAtt.toString()} onValueChange={(val) => updateFilter('workRateAtt', parseInt(val))}>
                 <SelectTrigger className="h-9 text-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-popover z-50">
-                  {Object.entries(workRateNames).map(([key, name]) => (
-                    <SelectItem key={key} value={key}>
-                      {name}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="0">{t("filters.all", "All")}</SelectItem>
+                  <SelectItem value="1">{t("filters.low", "Low")}</SelectItem>
+                  <SelectItem value="2">{t("filters.medium", "Medium")}</SelectItem>
+                  <SelectItem value="3">{t("filters.high", "High")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label className="text-xs">Phòng ngự</Label>
+              <Label className="text-xs">{t("filters.defensive", "Defensive")}</Label>
               <Select value={filters.workRateDef.toString()} onValueChange={(val) => updateFilter('workRateDef', parseInt(val))}>
                 <SelectTrigger className="h-9 text-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-popover z-50">
-                  {Object.entries(workRateNames).map(([key, name]) => (
-                    <SelectItem key={key} value={key}>
-                      {name}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="0">{t("filters.all", "All")}</SelectItem>
+                  <SelectItem value="1">{t("filters.low", "Low")}</SelectItem>
+                  <SelectItem value="2">{t("filters.medium", "Medium")}</SelectItem>
+                  <SelectItem value="3">{t("filters.high", "High")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
