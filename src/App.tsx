@@ -20,6 +20,7 @@ import PlayersManagement from "./pages/admin/PlayersManagement";
 import LeaguesManagement from "./pages/admin/LeaguesManagement";
 import UsersManagement from "./pages/admin/UsersManagement";
 import LogsActivity from "./pages/admin/LogsActivity";
+import ProgramsManagement from "./pages/admin/ProgramsManagement";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,7 @@ const App = () => (
           <Route path="players" element={<PlayersManagement />} />
           <Route path="sync" element={<SyncData />} />
           <Route path="leagues" element={<LeaguesManagement />} />
+          <Route path="programs" element={<ProgramsManagement />} />
           <Route path="users" element={<UsersManagement />} />
           <Route path="logs" element={<LogsActivity />} />
           <Route path="settings" element={<AdminSettings />} />

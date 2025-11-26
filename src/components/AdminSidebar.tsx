@@ -11,6 +11,7 @@ import {
   EyeOff,
   FileText,
   Home,
+  Package,
 } from "lucide-react";
 import {
   Sidebar,
@@ -45,6 +46,11 @@ const menuItems = [
     title: "Giải Đấu & CLB", 
     url: "/admin/leagues", 
     icon: Trophy 
+  },
+  { 
+    title: "Quản Lý Programs", 
+    url: "/admin/programs", 
+    icon: Package 
   },
   { 
     title: "Quản Lý Users", 

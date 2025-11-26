@@ -7,12 +7,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Search, Trash2, Edit, Eye, Loader2, Users, EyeOff } from "lucide-react";
+import { Search, Trash2, Edit, Eye, Loader2, Users, EyeOff, Plus } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import PlayerDetailDialog from "@/components/PlayerDetailDialog";
+import PlayerFormDialog from "@/components/admin/PlayerFormDialog";
 
 export default function PlayersManagement() {
   const [players, setPlayers] = useState<any[]>([]);
@@ -30,6 +31,8 @@ export default function PlayersManagement() {
   const [playerToDelete, setPlayerToDelete] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [updatingVisibility, setUpdatingVisibility] = useState<Set<number>>(new Set());
+  const [formOpen, setFormOpen] = useState(false);
+  const [editingPlayer, setEditingPlayer] = useState<any>(null);
   const playersPerPage = 50;
 
   useEffect(() => {
@@ -208,13 +211,29 @@ export default function PlayersManagement() {
     return player.cardName || player.commonName || `${player.firstName} ${player.lastName}`;
   };
 
+  const handleCreatePlayer = () => {
+    setEditingPlayer(null);
+    setFormOpen(true);
+  };
+
+  const handleEditPlayer = (player: any) => {
+    setEditingPlayer(player);
+    setFormOpen(true);
+  };
+
   return (
     <div className="flex flex-col space-y-4">
-      <div>
-        <h1 className="text-4xl font-bold mb-2">Quản Lý Cầu Thủ</h1>
-        <p className="text-muted-foreground">
-          Quản lý và chỉnh sửa thông tin cầu thủ trong database
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-4xl font-bold mb-2">Quản Lý Cầu Thủ</h1>
+          <p className="text-muted-foreground">
+            Quản lý và chỉnh sửa thông tin cầu thủ trong database
+          </p>
+        </div>
+        <Button onClick={handleCreatePlayer}>
+          <Plus className="h-4 w-4 mr-2" />
+          Tạo Cầu Thủ
+        </Button>
       </div>
 
       {/* Stats Cards */}
@@ -451,6 +470,13 @@ export default function PlayersManagement() {
                               <Button
                                 variant="ghost"
                                 size="icon"
+                                onClick={() => handleEditPlayer(player)}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
                                 onClick={() => {
                                   setPlayerToDelete(player);
                                   setDeleteDialogOpen(true);
@@ -500,6 +526,14 @@ export default function PlayersManagement() {
         assetId={selectedPlayer?.assetId || null}
         open={!!selectedPlayer}
         onOpenChange={(open) => !open && setSelectedPlayer(null)}
+      />
+
+      {/* Player Form Dialog */}
+      <PlayerFormDialog
+        open={formOpen}
+        onOpenChange={setFormOpen}
+        player={editingPlayer}
+        onSuccess={fetchData}
       />
 
       {/* Delete Confirmation */}
