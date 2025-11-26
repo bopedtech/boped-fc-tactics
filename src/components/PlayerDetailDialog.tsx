@@ -9,6 +9,10 @@ import { Loader2, X } from "lucide-react";
 import PlayerCard from "@/components/PlayerCard";
 import { FootIcon } from "@/components/FootIcon";
 import { useT } from "@/contexts/LocalizationContext";
+import { useUserTierContext } from "@/contexts/UserTierContext";
+import { usePlayerMerchandise } from "@/hooks/usePlayerMerchandise";
+import { BannerAd } from "@/components/ads/BannerAd";
+import { AffiliateLink } from "@/components/ads/AffiliateLink";
 
 interface PlayerStats {
   pace?: number;
@@ -134,7 +138,8 @@ interface PlayerDetailDialogProps {
 }
 
 export default function PlayerDetailDialog({ assetId, open, onOpenChange }: PlayerDetailDialogProps) {
-  const { t } = useT();
+  const { t, locale } = useT();
+  const { tier } = useUserTierContext();
   const [player, setPlayer] = useState<Player | null>(null);
   const [loading, setLoading] = useState(false);
   const [nationInfo, setNationInfo] = useState<{ displayName: string; image?: string } | null>(null);
@@ -143,6 +148,12 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
   const [traitsData, setTraitsData] = useState<Array<{ name: string; image: string; category: string }>>([]);
   const [skillMoveInfo, setSkillMoveInfo] = useState<{ displayName: string; image?: string } | null>(null);
   const [celebrationInfo, setCelebrationInfo] = useState<{ displayName: string; image?: string } | null>(null);
+  
+  // Fetch merchandise for this player (FREE tier only)
+  const { merchandise } = usePlayerMerchandise(
+    tier === 'FREE' ? player?.playerId || null : null,
+    locale
+  );
 
   useEffect(() => {
     if (open && assetId) {
@@ -349,10 +360,20 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-4">
               {/* Left: Player Card */}
-              <div className="lg:col-span-1">
+              <div className="lg:col-span-1 space-y-4">
                 <div className="max-w-[280px] mx-auto">
                   <PlayerCard player={player as any} />
                 </div>
+                
+                {/* Banner Ad below player card - FREE tier only */}
+                {tier === 'FREE' && (
+                  <div className="flex justify-center">
+                    <BannerAd 
+                      adUnitId={`banner-player-${player.assetId}`}
+                      size="300x250"
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Right: Detailed Stats */}
@@ -653,6 +674,22 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
                       </div>
                     </TabsContent>
                   </Tabs>
+                  
+                  {/* Affiliate Links - FREE tier only */}
+                  {tier === 'FREE' && merchandise.length > 0 && (
+                    <div className="mt-6 pt-6 border-t space-y-3">
+                      <h3 className="text-sm font-semibold text-muted-foreground uppercase">
+                        {t("player.detail.relatedProducts", "Sản phẩm liên quan")}
+                      </h3>
+                      {merchandise.map((item) => (
+                        <AffiliateLink
+                          key={item.id}
+                          productDescription={item.productDescription}
+                          affiliateUrl={item.affiliateUrl}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </Card>
               </div>
             </div>
