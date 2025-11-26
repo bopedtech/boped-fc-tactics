@@ -370,21 +370,21 @@ const STATIC_DICTIONARY: LocalizationDictionary = {
   "filters.program.search": { en: "Search program...", vi: "Tìm chương trình..." },
   "filters.height": { en: "Height", vi: "Chiều cao" },
   "filters.weight": { en: "Weight", vi: "Cân nặng" },
-  "filters.skillMoves": { en: "Skill Moves", vi: "Kỹ năng" },
+  "filters.skillMoves": { en: "Skill Moves", vi: "Kỹ năng rê bóng" },
   "filters.weakFoot": { en: "Weak Foot", vi: "Chân yếu" },
   "filters.strongFoot": { en: "Strong Foot", vi: "Chân thuận" },
-  "filters.strongFoot.all": { en: "All", vi: "Tất cả" },
-  "filters.strongFoot.right": { en: "Right", vi: "Chân phải" },
-  "filters.strongFoot.left": { en: "Left", vi: "Chân trái" },
+  "filters.all": { en: "All", vi: "Tất cả" },
+  "filters.starsAndAbove": { en: "stars and above", vi: "sao trở lên" },
+  "filters.rightFoot": { en: "Right Foot", vi: "Chân phải" },
+  "filters.leftFoot": { en: "Left Foot", vi: "Chân trái" },
   "filters.workRates": { en: "Work Rates", vi: "Tốc độ làm việc" },
-  "filters.workRates.attack": { en: "Attack", vi: "Tấn công" },
-  "filters.workRates.defense": { en: "Defense", vi: "Phòng thủ" },
-  "filters.workRates.all": { en: "All", vi: "Tất cả" },
-  "filters.workRates.low": { en: "Low", vi: "Thấp" },
-  "filters.workRates.medium": { en: "Medium", vi: "Trung bình" },
-  "filters.workRates.high": { en: "High", vi: "Cao" },
+  "filters.attacking": { en: "Attacking", vi: "Tấn công" },
+  "filters.defensive": { en: "Defensive", vi: "Phòng thủ" },
+  "filters.low": { en: "Low", vi: "Thấp" },
+  "filters.medium": { en: "Medium", vi: "Trung bình" },
+  "filters.high": { en: "High", vi: "Cao" },
   "filters.traits": { en: "Traits", vi: "Đặc điểm" },
-  "filters.traits.search": { en: "Search trait...", vi: "Tìm đặc điểm..." },
+  "filters.searchTraits": { en: "Search traits...", vi: "Tìm đặc điểm..." },
 
   // Old AI Advisor keys (keeping non-duplicates)
   "aiAdvisor.subtitle": { en: "Smart Manager Mode setup suggestions for FC Mobile", vi: "Gợi ý thiết lập Manager Mode FC Mobile thông minh cho đội hình của bạn" },
@@ -578,6 +578,11 @@ const STATIC_DICTIONARY: LocalizationDictionary = {
   "admin.logs.system.online": { en: "Online", vi: "Online" },
   "admin.logs.toast.loadError": { en: "Cannot load data", vi: "Không thể tải dữ liệu" },
   
+  // News Section (Homepage)
+  "newsSection.title": { en: "FC Mobile News", vi: "Bảng tin FC Mobile" },
+  "newsSection.subtitle": { en: "Latest news and updates", vi: "Tin tức và cập nhật mới nhất" },
+  "newsSection.viewAll": { en: "View all", vi: "Xem tất cả" },
+  
   // News Section Items
   "news.item1.title": { en: "New AI Squad Builder Feature", vi: "Ra mắt tính năng AI Squad Builder mới" },
   "news.item1.description": { en: "Discover AI technology that helps you build the perfect squad in seconds", vi: "Khám phá công nghệ AI giúp bạn xây dựng đội hình hoàn hảo trong vài giây" },
@@ -608,18 +613,6 @@ const STATIC_DICTIONARY: LocalizationDictionary = {
   "filters.positions.RW": { en: "Right Winger", vi: "Tiền đạo cánh phải" },
   "filters.positions.CF": { en: "Center Forward", vi: "Tiền đạo ảo" },
   "filters.positions.ST": { en: "Striker", vi: "Tiền đạo" },
-  
-  // Filter Additional Keys
-  "filters.searchTraits": { en: "Search traits...", vi: "Tìm đặc điểm..." },
-  "filters.all": { en: "All", vi: "Tất cả" },
-  "filters.low": { en: "Low", vi: "Thấp" },
-  "filters.medium": { en: "Medium", vi: "Trung bình" },
-  "filters.high": { en: "High", vi: "Cao" },
-  "filters.rightFoot": { en: "Right Foot", vi: "Chân phải" },
-  "filters.leftFoot": { en: "Left Foot", vi: "Chân trái" },
-  "filters.starsAndAbove": { en: "stars and above", vi: "sao trở lên" },
-  "filters.attacking": { en: "Attacking", vi: "Tấn công" },
-  "filters.defensive": { en: "Defensive", vi: "Phòng ngự" },
 };
 
 const FALLBACK_LOCALE = "vi"; // Default to Vietnamese
