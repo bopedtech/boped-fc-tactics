@@ -102,15 +102,15 @@ export default function Database() {
   useEffect(() => {
     const hasSearch = searchName.trim().length > 0;
     const hasFilters = 
-      filters.ratingRange[0] > 0 || filters.ratingRange[1] < 125 ||
+      filters.ratingRange[0] > 40 || filters.ratingRange[1] < 125 ||
       filters.positionFilter !== "all" ||
       filters.positions.length > 0 ||
       filters.leagues.length > 0 ||
       filters.clubs.length > 0 ||
       filters.nations.length > 0 ||
       filters.programs.length > 0 ||
-      filters.heightRange[0] > 0 || filters.heightRange[1] < 250 ||
-      filters.weightRange[0] > 0 || filters.weightRange[1] < 150 ||
+      filters.heightRange[0] > 150 || filters.heightRange[1] < 210 ||
+      filters.weightRange[0] > 50 || filters.weightRange[1] < 110 ||
       filters.skillMovesLevel > 0 ||
       filters.weakFoot > 0 ||
       filters.strongFoot !== "all" ||
@@ -210,14 +210,10 @@ export default function Database() {
       query = query.or(`commonName.ilike.%${searchName}%,cardName.ilike.%${searchName}%,firstName.ilike.%${searchName}%,lastName.ilike.%${searchName}%`);
     }
 
-    // Apply rating filter
-    if (filters.ratingRange[0] > 0 || filters.ratingRange[1] < 125) {
-      if (filters.ratingRange[0] > 0) {
-        query = query.gte("rating", filters.ratingRange[0]);
-      }
-      if (filters.ratingRange[1] < 125) {
-        query = query.lte("rating", filters.ratingRange[1]);
-      }
+    // Apply rating filter at database level
+    if (filters.ratingRange[0] > 40 || filters.ratingRange[1] < 125) {
+      query = query.gte("rating", filters.ratingRange[0]);
+      query = query.lte("rating", filters.ratingRange[1]);
     }
 
     // Note: Position filter will be applied client-side because potentialPositions is JSONB
@@ -256,14 +252,22 @@ export default function Database() {
 
     if (error) throw error;
 
-    // Apply client-side filters (especially for positions with potentialPositions)
+    // Apply client-side filters for complex JSONB fields and filters that can't be done at DB level
     let filteredPlayers = data || [];
-    if (filters.positions.length > 0 || filters.programs.length > 0 || 
-        filters.traits.length > 0 || filters.skillMovesLevel > 0 || 
-        filters.weakFoot > 0 || filters.strongFoot !== "all" ||
-        filters.workRateAtt > 0 || filters.workRateDef > 0 ||
-        filters.heightRange[0] > 0 || filters.heightRange[1] < 250 ||
-        filters.weightRange[0] > 0 || filters.weightRange[1] < 150) {
+    const needsClientSideFiltering = 
+      filters.positions.length > 0 || 
+      filters.traits.length > 0 || 
+      filters.skillMovesLevel > 0 || 
+      filters.weakFoot > 0 || 
+      filters.strongFoot !== "all" ||
+      filters.workRateAtt > 0 || 
+      filters.workRateDef > 0 ||
+      filters.heightRange[0] > 150 || 
+      filters.heightRange[1] < 210 ||
+      filters.weightRange[0] > 50 || 
+      filters.weightRange[1] < 110;
+    
+    if (needsClientSideFiltering) {
       filteredPlayers = applyFiltersToQuery(filteredPlayers);
     }
 
