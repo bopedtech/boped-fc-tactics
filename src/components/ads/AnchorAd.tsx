@@ -17,7 +17,7 @@ export const AnchorAd = ({ adUnitId }: AnchorAdProps) => {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-t shadow-lg">
+    <div className="fixed bottom-0 left-0 z-40 bg-background/95 backdrop-blur-md border-t shadow-lg" style={{ right: '100px' }}>
       <div className="relative mx-auto max-w-screen-xl px-4 py-2">
         <div className="flex items-center justify-between gap-4">
           <Badge variant="outline" className="text-xs shrink-0">
