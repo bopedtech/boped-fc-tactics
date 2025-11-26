@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, Fragment } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
@@ -14,6 +14,9 @@ import PlayerFilters from "@/components/PlayerFilters";
 import { usePlayerFilters } from "@/hooks/usePlayerFilters";
 import PlayerDetailDialog from "@/components/PlayerDetailDialog";
 import { useT } from "@/contexts/LocalizationContext";
+import { useUserTierContext } from "@/contexts/UserTierContext";
+import { NativeAdCard } from "@/components/ads/NativeAdCard";
+import { AnchorAd } from "@/components/ads/AnchorAd";
 
 interface PlayerStats {
   pace?: number;
@@ -72,6 +75,7 @@ const PAGE_SIZE = 20;
 
 export default function Database() {
   const { t } = useT();
+  const { tier } = useUserTierContext();
   const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
   const [searchName, setSearchName] = useState("");
@@ -448,13 +452,22 @@ export default function Database() {
             ) : (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {allPlayers.map((player) => (
-                    <div key={player.assetId} className="max-w-[280px] mx-auto">
-                      <PlayerCard 
-                        player={player as any} 
-                        onClick={() => handlePlayerClick(player.assetId)}
-                      />
-                    </div>
+                  {allPlayers.map((player, index) => (
+                    <Fragment key={player.assetId}>
+                      <div className="max-w-[280px] mx-auto">
+                        <PlayerCard 
+                          player={player as any} 
+                          onClick={() => handlePlayerClick(player.assetId)}
+                        />
+                      </div>
+                      
+                      {/* Insert Native Ad every 15 players for FREE tier */}
+                      {tier === 'FREE' && (index + 1) % 15 === 0 && (
+                        <div className="max-w-[280px] mx-auto">
+                          <NativeAdCard adUnitId={`native-ad-database-${Math.floor(index / 15)}`} />
+                        </div>
+                      )}
+                    </Fragment>
                   ))}
                 </div>
                 
@@ -490,6 +503,9 @@ export default function Database() {
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
       />
+      
+      {/* Anchor Ad for FREE tier users */}
+      {tier === 'FREE' && <AnchorAd adUnitId="anchor-ad-database" />}
     </div>
   );
 }

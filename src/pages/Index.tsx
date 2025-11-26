@@ -13,9 +13,12 @@ import { Database, Users, Zap, TrendingUp, Shield, Gift } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useT } from "@/contexts/LocalizationContext";
+import { useUserTierContext } from "@/contexts/UserTierContext";
+import { AnchorAd } from "@/components/ads/AnchorAd";
 
 const Index = () => {
   const { t } = useT();
+  const { tier } = useUserTierContext();
   const [latestPlayers, setLatestPlayers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPlayerAssetId, setSelectedPlayerAssetId] = useState<number | null>(null);
@@ -156,6 +159,9 @@ const Index = () => {
 
       {/* AI Assistant Bubble */}
       <AIAssistantBubble />
+
+      {/* Anchor Ad for FREE tier users */}
+      {tier === 'FREE' && <AnchorAd adUnitId="anchor-ad-home" />}
 
       {/* Footer */}
       <Footer />

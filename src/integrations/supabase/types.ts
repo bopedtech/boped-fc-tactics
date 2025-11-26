@@ -161,6 +161,36 @@ export type Database = {
         }
         Relationships: []
       }
+      player_merchandise: {
+        Row: {
+          affiliateUrl: string
+          createdAt: string | null
+          id: number
+          isActive: boolean | null
+          playerId: number
+          productDescription: string
+          productDescriptionVi: string | null
+        }
+        Insert: {
+          affiliateUrl: string
+          createdAt?: string | null
+          id?: number
+          isActive?: boolean | null
+          playerId: number
+          productDescription: string
+          productDescriptionVi?: string | null
+        }
+        Update: {
+          affiliateUrl?: string
+          createdAt?: string | null
+          id?: number
+          isActive?: boolean | null
+          playerId?: number
+          productDescription?: string
+          productDescriptionVi?: string | null
+        }
+        Relationships: []
+      }
       players: {
         Row: {
           added: string | null
@@ -326,6 +356,7 @@ export type Database = {
       profiles: {
         Row: {
           age: number | null
+          aiPromptLimitDaily: number | null
           avatar_url: string | null
           bio: string | null
           created_at: string | null
@@ -335,11 +366,14 @@ export type Database = {
           fc_mobile_experience: string | null
           full_name: string | null
           id: string
+          subscriptionExpiresAt: string | null
+          subscriptionTier: string | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
           age?: number | null
+          aiPromptLimitDaily?: number | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string | null
@@ -349,11 +383,14 @@ export type Database = {
           fc_mobile_experience?: string | null
           full_name?: string | null
           id?: string
+          subscriptionExpiresAt?: string | null
+          subscriptionTier?: string | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
           age?: number | null
+          aiPromptLimitDaily?: number | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string | null
@@ -363,6 +400,8 @@ export type Database = {
           fc_mobile_experience?: string | null
           full_name?: string | null
           id?: string
+          subscriptionExpiresAt?: string | null
+          subscriptionTier?: string | null
           updated_at?: string | null
           user_id?: string
         }
