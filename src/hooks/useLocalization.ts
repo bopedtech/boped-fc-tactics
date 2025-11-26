@@ -577,6 +577,49 @@ const STATIC_DICTIONARY: LocalizationDictionary = {
   "admin.logs.system.functions.description": { en: "Serverless Backend", vi: "Serverless Backend" },
   "admin.logs.system.online": { en: "Online", vi: "Online" },
   "admin.logs.toast.loadError": { en: "Cannot load data", vi: "Không thể tải dữ liệu" },
+  
+  // News Section Items
+  "news.item1.title": { en: "New AI Squad Builder Feature", vi: "Ra mắt tính năng AI Squad Builder mới" },
+  "news.item1.description": { en: "Discover AI technology that helps you build the perfect squad in seconds", vi: "Khám phá công nghệ AI giúp bạn xây dựng đội hình hoàn hảo trong vài giây" },
+  "news.item1.category": { en: "New Feature", vi: "Tính năng mới" },
+  "news.item2.title": { en: "Player Database Update for New Season", vi: "Cập nhật dữ liệu cầu thủ mùa giải mới" },
+  "news.item2.description": { en: "Database updated with over 10,000 players from the current season", vi: "Database đã được cập nhật với hơn 10,000 cầu thủ từ mùa giải hiện tại" },
+  "news.item2.category": { en: "Update", vi: "Cập nhật" },
+  "news.item3.title": { en: "Top 10 Notable Players in January", vi: "Top 10 cầu thủ đáng chú ý tháng 1" },
+  "news.item3.description": { en: "List of players with the highest performance in the past month", vi: "Danh sách những cầu thủ có phong độ cao nhất trong tháng vừa qua" },
+  "news.item3.category": { en: "News", vi: "Tin tức" },
+  "news.item4.title": { en: "Squad Optimization Guide", vi: "Hướng dẫn tối ưu hóa đội hình" },
+  "news.item4.description": { en: "Tips and tactics to make your squad stronger", vi: "Những mẹo và chiến thuật giúp đội hình của bạn mạnh hơn" },
+  "news.item4.category": { en: "Guide", vi: "Hướng dẫn" },
+  
+  // Filter Positions
+  "filters.positions.GK": { en: "Goalkeeper", vi: "Thủ môn" },
+  "filters.positions.LB": { en: "Left Back", vi: "Hậu vệ trái" },
+  "filters.positions.LWB": { en: "Left Wing Back", vi: "Tiền vệ cánh trái" },
+  "filters.positions.CB": { en: "Center Back", vi: "Trung vệ" },
+  "filters.positions.RB": { en: "Right Back", vi: "Hậu vệ phải" },
+  "filters.positions.RWB": { en: "Right Wing Back", vi: "Tiền vệ cánh phải" },
+  "filters.positions.CDM": { en: "Defensive Midfielder", vi: "Tiền vệ phòng ngự" },
+  "filters.positions.CM": { en: "Center Midfielder", vi: "Tiền vệ trung tâm" },
+  "filters.positions.CAM": { en: "Attacking Midfielder", vi: "Tiền vệ tấn công" },
+  "filters.positions.LM": { en: "Left Midfielder", vi: "Tiền vệ trái" },
+  "filters.positions.RM": { en: "Right Midfielder", vi: "Tiền vệ phải" },
+  "filters.positions.LW": { en: "Left Winger", vi: "Tiền đạo cánh trái" },
+  "filters.positions.RW": { en: "Right Winger", vi: "Tiền đạo cánh phải" },
+  "filters.positions.CF": { en: "Center Forward", vi: "Tiền đạo ảo" },
+  "filters.positions.ST": { en: "Striker", vi: "Tiền đạo" },
+  
+  // Filter Additional Keys
+  "filters.searchTraits": { en: "Search traits...", vi: "Tìm đặc điểm..." },
+  "filters.all": { en: "All", vi: "Tất cả" },
+  "filters.low": { en: "Low", vi: "Thấp" },
+  "filters.medium": { en: "Medium", vi: "Trung bình" },
+  "filters.high": { en: "High", vi: "Cao" },
+  "filters.rightFoot": { en: "Right Foot", vi: "Chân phải" },
+  "filters.leftFoot": { en: "Left Foot", vi: "Chân trái" },
+  "filters.starsAndAbove": { en: "stars and above", vi: "sao trở lên" },
+  "filters.attacking": { en: "Attacking", vi: "Tấn công" },
+  "filters.defensive": { en: "Defensive", vi: "Phòng ngự" },
 };
 
 const FALLBACK_LOCALE = "vi"; // Default to Vietnamese

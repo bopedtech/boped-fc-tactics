@@ -10,31 +10,43 @@ const NewsSection = () => {
   const news = [
     {
       id: 1,
-      title: "Ra mắt tính năng AI Squad Builder mới",
-      description: "Khám phá công nghệ AI giúp bạn xây dựng đội hình hoàn hảo trong vài giây",
+      titleKey: "news.item1.title",
+      titleFallback: "New AI Squad Builder Feature",
+      descriptionKey: "news.item1.description",
+      descriptionFallback: "Discover AI technology that helps you build the perfect squad in seconds",
       date: "2024-01-15",
-      category: "Tính năng mới",
+      categoryKey: "news.item1.category",
+      categoryFallback: "New Feature",
     },
     {
       id: 2,
-      title: "Cập nhật dữ liệu cầu thủ mùa giải mới",
-      description: "Database đã được cập nhật với hơn 10,000 cầu thủ từ mùa giải hiện tại",
+      titleKey: "news.item2.title",
+      titleFallback: "Player Database Update for New Season",
+      descriptionKey: "news.item2.description",
+      descriptionFallback: "Database updated with over 10,000 players from the current season",
       date: "2024-01-14",
-      category: "Cập nhật",
+      categoryKey: "news.item2.category",
+      categoryFallback: "Update",
     },
     {
       id: 3,
-      title: "Top 10 cầu thủ đáng chú ý tháng 1",
-      description: "Danh sách những cầu thủ có phong độ cao nhất trong tháng vừa qua",
+      titleKey: "news.item3.title",
+      titleFallback: "Top 10 Notable Players in January",
+      descriptionKey: "news.item3.description",
+      descriptionFallback: "List of players with the highest performance in the past month",
       date: "2024-01-13",
-      category: "Tin tức",
+      categoryKey: "news.item3.category",
+      categoryFallback: "News",
     },
     {
       id: 4,
-      title: "Hướng dẫn tối ưu hóa đội hình",
-      description: "Những mẹo và chiến thuật giúp đội hình của bạn mạnh hơn",
+      titleKey: "news.item4.title",
+      titleFallback: "Squad Optimization Guide",
+      descriptionKey: "news.item4.description",
+      descriptionFallback: "Tips and tactics to make your squad stronger",
       date: "2024-01-12",
-      category: "Hướng dẫn",
+      categoryKey: "news.item4.category",
+      categoryFallback: "Guide",
     },
   ];
 
@@ -65,12 +77,12 @@ const NewsSection = () => {
               >
               <div className="mb-3">
                 <span className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
-                  {item.category}
+                  {t(item.categoryKey, item.categoryFallback)}
                 </span>
               </div>
-              <h3 className="font-bold text-lg mb-2 line-clamp-2">{item.title}</h3>
+              <h3 className="font-bold text-lg mb-2 line-clamp-2">{t(item.titleKey, item.titleFallback)}</h3>
               <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
-                {item.description}
+                {t(item.descriptionKey, item.descriptionFallback)}
               </p>
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Calendar className="h-3 w-3" />
