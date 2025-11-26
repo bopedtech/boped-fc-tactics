@@ -33,11 +33,13 @@ export default function PlayersManagement() {
   const [updatingVisibility, setUpdatingVisibility] = useState<Set<number>>(new Set());
   const [formOpen, setFormOpen] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState<any>(null);
+  const [sortBy, setSortBy] = useState("newest");
+  const [totalCount, setTotalCount] = useState(0);
   const playersPerPage = 50;
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [sortBy]);
 
   useEffect(() => {
     filterPlayers();
@@ -47,9 +49,43 @@ export default function PlayersManagement() {
     try {
       setLoading(true);
       
+      // Get total count
+      const { count } = await supabase
+        .from("players")
+        .select("*", { count: "exact", head: true });
+      
+      setTotalCount(count || 0);
+
+      // Build query with sorting
+      let playersQuery = supabase.from("players").select("*");
+      
+      // Apply sorting
+      switch (sortBy) {
+        case "newest":
+          playersQuery = playersQuery.order("createdAt", { ascending: false });
+          break;
+        case "oldest":
+          playersQuery = playersQuery.order("createdAt", { ascending: true });
+          break;
+        case "ovr-high":
+          playersQuery = playersQuery.order("rating", { ascending: false });
+          break;
+        case "ovr-low":
+          playersQuery = playersQuery.order("rating", { ascending: true });
+          break;
+        case "name-az":
+          playersQuery = playersQuery.order("commonName", { ascending: true });
+          break;
+        case "name-za":
+          playersQuery = playersQuery.order("commonName", { ascending: false });
+          break;
+      }
+      
+      playersQuery = playersQuery.limit(500);
+      
       // Fetch all data in parallel
       const [playersRes, nationsRes, clubsRes, programsRes] = await Promise.all([
-        supabase.from("players").select("*").order("rating", { ascending: false }).limit(500),
+        playersQuery,
         supabase.from("nations").select("*"),
         supabase.from("teams").select("*"),
         supabase.from("programs").select("*"),
@@ -237,36 +273,17 @@ export default function PlayersManagement() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Tổng Cầu Thủ</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{players.length.toLocaleString()}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Kết Quả Lọc</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{filteredPlayers.length.toLocaleString()}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Trung Bình Rating</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">
-              {players.length > 0
-                ? (players.reduce((sum, p) => sum + p.rating, 0) / players.length).toFixed(1)
-                : "0"}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-medium">Tổng Cầu Thủ</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-3xl font-bold">{totalCount.toLocaleString()}</div>
+          <p className="text-xs text-muted-foreground mt-1">
+            Đang hiển thị {players.length.toLocaleString()} cầu thủ
+          </p>
+        </CardContent>
+      </Card>
 
       {/* Filters */}
       <Card>
@@ -274,62 +291,80 @@ export default function PlayersManagement() {
           <CardTitle className="text-lg">Bộ Lọc & Tìm Kiếm</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col md:flex-row gap-3">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Tìm kiếm theo tên cầu thủ..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9"
-                />
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-col md:flex-row gap-3">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Tìm kiếm theo tên cầu thủ..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9"
+                  />
+                </div>
               </div>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Sắp xếp" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">Mới nhất</SelectItem>
+                  <SelectItem value="oldest">Cũ nhất</SelectItem>
+                  <SelectItem value="ovr-high">OVR cao → thấp</SelectItem>
+                  <SelectItem value="ovr-low">OVR thấp → cao</SelectItem>
+                  <SelectItem value="name-az">Tên A → Z</SelectItem>
+                  <SelectItem value="name-za">Tên Z → A</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <Select value={positionFilter} onValueChange={setPositionFilter}>
-              <SelectTrigger className="w-[140px]">
-                <SelectValue placeholder="Vị trí" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tất cả vị trí</SelectItem>
-                {positions.map((pos) => (
-                  <SelectItem key={pos} value={pos}>
-                    {pos}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={ratingFilter} onValueChange={setRatingFilter}>
-              <SelectTrigger className="w-[140px]">
-                <SelectValue placeholder="Rating" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tất cả rating</SelectItem>
-                {ratingRanges.map((range) => (
-                  <SelectItem key={range.value} value={range.value}>
-                    {range.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={visibilityFilter} onValueChange={setVisibilityFilter}>
-              <SelectTrigger className="w-[140px]">
-                <SelectValue placeholder="Hiển thị" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tất cả</SelectItem>
-                <SelectItem value="visible">Đang hiện</SelectItem>
-                <SelectItem value="hidden">Đang ẩn</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button variant="outline" onClick={() => {
-              setSearchQuery("");
-              setPositionFilter("all");
-              setRatingFilter("all");
-              setVisibilityFilter("all");
-            }}>
-              Xóa lọc
-            </Button>
+            <div className="flex flex-col md:flex-row gap-3">
+              <Select value={positionFilter} onValueChange={setPositionFilter}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="Vị trí" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tất cả vị trí</SelectItem>
+                  {positions.map((pos) => (
+                    <SelectItem key={pos} value={pos}>
+                      {pos}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={ratingFilter} onValueChange={setRatingFilter}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="Rating" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tất cả rating</SelectItem>
+                  {ratingRanges.map((range) => (
+                    <SelectItem key={range.value} value={range.value}>
+                      {range.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={visibilityFilter} onValueChange={setVisibilityFilter}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="Hiển thị" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tất cả</SelectItem>
+                  <SelectItem value="visible">Đang hiện</SelectItem>
+                  <SelectItem value="hidden">Đang ẩn</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button variant="outline" onClick={() => {
+                setSearchQuery("");
+                setPositionFilter("all");
+                setRatingFilter("all");
+                setVisibilityFilter("all");
+                setSortBy("newest");
+              }}>
+                Xóa lọc
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
