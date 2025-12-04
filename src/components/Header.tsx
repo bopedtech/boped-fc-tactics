@@ -74,7 +74,7 @@ export default function Header() {
         .select("avatar_url")
         .eq("user_id", userId)
         .maybeSingle();
-      
+
       setAvatarUrl(data?.avatar_url || null);
     } catch (error) {
       console.error("Error fetching avatar:", error);
@@ -89,7 +89,7 @@ export default function Header() {
         .eq("user_id", userId)
         .eq("role", "super_admin")
         .maybeSingle();
-      
+
       setIsAdmin(!!data);
     } catch (error) {
       console.error("Error checking admin status:", error);
@@ -135,8 +135,8 @@ export default function Header() {
                         onClick={() => setMobileMenuOpen(false)}
                         className={cn(
                           "text-base transition-colors hover:text-primary px-2 py-2 rounded-md",
-                          isActive(item.path) 
-                            ? "text-primary font-semibold bg-muted" 
+                          isActive(item.path)
+                            ? "text-primary font-semibold bg-muted"
                             : "text-gray-700"
                         )}
                       >
@@ -150,9 +150,9 @@ export default function Header() {
           )}
 
           <Link to="/" className="flex items-center space-x-2">
-            <img 
-              src={logoImage} 
-              alt="BopedFCTactics Logo" 
+            <img
+              src={logoImage}
+              alt="BopedFCTactics Logo"
               className="h-12 w-auto"
             />
           </Link>
@@ -175,7 +175,7 @@ export default function Header() {
 
         <div className="flex items-center gap-2 md:gap-4">
           <LanguageSwitcher />
-          
+
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -196,21 +196,21 @@ export default function Header() {
                   <UserIcon className="mr-2 h-4 w-4" />
                   <span className="truncate">{user.email}</span>
                 </DropdownMenuItem>
-                
+
                 <DropdownMenuSeparator />
-                
-                <DropdownMenuItem 
+
+                <DropdownMenuItem
                   className="cursor-pointer"
                   onClick={() => navigate("/profile")}
                 >
                   <UserIcon className="mr-2 h-4 w-4" />
                   <span>{t("header.user.profile", "Cá nhân")}</span>
                 </DropdownMenuItem>
-                
+
                 {isAdmin && (
                   <>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem 
+                    <DropdownMenuItem
                       className="cursor-pointer text-primary"
                       onClick={() => navigate("/admin")}
                     >
@@ -219,9 +219,9 @@ export default function Header() {
                     </DropdownMenuItem>
                   </>
                 )}
-                
+
                 <DropdownMenuSeparator />
-                
+
                 <DropdownMenuItem
                   className="cursor-pointer"
                   onClick={handleLogout}
@@ -233,7 +233,7 @@ export default function Header() {
             </DropdownMenu>
           ) : (
             <>
-              <Button variant="ghost" asChild>
+              <Button className="gradient-primary" asChild>
                 <Link to="/auth">{t("header.auth.login", "Đăng nhập")}</Link>
               </Button>
               <Button className="gradient-primary" asChild>

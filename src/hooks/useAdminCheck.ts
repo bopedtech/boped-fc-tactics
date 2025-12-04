@@ -18,7 +18,7 @@ export function useAdminCheck() {
 
       // Check if user is logged in
       const { data: { user }, error: userError } = await supabase.auth.getUser();
-      
+
       if (userError || !user) {
         toast.error("Vui lòng đăng nhập để tiếp tục");
         navigate("/auth");

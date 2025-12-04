@@ -62,7 +62,7 @@ export default function Profile() {
   const checkAuth = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       if (!user) {
         toast.error(t("profile.toast.loginRequired"));
         navigate("/auth");
@@ -145,12 +145,12 @@ export default function Profile() {
 
     const file = e.target.files[0];
     const reader = new FileReader();
-    
+
     reader.onload = () => {
       setImageToCrop(reader.result as string);
       setCropDialogOpen(true);
     };
-    
+
     reader.readAsDataURL(file);
     e.target.value = ""; // Reset input
   };
@@ -160,14 +160,14 @@ export default function Profile() {
 
     try {
       setUploading(true);
-      
+
       const fileName = `avatar.jpg`;
       const filePath = `${user.id}/${fileName}`;
 
       // Upload file
       const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(filePath, croppedImageBlob, { 
+        .upload(filePath, croppedImageBlob, {
           upsert: true,
           contentType: 'image/jpeg'
         });
@@ -179,7 +179,7 @@ export default function Profile() {
       const { data: { publicUrl } } = supabase.storage
         .from('avatars')
         .getPublicUrl(filePath);
-      
+
       const finalUrl = `${publicUrl}?t=${timestamp}`;
 
       // Update profile with avatar URL
@@ -195,7 +195,7 @@ export default function Profile() {
 
       setAvatarUrl(finalUrl);
       toast.success(t("profile.toast.avatarUpdated"));
-      
+
       // Trigger event to update avatar in Header
       window.dispatchEvent(new CustomEvent('avatarUpdated', { detail: { avatarUrl: finalUrl } }));
     } catch (error: any) {
@@ -208,7 +208,7 @@ export default function Profile() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!user) return;
 
     try {
@@ -284,7 +284,7 @@ export default function Profile() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
+
       <div className="container mx-auto py-8 max-w-4xl">
         <Tabs defaultValue="profile" className="space-y-6">
           <TabsList className="grid w-full grid-cols-2">

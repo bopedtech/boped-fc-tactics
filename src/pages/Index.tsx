@@ -33,8 +33,7 @@ const Index = () => {
       // Fetch latest 8 players based on createdAt
       const { data: players, error: playersError } = await supabase
         .from("players")
-        .select("*")
-        .eq("is_visible", true)
+        .select("assetId, commonName, cardName, firstName, lastName, rating, position, nation, club, league, images, avgStats, avgGkStats, auctionable, rank, createdAt, source")
         .order("createdAt", { ascending: false })
         .limit(8);
 
@@ -110,7 +109,7 @@ const Index = () => {
       {/* Latest Players */}
       <section className="py-12 border-t border-border/40">
         <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center justify-between mb-8">
             <div>
               <h2 className="text-2xl md:text-3xl font-bold mb-2">{t("index.latestPlayers.title", "Cầu thủ mới nhất")}</h2>
               <p className="text-muted-foreground">{t("index.latestPlayers.subtitle", "Những cầu thủ được cập nhật gần đây")}</p>
@@ -133,7 +132,7 @@ const Index = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {latestPlayers.map((player) => (
                 <div key={player.assetId} className="max-w-[280px] mx-auto">
-                  <PlayerCard 
+                  <PlayerCard
                     player={player}
                     onClick={() => {
                       setSelectedPlayerAssetId(player.assetId);

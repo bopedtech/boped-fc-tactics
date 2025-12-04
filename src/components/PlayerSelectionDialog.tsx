@@ -6,9 +6,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import PlayerFilters from "@/components/PlayerFilters";
+import PlayerCard from "@/components/PlayerCard";
 import { usePlayerFilters } from "@/hooks/usePlayerFilters";
 
 interface Player {
@@ -45,7 +45,7 @@ const positionNames: Record<string, string> = {
   "LB": "Hậu vệ trái",
   "LWB": "Tiền vệ cánh trái",
   "CB": "Trung vệ",
-  "RB": "Hậu vệ phải", 
+  "RB": "Hậu vệ phải",
   "RWB": "Tiền vệ cánh phải",
   "CDM": "Tiền vệ phòng ngự",
   "CM": "Tiền vệ trung tâm",
@@ -60,9 +60,9 @@ const positionNames: Record<string, string> = {
   "RF": "Tiền đạo lệch phải"
 };
 
-export default function PlayerSelectionDialog({ 
-  open, 
-  onClose, 
+export default function PlayerSelectionDialog({
+  open,
+  onClose,
   onSelectPlayer,
   requiredPosition,
   selectedPlayerIds = []
@@ -73,7 +73,7 @@ export default function PlayerSelectionDialog({
   const [loading, setLoading] = useState(false);
   const [selectedRank, setSelectedRank] = useState<number>(1);
   const [selectedTraining, setSelectedTraining] = useState<number>(0);
-  
+
   const { filters, setFilters, resetFilters: resetFilterState, applyFiltersToQuery } = usePlayerFilters(requiredPosition);
 
   useEffect(() => {
@@ -137,13 +137,13 @@ export default function PlayerSelectionDialog({
     setSelectedRank(1);
     setSelectedTraining(0);
   };
-  
+
   const getClubName = (club: any) => {
     if (!club) return "";
     if (typeof club === 'object' && 'name' in club) return club.name as string;
     return "";
   };
-  
+
   const getNationName = (nation: any) => {
     if (!nation) return "";
     if (typeof nation === 'object' && 'name' in nation) return nation.name as string;
@@ -168,8 +168,8 @@ export default function PlayerSelectionDialog({
             <div className="p-4 space-y-1">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-sm">BỘ LỌC</h3>
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   size="sm"
                   onClick={resetFilters}
                   className="h-7 text-xs"
@@ -203,19 +203,17 @@ export default function PlayerSelectionDialog({
                       <button
                         key={rank}
                         onClick={() => setSelectedRank(rank)}
-                        className={`aspect-square rounded-lg border-2 transition-all flex flex-col items-center justify-center p-1 ${
-                          selectedRank === rank 
-                            ? 'border-primary bg-primary/20 scale-105' 
-                            : 'border-muted hover:border-primary/50 bg-card/50'
-                        }`}
+                        className={`aspect-square rounded-lg border-2 transition-all flex flex-col items-center justify-center p-1 ${selectedRank === rank
+                          ? 'border-primary bg-primary/20 scale-105'
+                          : 'border-muted hover:border-primary/50 bg-card/50'
+                          }`}
                       >
-                        <div className={`w-5 h-5 mb-0.5 ${
-                          rank === 1 ? 'bg-green-500' :
+                        <div className={`w-5 h-5 mb-0.5 ${rank === 1 ? 'bg-green-500' :
                           rank === 2 ? 'bg-blue-500' :
-                          rank === 3 ? 'bg-purple-500' :
-                          rank === 4 ? 'bg-red-500' :
-                          'bg-orange-500'
-                        } clip-hexagon`} />
+                            rank === 3 ? 'bg-purple-500' :
+                              rank === 4 ? 'bg-red-500' :
+                                'bg-orange-500'
+                          } clip-hexagon`} />
                         <span className="text-[10px] font-bold">{rank}</span>
                       </button>
                     ))}
@@ -267,138 +265,21 @@ export default function PlayerSelectionDialog({
                     const isAlternativePosition = requiredPosition && player.position !== requiredPosition;
                     const ovrPenalty = isAlternativePosition && selectedRank < 2 ? 2 : isAlternativePosition ? 1 : 0;
                     const displayOvr = player.rating - ovrPenalty;
-                    
+
                     return (
-                      <div
+                      <PlayerCard
                         key={player.assetId}
-                        className={`group bg-card rounded-lg p-4 border transition-all ${
-                          isSelected 
-                            ? 'border-muted-foreground/30 opacity-50 cursor-not-allowed' 
-                            : 'border-border hover:border-primary/50 cursor-pointer hover:shadow-lg hover:shadow-primary/10'
-                        }`}
-                        onClick={() => !isSelected && handleSelectPlayer(player)}
-                      >
-                        <div className="flex items-center gap-4">
-                          {/* OVR and Position - Consistent with PlayerCard */}
-                          <div className="text-center shrink-0">
-                            <div className="flex flex-col items-center">
-                              <div className="text-3xl font-black gradient-primary bg-clip-text text-transparent leading-none">
-                                {displayOvr}
-                                {ovrPenalty > 0 && (
-                                  <span className="text-xs text-destructive ml-1">-{ovrPenalty}</span>
-                                )}
-                              </div>
-                              <div className="text-sm font-black text-foreground mt-1">
-                                {player.position}
-                              </div>
-                              {isAlternativePosition && (
-                                <div className="text-[10px] text-orange-500 font-semibold mt-1">Vị trí phụ</div>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Player Info - Center */}
-                          <div className="flex-1 min-w-0">
-                            {/* Player Name - Bold and prominent */}
-                            <div className={`font-black text-base uppercase truncate transition-colors tracking-wide ${!isSelected && 'group-hover:text-primary'}`}>
-                              {player.commonName}
-                              {isSelected && <span className="ml-2 text-xs text-muted-foreground normal-case">(Đã chọn)</span>}
-                            </div>
-                            
-                            {/* Nation and Club Icons - Below name */}
-                            <div className="flex items-center gap-2 mt-2">
-                              {player.nation?.image && (
-                                <div className="w-8 h-6 rounded overflow-hidden shadow-sm border border-border/50">
-                                  <img 
-                                    src={player.nation.image} 
-                                    alt="Nation"
-                                    className="w-full h-full object-cover"
-                                  />
-                                </div>
-                              )}
-                              {player.club?.image && (
-                                <div className="w-6 h-6 rounded-full overflow-hidden shadow-sm border border-border/50 bg-white/10 p-0.5">
-                                  <img 
-                                    src={player.club.image} 
-                                    alt="Club"
-                                    className="w-full h-full object-contain"
-                                  />
-                                </div>
-                              )}
-                              <div className="text-xs text-muted-foreground truncate flex items-center gap-1.5">
-                                <span>{getClubName(player.club)}</span>
-                                {getClubName(player.club) && getNationName(player.nation) && <span>•</span>}
-                                <span>{getNationName(player.nation)}</span>
-                              </div>
-                            </div>
-                            
-                            {/* Player attributes */}
-                            <div className="flex flex-wrap gap-1 mt-2">
-                              {player.weakFoot && (
-                                <Badge variant="outline" className="text-xs">
-                                  Chân thuận: {player.weakFoot}⭐
-                                </Badge>
-                              )}
-                              {player.skillMovesLevel && (
-                                <Badge variant="outline" className="text-xs">
-                                  Kỹ năng: {player.skillMovesLevel}⭐
-                                </Badge>
-                              )}
-                              {player.height && (
-                                <Badge variant="outline" className="text-xs">
-                                  {player.height}cm
-                                </Badge>
-                              )}
-                            </div>
-
-                            {isAlternativePosition && selectedRank < 2 && (
-                              <div className="text-xs text-orange-500 mt-2 font-medium">
-                                ⚠️ Rank {selectedRank}: OVR giảm {ovrPenalty} • Cần Rank 2+ để mở khóa vị trí phụ
-                              </div>
-                            )}
-                            {isAlternativePosition && selectedRank >= 2 && (
-                              <div className="text-xs text-blue-500 mt-2 font-medium">
-                                ✓ Rank {selectedRank}: OVR giảm {ovrPenalty} khi chơi vị trí phụ
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Stats preview */}
-                          <div className="hidden 2xl:grid grid-cols-3 gap-2 text-xs shrink-0">
-                            {player.position === "GK" ? (
-                              <>
-                                <div className="text-center">
-                                  <div className="text-[10px] text-muted-foreground">PHÁ</div>
-                                  <div className="font-semibold">{player.stats?.gkd || 0}</div>
-                                </div>
-                                <div className="text-center">
-                                  <div className="text-[10px] text-muted-foreground">BẮT</div>
-                                  <div className="font-semibold">{player.stats?.han || 0}</div>
-                                </div>
-                                <div className="text-center">
-                                  <div className="text-[10px] text-muted-foreground">PHẢ</div>
-                                  <div className="font-semibold">{player.stats?.ref || 0}</div>
-                                </div>
-                              </>
-                            ) : (
-                              <>
-                                <div className="text-center">
-                                  <div className="text-[10px] text-muted-foreground">TỐC</div>
-                                  <div className="font-semibold">{player.stats?.spa || player.stats?.pace || 0}</div>
-                                </div>
-                                <div className="text-center">
-                                  <div className="text-[10px] text-muted-foreground">SÚT</div>
-                                  <div className="font-semibold">{player.stats?.sho || player.stats?.shooting || 0}</div>
-                                </div>
-                                <div className="text-center">
-                                  <div className="text-[10px] text-muted-foreground">RÊ</div>
-                                  <div className="font-semibold">{player.stats?.dri || player.stats?.dribbling || 0}</div>
-                                </div>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      </div>
+                        player={player as any}
+                        variant="list"
+                        onClick={() => handleSelectPlayer(player)}
+                        isSelected={isSelected}
+                        isAlternativePosition={isAlternativePosition}
+                        showPenalty={ovrPenalty > 0}
+                        ovrPenalty={ovrPenalty}
+                        displayOvr={displayOvr}
+                        selectedRank={selectedRank}
+                        requiredPosition={requiredPosition}
+                      />
                     );
                   })}
                 </div>

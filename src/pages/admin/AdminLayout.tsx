@@ -43,7 +43,7 @@ export default function AdminLayout() {
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                Trang này chỉ dành cho quản trị viên hệ thống. Nếu bạn cho rằng đây là lỗi, 
+                Trang này chỉ dành cho quản trị viên hệ thống. Nếu bạn cho rằng đây là lỗi,
                 vui lòng liên hệ với quản trị viên.
               </p>
               <Button onClick={() => navigate("/")} className="w-full">
@@ -59,20 +59,20 @@ export default function AdminLayout() {
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="flex w-full min-h-screen overflow-x-hidden">
-          <AdminSidebar />
-          <SidebarInset className="flex-1 flex flex-col min-w-0">
-            <div className="sticky top-0 z-10 flex h-14 items-center border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4">
-              <SidebarTrigger />
-              <div className="ml-4 flex-1">
-                <h2 className="text-lg font-semibold">Quản Trị Hệ Thống</h2>
-              </div>
+        <AdminSidebar />
+        <SidebarInset className="flex-1 flex flex-col min-w-0">
+          <div className="sticky top-0 z-10 flex h-14 items-center border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4">
+            <SidebarTrigger />
+            <div className="ml-4 flex-1">
+              <h2 className="text-lg font-semibold">Quản Trị Hệ Thống</h2>
             </div>
-            
-            <main className="flex-1 p-6 overflow-y-auto overflow-x-hidden">
-              <Outlet />
-            </main>
-          </SidebarInset>
-        </div>
-      </SidebarProvider>
+          </div>
+
+          <main className="flex-1 p-6 overflow-y-auto overflow-x-hidden">
+            <Outlet />
+          </main>
+        </SidebarInset>
+      </div>
+    </SidebarProvider>
   );
 }

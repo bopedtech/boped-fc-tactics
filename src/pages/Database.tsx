@@ -87,7 +87,7 @@ export default function Database() {
   const [selectedPlayerAssetId, setSelectedPlayerAssetId] = useState<number | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const loadMoreRef = useRef<HTMLDivElement>(null);
-  
+
   const { filters, setFilters, resetFilters: resetFilterState, applyFiltersToQuery } = usePlayerFilters();
 
   // Get search query from URL parameter
@@ -101,7 +101,7 @@ export default function Database() {
   // Auto switch to rating_desc when search or filter is active
   useEffect(() => {
     const hasSearch = searchName.trim().length > 0;
-    const hasFilters = 
+    const hasFilters =
       filters.ratingRange[0] > 40 || filters.ratingRange[1] < 125 ||
       filters.positionFilter !== "all" ||
       filters.positions.length > 0 ||
@@ -176,9 +176,9 @@ export default function Database() {
   const fetchPlayersPage = async ({ pageParam = 0 }) => {
     let query = supabase
       .from("players")
-      .select("*", { count: "exact" })
+      .select("assetId, commonName, cardName, firstName, lastName, rating, position, nation, club, league, images, avgStats, avgGkStats, auctionable, rank, createdAt, source", { count: "exact" })
       .eq("is_visible", true); // Only show visible players to users
-    
+
     // Apply sorting
     switch (sortBy) {
       case "rating_desc":
@@ -201,7 +201,7 @@ export default function Database() {
         query = query.order("createdAt", { ascending: false, nullsFirst: false });
         break;
     }
-    
+
     // Add secondary sort by assetId for consistency
     query = query.order("assetId", { ascending: false });
 
@@ -254,19 +254,19 @@ export default function Database() {
 
     // Apply client-side filters for complex JSONB fields and filters that can't be done at DB level
     let filteredPlayers = data || [];
-    const needsClientSideFiltering = 
-      filters.positions.length > 0 || 
-      filters.traits.length > 0 || 
-      filters.skillMovesLevel > 0 || 
-      filters.weakFoot > 0 || 
+    const needsClientSideFiltering =
+      filters.positions.length > 0 ||
+      filters.traits.length > 0 ||
+      filters.skillMovesLevel > 0 ||
+      filters.weakFoot > 0 ||
       filters.strongFoot !== "all" ||
-      filters.workRateAtt > 0 || 
+      filters.workRateAtt > 0 ||
       filters.workRateDef > 0 ||
-      filters.heightRange[0] > 150 || 
+      filters.heightRange[0] > 150 ||
       filters.heightRange[1] < 210 ||
-      filters.weightRange[0] > 50 || 
+      filters.weightRange[0] > 50 ||
       filters.weightRange[1] < 110;
-    
+
     if (needsClientSideFiltering) {
       filteredPlayers = applyFiltersToQuery(filteredPlayers);
     }
@@ -459,12 +459,12 @@ export default function Database() {
                   {allPlayers.map((player, index) => (
                     <Fragment key={player.assetId}>
                       <div className="max-w-[280px] mx-auto">
-                        <PlayerCard 
-                          player={player as any} 
+                        <PlayerCard
+                          player={player as any}
                           onClick={() => handlePlayerClick(player.assetId)}
                         />
                       </div>
-                      
+
                       {/* Insert Native Ad every 15 players for FREE tier */}
                       {tier === 'FREE' && (index + 1) % 15 === 0 && (
                         <div className="max-w-[280px] mx-auto">
@@ -474,7 +474,7 @@ export default function Database() {
                     </Fragment>
                   ))}
                 </div>
-                
+
                 {/* Infinite scroll trigger */}
                 <div ref={loadMoreRef} className="py-8 text-center">
                   {isFetchingNextPage ? (
@@ -507,7 +507,7 @@ export default function Database() {
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
       />
-      
+
       {/* Anchor Ad for FREE tier users */}
       {tier === 'FREE' && <AnchorAd adUnitId="anchor-ad-database" />}
     </div>

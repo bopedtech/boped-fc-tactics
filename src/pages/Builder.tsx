@@ -46,7 +46,7 @@ interface Formation {
 // Helper function to calculate formation layout positions
 const calculateFormationLayout = (positions: string[]): Array<{ top: string; left: string; position: string }> => {
   const layout: Array<{ top: string; left: string; position: string }> = [];
-  
+
   // Định nghĩa thứ tự Y cho từng loại vị trí (từ cao xuống thấp = từ tấn công về phòng thủ)
   const positionHierarchy: Record<string, number> = {
     // Attackers (cao nhất)
@@ -56,35 +56,35 @@ const calculateFormationLayout = (positions: string[]): Array<{ top: string; lef
     'RW': 18,
     'LF': 18,
     'RF': 18,
-    
+
     // Attacking midfielders (CAM cao hơn LM/RM)
     'CAM': 32,
-    
+
     // Wing attackers/midfielders
     'LM': 44,
     'RM': 44,
-    
+
     // Central midfielders
     'CM': 54,
-    
+
     // Defensive midfielders
     'CDM': 64,
-    
+
     // Wing backs
     'LWB': 71,
     'RWB': 71,
-    
+
     // Full backs
     'LB': 77,
     'RB': 77,
-    
+
     // Center backs
     'CB': 83,
-    
+
     // Goalkeeper
     'GK': 92
   };
-  
+
   // Định nghĩa vị trí X cho từng loại vị trí
   const positionLateralType: Record<string, 'left' | 'center' | 'right'> = {
     'LW': 'left',
@@ -92,13 +92,13 @@ const calculateFormationLayout = (positions: string[]): Array<{ top: string; lef
     'LM': 'left',
     'LWB': 'left',
     'LB': 'left',
-    
+
     'RW': 'right',
     'RF': 'right',
     'RM': 'right',
     'RWB': 'right',
     'RB': 'right',
-    
+
     'ST': 'center',
     'CF': 'center',
     'CAM': 'center',
@@ -107,29 +107,29 @@ const calculateFormationLayout = (positions: string[]): Array<{ top: string; lef
     'CB': 'center',
     'GK': 'center'
   };
-  
+
   // Nhóm các vị trí theo thứ bậc Y
   const positionsByLevel: Record<number, { pos: string; lateral: 'left' | 'center' | 'right' }[]> = {};
-  
+
   positions.forEach(pos => {
     const yLevel = positionHierarchy[pos] || 50;
     const lateral = positionLateralType[pos] || 'center';
-    
+
     if (!positionsByLevel[yLevel]) {
       positionsByLevel[yLevel] = [];
     }
     positionsByLevel[yLevel].push({ pos, lateral });
   });
-  
+
   // Tính toán vị trí cho từng level
   Object.entries(positionsByLevel).forEach(([yLevel, posArray]) => {
     const y = `${yLevel}%`;
-    
+
     // Nhóm theo lateral (left, center, right)
     const leftPositions = posArray.filter(p => p.lateral === 'left');
     const centerPositions = posArray.filter(p => p.lateral === 'center');
     const rightPositions = posArray.filter(p => p.lateral === 'right');
-    
+
     // Xử lý vị trí bên trái
     if (leftPositions.length === 1) {
       layout.push({ top: y, left: '12%', position: leftPositions[0].pos });
@@ -139,7 +139,7 @@ const calculateFormationLayout = (positions: string[]): Array<{ top: string; lef
         layout.push({ top: y, left: `${leftX}%`, position: p.pos });
       });
     }
-    
+
     // Xử lý vị trí trung tâm (giãn khoảng cách hơn)
     if (centerPositions.length === 1) {
       layout.push({ top: y, left: '50%', position: centerPositions[0].pos });
@@ -162,7 +162,7 @@ const calculateFormationLayout = (positions: string[]): Array<{ top: string; lef
       layout.push({ top: y, left: '68%', position: centerPositions[3].pos });
       layout.push({ top: y, left: '85%', position: centerPositions[4].pos });
     }
-    
+
     // Xử lý vị trí bên phải
     if (rightPositions.length === 1) {
       layout.push({ top: y, left: '88%', position: rightPositions[0].pos });
@@ -173,7 +173,7 @@ const calculateFormationLayout = (positions: string[]): Array<{ top: string; lef
       });
     }
   });
-  
+
   return layout;
 };
 
@@ -188,7 +188,7 @@ export default function Builder() {
   const [showAIAdvisor, setShowAIAdvisor] = useState(false);
   const [showPlayerDialog, setShowPlayerDialog] = useState(false);
   const [selectedSlotIndex, setSelectedSlotIndex] = useState<number | null>(null);
-  
+
   // Squad lineup (11 positions)
   const [lineup, setLineup] = useState<(Player | null)[]>(Array(11).fill(null));
 
@@ -215,14 +215,14 @@ export default function Builder() {
         .from("formations")
         .select("*")
         .order("id", { ascending: true });
-      
+
       if (error) throw error;
-      
+
       const formattedFormations = (data || []).map(f => ({
         ...f,
         positions: typeof f.positions === 'string' ? JSON.parse(f.positions) : f.positions
       }));
-      
+
       setFormations(formattedFormations);
       if (formattedFormations.length > 0) {
         setSelectedFormation(formattedFormations[0]);
@@ -325,7 +325,7 @@ export default function Builder() {
     lineup.reduce((sum, player) => sum + (player?.rating || 0), 0) / 11
   );
 
-  const formationLayout = selectedFormation 
+  const formationLayout = selectedFormation
     ? calculateFormationLayout(selectedFormation.positions)
     : [];
 
@@ -370,7 +370,7 @@ export default function Builder() {
             <Card className="p-6 bg-gradient-to-br from-card/95 to-card/80 backdrop-blur-sm border-2">
               <div className="text-center mb-6">
                 <h3 className="text-2xl font-bold gradient-primary bg-clip-text text-transparent">
-                  {selectedFormation 
+                  {selectedFormation
                     ? (locale === 'en' ? selectedFormation.nameEn : selectedFormation.name)
                     : t("builder.selectFormation", "Chọn sơ đồ")}
                 </h3>
@@ -450,8 +450,8 @@ export default function Builder() {
               {/* Formation Select */}
               <div className="space-y-2 mb-6">
                 <Label className="text-sm font-semibold">{t("builder.formation", "Sơ đồ chiến thuật")}</Label>
-                <Select 
-                  value={selectedFormation?.id.toString()} 
+                <Select
+                  value={selectedFormation?.id.toString()}
                   onValueChange={handleFormationChange}
                 >
                   <SelectTrigger className="bg-background/50">
@@ -468,7 +468,7 @@ export default function Builder() {
                       return acc;
                     }, []).map((group) => (
                       <div key={group.category}>
-                       <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-muted/50">
+                        <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-muted/50">
                           {group.category}
                         </div>
                         {group.items.map((f: Formation) => (
