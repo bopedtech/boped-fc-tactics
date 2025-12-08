@@ -10,6 +10,7 @@ interface UserTierContextType {
   aiPromptLimitDaily: number;
   subscriptionExpiresAt: string | null;
   user: User | null;
+  isAdmin: boolean;
 }
 
 const UserTierContext = createContext<UserTierContextType | undefined>(undefined);
@@ -17,7 +18,7 @@ const UserTierContext = createContext<UserTierContextType | undefined>(undefined
 export function UserTierProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
-  
+
   useEffect(() => {
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {

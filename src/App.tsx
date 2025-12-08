@@ -11,6 +11,7 @@ import MySquads from "./pages/MySquads";
 import Profile from "./pages/Profile";
 import News from "./pages/News";
 import NewsDetail from "./pages/NewsDetail";
+import Pricing from "./pages/Pricing";
 import NotFound from "./pages/NotFound";
 import AdminLayout from "./pages/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -39,7 +40,9 @@ const App = () => (
         <Route path="/profile" element={<Profile />} />
         <Route path="/news" element={<News />} />
         <Route path="/news/:id" element={<NewsDetail />} />
-        
+
+        <Route path="/pricing" element={<Pricing />} />
+
         {/* Admin Routes with Sidebar Layout */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />
@@ -51,7 +54,7 @@ const App = () => (
           <Route path="logs" element={<LogsActivity />} />
           <Route path="settings" element={<AdminSettings />} />
         </Route>
-        
+
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>

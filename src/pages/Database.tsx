@@ -176,7 +176,7 @@ export default function Database() {
   const fetchPlayersPage = async ({ pageParam = 0 }) => {
     let query = supabase
       .from("players")
-      .select("assetId, commonName, cardName, firstName, lastName, rating, position, nation, club, league, images, avgStats, avgGkStats, auctionable, rank, createdAt, source", { count: "exact" })
+      .select("assetId, commonName, cardName, firstName, lastName, rating, position, nation, club, league, images, avgStats, avgGkStats, auctionable, rank, createdAt, source, height, weight, skillMovesLevel, weakFoot, foot, workRates, traits, potentialPositions", { count: "exact" })
       .eq("is_visible", true); // Only show visible players to users
 
     // Apply sorting
@@ -216,9 +216,28 @@ export default function Database() {
       query = query.lte("rating", filters.ratingRange[1]);
     }
 
-    // Note: Position filter will be applied client-side because potentialPositions is JSONB
-    // We only filter by position in DB if using old positionFilter (for backward compatibility)
-    if (filters.positionFilter !== "all" && filters.positions.length === 0) {
+    // Apply position filter at database level
+    if (filters.positions.length > 0) {
+      if (filters.positionType === "primary") {
+        // Only check primary position
+        query = query.in("position", filters.positions);
+      } else if (filters.positionType === "alternate") {
+        // Only check alternate positions (potentialPositions is JSONB array)
+        const alternateFilters = filters.positions.map(pos =>
+          `potentialPositions.cs.["${pos}"]`
+        ).join(',');
+        query = query.or(alternateFilters);
+      } else {
+        // "all" type - check both primary AND alternate positions
+        // Build OR: primary position matches OR any alternate position matches
+        const primaryFilter = filters.positions.map(pos => `position.eq.${pos}`).join(',');
+        const alternateFilters = filters.positions.map(pos =>
+          `potentialPositions.cs.["${pos}"]`
+        ).join(',');
+        query = query.or(`${primaryFilter},${alternateFilters}`);
+      }
+    } else if (filters.positionFilter !== "all") {
+      // Old single position filter for backward compatibility
       query = query.eq("position", filters.positionFilter);
     }
 
@@ -245,6 +264,53 @@ export default function Database() {
       query = query.in("source", filters.programs);
     }
 
+    // Apply height filter at database level
+    if (filters.heightRange[0] > 150 || filters.heightRange[1] < 210) {
+      query = query.gte("height", filters.heightRange[0]);
+      query = query.lte("height", filters.heightRange[1]);
+    }
+
+    // Apply weight filter at database level
+    if (filters.weightRange[0] > 50 || filters.weightRange[1] < 110) {
+      query = query.gte("weight", filters.weightRange[0]);
+      query = query.lte("weight", filters.weightRange[1]);
+    }
+
+    // Apply skill moves filter at database level
+    if (filters.skillMovesLevel > 0) {
+      query = query.gte("skillMovesLevel", filters.skillMovesLevel);
+    }
+
+    // Apply weak foot filter at database level
+    if (filters.weakFoot > 0) {
+      query = query.gte("weakFoot", filters.weakFoot);
+    }
+
+    // Apply strong foot filter at database level
+    if (filters.strongFoot !== "all") {
+      query = query.eq("foot", parseInt(filters.strongFoot));
+    }
+
+    // Apply work rate attack filter at database level (JSONB)
+    if (filters.workRateAtt > 0) {
+      // workRates is JSONB like {attack: 2, defense: 1} or {att: 2, def: 1}
+      query = query.or(`workRates->attack.eq.${filters.workRateAtt},workRates->att.eq.${filters.workRateAtt}`);
+    }
+
+    // Apply work rate defense filter at database level (JSONB)
+    if (filters.workRateDef > 0) {
+      query = query.or(`workRates->defense.eq.${filters.workRateDef},workRates->def.eq.${filters.workRateDef}`);
+    }
+
+    // Apply traits filter at database level (JSONB array)
+    if (filters.traits.length > 0) {
+      // Build OR conditions for each trait - traits is array of {id, ...} objects
+      const traitFilters = filters.traits.map(traitId =>
+        `traits.cs.[{"id":${traitId}}]`
+      ).join(',');
+      query = query.or(traitFilters);
+    }
+
     // Pagination - always fetch PAGE_SIZE
     query = query.range(pageParam, pageParam + PAGE_SIZE - 1);
 
@@ -252,24 +318,8 @@ export default function Database() {
 
     if (error) throw error;
 
-    // Apply client-side filters for complex JSONB fields and filters that can't be done at DB level
-    let filteredPlayers = data || [];
-    const needsClientSideFiltering =
-      filters.positions.length > 0 ||
-      filters.traits.length > 0 ||
-      filters.skillMovesLevel > 0 ||
-      filters.weakFoot > 0 ||
-      filters.strongFoot !== "all" ||
-      filters.workRateAtt > 0 ||
-      filters.workRateDef > 0 ||
-      filters.heightRange[0] > 150 ||
-      filters.heightRange[1] < 210 ||
-      filters.weightRange[0] > 50 ||
-      filters.weightRange[1] < 110;
-
-    if (needsClientSideFiltering) {
-      filteredPlayers = applyFiltersToQuery(filteredPlayers);
-    }
+    // All filters are now applied at database level
+    const filteredPlayers = data || [];
 
     return {
       players: filteredPlayers,

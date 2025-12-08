@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Plus, X } from "lucide-react";
+import { Plus, X, UserRound } from "lucide-react";
 import { useT } from "@/contexts/LocalizationContext";
 import React from "react";
 import defaultPlayerImage from "@/assets/default-player.png";
@@ -100,6 +100,12 @@ export default function PlayerCard({
   selectedRank = 1,
 }: PlayerCardProps) {
   const { t, locale } = useT();
+  const [imageError, setImageError] = React.useState(false);
+
+  // Reset error state when player changes
+  React.useEffect(() => {
+    setImageError(false);
+  }, [player?.assetId, player?.images?.playerCardImage]);
 
   // Helper to get club/nation names
   const getClubName = (club: any) => {
@@ -136,7 +142,8 @@ export default function PlayerCard({
   const rankColorClass = getRankColor(player.rank);
 
   // Default silhouette image
-  const DEFAULT_PLAYER_IMAGE = defaultPlayerImage;
+  // Default silhouette image
+  const DEFAULT_PLAYER_IMAGE = "https://images-bucket.renderz.app/player_23_0";
 
   // Get images
   const flagImage = player.images?.flagImage || player.nation?.image;
@@ -146,7 +153,8 @@ export default function PlayerCard({
 
   // Check for valid player image
   let playerImage = player.images?.playerCardImage;
-  if (playerImage === "image not found" || !playerImage) {
+  const isPlaceholderImage = playerImage === "image not found" || !playerImage || imageError;
+  if (isPlaceholderImage) {
     playerImage = DEFAULT_PLAYER_IMAGE;
   }
 
@@ -177,7 +185,6 @@ export default function PlayerCard({
 
   // Memoize statLabels to recalculate when locale changes
   const statLabels = React.useMemo(() => {
-    console.log(`🔄 Recalculating statLabels for locale: ${locale}, isGK: ${isGK}`);
     return isGK
       ? [
         t("stats.diving"),
@@ -228,9 +235,11 @@ export default function PlayerCard({
               <img
                 src={playerImage}
                 alt={player.commonName}
-                className="w-full h-full object-cover object-center drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)]"
+                className="w-full h-full object-cover object-center"
                 onError={(e) => {
-                  e.currentTarget.src = DEFAULT_PLAYER_IMAGE;
+                  if (!imageError) {
+                    setImageError(true);
+                  }
                 }}
               />
             </div>
@@ -306,8 +315,8 @@ export default function PlayerCard({
     return (
       <div
         className={`group bg-card rounded-lg p-4 border transition-all ${isSelected
-            ? 'border-muted-foreground/30 opacity-50 cursor-not-allowed'
-            : 'border-border hover:border-primary/50 cursor-pointer hover:shadow-lg hover:shadow-primary/10'
+          ? 'border-muted-foreground/30 opacity-50 cursor-not-allowed'
+          : 'border-border hover:border-primary/50 cursor-pointer hover:shadow-lg hover:shadow-primary/10'
           }`}
         onClick={!isSelected ? onClick : undefined}
       >
@@ -490,9 +499,11 @@ export default function PlayerCard({
                 <img
                   src={playerImage}
                   alt={player.cardName || player.commonName}
-                  className="w-full h-full object-cover object-center drop-shadow-[0_10px_20px_rgba(0,0,0,0.9)]"
+                  className="drop-shadow-[0_10px_20px_rgba(0,0,0,0.9)] w-full h-full object-cover object-center"
                   onError={(e) => {
-                    e.currentTarget.src = DEFAULT_PLAYER_IMAGE;
+                    if (!imageError) {
+                      setImageError(true);
+                    }
                   }}
                 />
               </div>
@@ -629,9 +640,11 @@ export default function PlayerCard({
             <img
               src={playerImage}
               alt={player.cardName || player.commonName}
-              className="w-full h-full object-cover object-center drop-shadow-[0_8px_16px_rgba(0,0,0,0.9)]"
+              className="drop-shadow-[0_8px_16px_rgba(0,0,0,0.9)] w-full h-full object-cover object-center"
               onError={(e) => {
-                e.currentTarget.src = DEFAULT_PLAYER_IMAGE;
+                if (!imageError) {
+                  setImageError(true);
+                }
               }}
             />
           </div>

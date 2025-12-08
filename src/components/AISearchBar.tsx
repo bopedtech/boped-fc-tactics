@@ -6,21 +6,66 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useT } from "@/contexts/LocalizationContext";
 
+import { useUserTierContext } from "@/contexts/UserTierContext";
+
+import { AIChatIntroDialog } from "./AIChatIntroDialog";
+
 const AISearchBar = () => {
   const { t } = useT();
+  const { user, isAdmin } = useUserTierContext();
   const [query, setQuery] = useState("");
+  const [showIntro, setShowIntro] = useState(false);
   const navigate = useNavigate();
+
+  const handleGuestInteraction = () => {
+    // Force blur if focused
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+    setShowIntro(true);
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Strict guest check
+    if (!user) {
+      setShowIntro(true);
+      return;
+    }
+
     if (!query.trim()) {
       toast.error(t("aiSearch.pleaseEnterQuestion", "Vui lòng nhập câu hỏi"));
       return;
     }
-    
+
+    // Check daily limits
+    const TODAY = new Date().toISOString().split('T')[0];
+    const limit = 3; // 3 for users (guests are blocked by interaction handler)
+    const usageKey = `ai_usage_${user?.id}_${TODAY}`;
+    const currentUsage = parseInt(localStorage.getItem(usageKey) || '0');
+
+    if (!isAdmin && currentUsage >= limit) {
+      toast.error(
+        t("aiSearch.limitUser", "Bạn đã dùng hết 3 câu hỏi hôm nay!"),
+        {
+          description: t("aiSearch.upgradeDesc", "Nâng cấp gói Premium để chat không giới hạn."),
+          action: {
+            label: t("common.upgrade", "Nâng cấp"),
+            onClick: () => navigate("/pricing")
+          },
+          duration: 5000,
+        }
+      );
+      return;
+    }
+
+    // Increment usage
+    localStorage.setItem(usageKey, (currentUsage + 1).toString());
+
     // AI search logic - for now, navigate to database with query
     const lowerQuery = query.toLowerCase();
-    
+
     if (lowerQuery.includes("cầu thủ") || lowerQuery.includes("player")) {
       navigate("/database");
       toast.success(t("aiSearch.searchingPlayers", "Đang tìm kiếm cầu thủ..."));
@@ -31,7 +76,7 @@ const AISearchBar = () => {
       navigate("/database");
       toast.success(t("aiSearch.searching", "Đang tìm kiếm..."));
     }
-    
+
     setQuery("");
   };
 
@@ -54,15 +99,30 @@ const AISearchBar = () => {
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              // Remove direct handlers on Input to avoid event swallowing issues
+              // readOnly={!user} <-- Removed readOnly to ensure keyboard doesn't flash
               placeholder={t("aiSearch.placeholder", "Hỏi AI: 'Tìm tiền đạo có pace trên 90', 'Gợi ý đội hình Tiki-Taka'...")}
               className="flex-1 border-0 bg-transparent text-base focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/70"
             />
-            <Button type="submit" size="sm" className="gradient-primary">
+            <Button type="submit" size="sm" className="gradient-primary" disabled={!user}>
               <Search className="h-4 w-4" />
             </Button>
           </div>
+
+          {/* Guest Overlay - Absolute positioning to catch ALL interactions */}
+          {!user && (
+            <div
+              className="absolute inset-0 z-20 cursor-pointer"
+              onClick={handleGuestInteraction}
+              onFocus={handleGuestInteraction}
+              role="button"
+              tabIndex={0}
+            />
+          )}
         </div>
       </form>
+
+      <AIChatIntroDialog open={showIntro} onOpenChange={setShowIntro} />
     </div>
   );
 };

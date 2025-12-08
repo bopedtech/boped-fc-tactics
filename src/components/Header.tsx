@@ -112,6 +112,7 @@ export default function Header() {
     { path: "/database", label: t("header.nav.database", "Danh sách cầu thủ") },
     { path: "/builder", label: t("header.nav.builder", "Xây dựng đội hình") },
     { path: "/news", label: t("header.nav.news", "Bảng tin") },
+    { path: "/pricing", label: t("header.nav.pricing", "Gói cước") },
   ];
 
   return (

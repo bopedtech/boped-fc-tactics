@@ -9,6 +9,9 @@ import logoImage from "@/assets/bopedfctactics-logo.png";
 import PlayerCard from "@/components/PlayerCard";
 import PlayerDetailDialog from "@/components/PlayerDetailDialog";
 import { useT } from "@/contexts/LocalizationContext";
+import { useUserTierContext } from "@/contexts/UserTierContext";
+import { AIChatIntroDialog } from "./AIChatIntroDialog";
+import { useNavigate } from "react-router-dom";
 
 interface Player {
   assetId: number;
@@ -41,10 +44,13 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   players?: Player[];
+  suggestedQuestions?: string[];
 }
 
 const AIAssistantBubble = () => {
   const { t, locale } = useT();
+  const { user, isAdmin } = useUserTierContext();
+  const navigate = useNavigate();
 
   const randomGreetings = [
     t("aiAssistant.greeting1", "Tìm cầu thủ có tốc độ nhanh nhất FC Mobile"),
@@ -57,6 +63,7 @@ const AIAssistantBubble = () => {
   ];
 
   const [isOpen, setIsOpen] = useState(false);
+  const [showIntro, setShowIntro] = useState(false);
   const [showGreeting, setShowGreeting] = useState(false);
   const [greeting, setGreeting] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
@@ -123,6 +130,11 @@ const AIAssistantBubble = () => {
   }, [position]);
 
   const handleOpen = () => {
+    if (!user) {
+      setShowIntro(true);
+      return;
+    }
+
     setIsOpen(true);
     setShowGreeting(false);
     // Add initial greeting message if chat is empty
@@ -195,6 +207,34 @@ const AIAssistantBubble = () => {
   const handleSend = async () => {
     if (!inputValue.trim() || isLoading) return;
 
+    // Check daily limits
+    const TODAY = new Date().toISOString().split('T')[0];
+    const limit = 3;
+    const usageKey = `ai_usage_${user?.id}_${TODAY}`;
+    const currentUsage = parseInt(localStorage.getItem(usageKey) || '0');
+
+    if (!isAdmin && currentUsage >= limit) {
+      toast.error(
+        t("aiSearch.limitUser", "Bạn đã dùng hết 3 câu hỏi hôm nay!"),
+        {
+          description: t("aiSearch.upgradeDesc", "Nâng cấp gói Premium để chat không giới hạn."),
+          action: {
+            label: t("common.upgrade", "Nâng cấp"),
+            onClick: () => {
+              setIsOpen(false);
+              navigate("/pricing");
+            }
+          },
+          duration: 5000,
+        }
+      );
+      return;
+    }
+
+    if (!isAdmin) {
+      localStorage.setItem(usageKey, (currentUsage + 1).toString());
+    }
+
     const userMessage: Message = { role: "user", content: inputValue };
     setMessages(prev => [...prev, userMessage]);
     setInputValue("");
@@ -222,8 +262,9 @@ const AIAssistantBubble = () => {
       const data = await response.json();
       const responseText = data.response || t("aiAssistant.cannotAnswer", "Xin lỗi, tôi không thể trả lời.");
 
-      // Parse player cards from JSON blocks (both with and without markdown)
+      // Parse response using regex to find JSON block
       let players: Player[] | undefined = undefined;
+      let suggestedQuestions: string[] | undefined = undefined;
       let displayContent = responseText;
 
       // Try to find JSON with markdown code block
@@ -231,12 +272,15 @@ const AIAssistantBubble = () => {
 
       // If not found, try to find raw JSON object
       if (!jsonMatch) {
-        jsonMatch = responseText.match(/(\{"playerCards":\s*\[[\s\S]*?\]\})/);
+        // Relaxed regex to catch JSON object that might start with { "playerCards": ... }
+        jsonMatch = responseText.match(/(\{\s*"playerCards"[\s\S]*?\})/);
       }
 
       if (jsonMatch) {
         try {
-          const jsonData = JSON.parse(jsonMatch[1]);
+          const jsonStr = jsonMatch[1];
+          const jsonData = JSON.parse(jsonStr);
+
           if (jsonData.playerCards && Array.isArray(jsonData.playerCards)) {
             players = jsonData.playerCards.map((p: any) => ({
               assetId: p.assetId,
@@ -265,10 +309,17 @@ const AIAssistantBubble = () => {
               auctionable: p.auctionable
             }));
           }
+
+          if (jsonData.suggestedQuestions && Array.isArray(jsonData.suggestedQuestions)) {
+            suggestedQuestions = jsonData.suggestedQuestions;
+          }
+
           // Remove JSON block from display
-          displayContent = responseText.replace(/```json\s*\{[\s\S]*?\}\s*```/, '').replace(/\{"playerCards":\s*\[[\s\S]*?\]\}/, '').trim();
+          displayContent = responseText.replace(/```json\s*\{[\s\S]*?\}\s*```/, '')
+            .replace(/\{\s*"playerCards"[\s\S]*?\}/, '') // fallback removal
+            .trim();
         } catch (e) {
-          console.error("Failed to parse player cards:", e);
+          console.error("Failed to parse AI response JSON:", e);
         }
       }
 
@@ -278,7 +329,8 @@ const AIAssistantBubble = () => {
       setMessages(prev => [...prev, {
         role: "assistant",
         content: displayContent,
-        players: players
+        players: players,
+        suggestedQuestions: suggestedQuestions
       }]);
 
     } catch (error) {
@@ -386,16 +438,55 @@ const AIAssistantBubble = () => {
                 >
                   {/* Player Cards */}
                   {message.players && message.players.length > 0 && (
-                    <div className="flex flex-wrap gap-3 max-w-full">
-                      {message.players.map((player) => (
+                    <div className="flex flex-col gap-4 max-w-full w-full">
+                      {/* Top 1 Player - Featured */}
+                      <div className="flex justify-center md:justify-start">
                         <div
-                          key={player.assetId}
-                          className="w-[160px] cursor-pointer hover:scale-105 transition-transform"
-                          onClick={() => setSelectedPlayer(player.assetId)}
+                          className="w-[180px] md:w-[200px] cursor-pointer hover:scale-105 transition-transform"
+                          onClick={() => setSelectedPlayer(message.players![0].assetId)}
                         >
-                          <PlayerCard player={player} variant="medium" />
+                          <div className="relative">
+                            <div className="absolute -top-3 -right-3 z-10 bg-yellow-400 text-black font-bold px-2 py-1 rounded-full text-xs shadow-lg animate-bounce">
+                              TOP 1
+                            </div>
+                            <PlayerCard player={message.players[0]} variant="medium" />
+                          </div>
                         </div>
-                      ))}
+                      </div>
+
+                      {/* Remaining Players - List View */}
+                      {message.players.length > 1 && (
+                        <div className="grid grid-cols-1 gap-2 w-full">
+                          {message.players.slice(1).map((player, idx) => (
+                            <div
+                              key={player.assetId}
+                              className="w-full cursor-pointer hover:bg-muted/50 rounded-lg transition-colors p-1"
+                              onClick={() => setSelectedPlayer(player.assetId)}
+                            >
+                              <div className="flex items-center gap-3 bg-card border border-border/50 rounded-lg p-2">
+                                <div className="font-bold text-muted-foreground w-6 text-center">#{idx + 2}</div>
+                                <PlayerCard player={player} variant="list" isSelected={false} />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* View More Button */}
+                      <div className="flex justify-center mt-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-2"
+                          onClick={() => {
+                            setIsOpen(false);
+                            navigate("/database");
+                          }}
+                        >
+                          {t("aiSearch.viewMore", "Xem thêm trong Database")}
+                          <Sparkles className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   )}
 
@@ -412,6 +503,25 @@ const AIAssistantBubble = () => {
                       <p className="text-sm leading-relaxed" style={{ whiteSpace: 'pre-wrap' }}>
                         {message.content.replace(/\*\*/g, '').replace(/\*/g, '')}
                       </p>
+                    </div>
+                  )}
+
+                  {/* Suggested Questions */}
+                  {message.suggestedQuestions && message.suggestedQuestions.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {message.suggestedQuestions.map((question, idx) => (
+                        <button
+                          key={idx}
+                          className="text-xs bg-primary/10 text-primary hover:bg-primary/20 hover:scale-105 transition-all px-3 py-1.5 rounded-full border border-primary/20 text-left"
+                          onClick={() => {
+                            setInputValue(question);
+                            // Optional: auto send
+                            // handleSend(); // Cannot call handleSend safely here due to closure/state, best to just populate input or use a separate effect
+                          }}
+                        >
+                          {question}
+                        </button>
+                      ))}
                     </div>
                   )}
                 </div>
@@ -464,6 +574,8 @@ const AIAssistantBubble = () => {
         open={!!selectedPlayer}
         onOpenChange={(open) => !open && setSelectedPlayer(null)}
       />
+
+      <AIChatIntroDialog open={showIntro} onOpenChange={setShowIntro} />
     </>
   );
 };

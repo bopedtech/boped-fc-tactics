@@ -24,7 +24,7 @@ const tools = [
     functionDeclarations: [
       {
         name: "find_top_players",
-        description: "Tìm kiếm các cầu thủ hàng đầu (Top N) dựa trên một chỉ số. Dùng khi hỏi ai giỏi nhất, nhanh nhất, cao nhất, hoặc tệ nhất, chậm nhất.",
+        description: "Tìm kiếm các cầu thủ hàng đầu (Top N) dựa trên một chỉ số. Mặc định luôn tìm 5 cầu thủ trừ khi người dùng hỏi đích danh 'ai nhất'.",
         parameters: {
           type: "OBJECT",
           properties: {
@@ -35,7 +35,7 @@ const tools = [
             },
             limit: {
               type: "INTEGER",
-              description: "Số lượng cầu thủ trả về (Mặc định 5). Dùng 1 nếu hỏi 'Ai nhất?'.",
+              description: "Số lượng cầu thủ trả về. Mặc định là 5. Chỉ dùng 1 nếu câu hỏi là dạng 'Ai là người... nhất?' (ngôi thứ nhất).",
             },
             ascending: {
               type: "BOOLEAN",
@@ -78,25 +78,37 @@ QUY TẮC SỬ DỤNG CÔNG CỤ:
      * Rê bóng/Dribbling = DRI
      * Phòng thủ/Defending = DEF
      * Thể chất/Sức mạnh/Physical = PHY
-   - Nếu hỏi "Ai nhất?", đặt limit là 1.
+   - Nếu hỏi chung chung (top, những cầu thủ...), đặt limit là 5.
+   - Chỉ đặt limit = 1 khi hỏi cụ thể "Ai là người..." (số ít).
    - Nếu hỏi "Ai giỏi nhất/nhanh nhất/cao nhất?", đặt ascending là FALSE.
    - Nếu hỏi "Ai chậm nhất/thấp nhất/tệ nhất?", đặt ascending là TRUE.
 3. Sau khi nhận kết quả từ công cụ, hãy tổng hợp câu trả lời tự nhiên, rõ ràng và thân thiện bằng tiếng Việt.
-4. QUAN TRỌNG: Trả lời với format JSON có playerCards để hiển thị thẻ cầu thủ:
+4. QUAN TRỌNG: Trả lời với format JSON có \`playerCards\` và \`suggestedQuestions\`:
 
 Format response:
 \`\`\`json
-{"playerCards": [<danh sách cầu thủ với đầy đủ thông tin từ kết quả công cụ>]}
+{
+  "playerCards": [<danh sách cầu thủ từ kết quả công cụ>],
+  "suggestedQuestions": ["<câu hỏi gợi ý 1>", "<câu hỏi gợi ý 2>", "<câu hỏi gợi ý 3>"]
+}
 \`\`\`
 
-Sau đó thêm phần giải thích văn bản ngắn gọn.
+Sau đó thêm phần giải thích văn bản ngắn gọn bên ngoài JSON (nếu cần, nhưng ưu tiên để response trong text của Gemini).
+Tuy nhiên, để App hiển thị đẹp, bạn hãy trả về JSON block trước, sau đó là lời dẫn.
+
+Về \`suggestedQuestions\`:
+- Dựa vào ngữ cảnh để gợi ý 3 câu hỏi tiếp theo thú vị.
+- Ví dụ: Nếu vừa hỏi về Tốc độ (PAC), gợi ý hỏi về Sút (SHO), hoặc so sánh 2 cầu thủ trong list.
 
 VÍ DỤ RESPONSE TỐT:
 \`\`\`json
-{"playerCards": [{"assetId": 123, "commonName": "Mbappe", "rating": 91, ...}]}
+{
+  "playerCards": [{"assetId": 123, "commonName": "Mbappe", "rating": 91, ...}, ...],
+  "suggestedQuestions": ["Ai sút hay nhất?", "Top hậu vệ phòng ngự hay nhất", "Cầu thủ cao nhất game là ai?"]
+}
 \`\`\`
 
-Đây là cầu thủ có tốc độ cao nhất trong FC Mobile với PAC 97.
+Dưới đây là danh sách 5 cầu thủ có tốc độ cao nhất FC Mobile. Mbappe dẫn đầu với chỉ số PAC 97...
 `;
 
 const SYSTEM_INSTRUCTION_EN = `
@@ -115,42 +127,51 @@ TOOL USAGE RULES:
      * Dribbling = DRI
      * Defending/Defense = DEF
      * Physical/Strength = PHY
-   - If asked "Who is the best?", set limit to 1.
+   - Default limit is 5. Only set limit=1 if asked "Who is THE ...".
    - If asked "Who is the best/fastest/tallest?", set ascending to FALSE.
    - If asked "Who is the worst/slowest/shortest?", set ascending to TRUE.
 3. After receiving tool results, provide a natural, clear, and friendly answer in English.
-4. IMPORTANT: Respond with JSON format containing playerCards to display player cards:
+4. IMPORTANT: Respond with JSON format containing \`playerCards\` and \`suggestedQuestions\`:
 
 Response format:
 \`\`\`json
-{"playerCards": [<list of players with full information from tool results>]}
+{
+  "playerCards": [<list of players from tool results>],
+  "suggestedQuestions": ["<suggestion 1>", "<suggestion 2>", "<suggestion 3>"]
+}
 \`\`\`
 
-Then add a brief text explanation.
+Followed by a brief text explanation.
+
+About \`suggestedQuestions\`:
+- Suggest 3 interesting follow-up questions based on context.
 
 GOOD RESPONSE EXAMPLE:
 \`\`\`json
-{"playerCards": [{"assetId": 123, "commonName": "Mbappe", "rating": 91, ...}]}
+{
+  "playerCards": [{"assetId": 123, "commonName": "Mbappe", "rating": 91, ...}],
+  "suggestedQuestions": ["Who has the best shooting?", "Top best defenders", "Who is the tallest player?"]
+}
 \`\`\`
 
-This is the player with the highest pace in FC Mobile with PAC 97.
+Here are the top 5 fastest players in FC Mobile...
 `;
 
 // Hàm thực thi công cụ
 async function executeGetPlayerCount(supabase: any, args: { filterPosition?: string }) {
   let query = supabase.from('players').select('*', { count: 'estimated', head: true }).eq('is_visible', true);
-  
+
   if (args.filterPosition) {
     query = query.eq('position', args.filterPosition.toUpperCase());
   }
 
   const { count, error } = await query;
-  
+
   if (error || count === null) {
     console.error("Count error:", error);
     return { error: error?.message || "Không thể đếm số lượng." };
   }
-  
+
   return { total_players: count };
 }
 
@@ -198,18 +219,18 @@ serve(async (req) => {
 
   try {
     const { messages, userQuery, locale = "vi" } = await req.json();
-    
+
     const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
     if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY không được cấu hình");
-    
+
     const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
 
     // Gọi Gemini với tool support
     const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-    
+
     const conversationHistory = messages || [];
     const query = userQuery || (conversationHistory.length > 0 ? conversationHistory[conversationHistory.length - 1].content : "");
 
@@ -229,7 +250,7 @@ serve(async (req) => {
     }
 
     const systemInstruction = locale === "en" ? SYSTEM_INSTRUCTION_EN : SYSTEM_INSTRUCTION_VI;
-    
+
     const requestBody = {
       contents: geminiMessages,
       tools: tools,
@@ -253,7 +274,7 @@ serve(async (req) => {
 
     const data1 = await response1.json();
     const candidate = data1.candidates?.[0];
-    
+
     if (!candidate) {
       throw new Error("Không nhận được phản hồi từ Gemini");
     }
@@ -263,23 +284,23 @@ serve(async (req) => {
 
     if (functionCalls && functionCalls.length > 0) {
       console.log("Phát hiện tool calls:", functionCalls.length);
-      
+
       // Thực thi các tool calls
       const functionResponses = [];
-      
+
       for (const call of functionCalls) {
         const functionName = call.functionCall.name;
         const args = call.functionCall.args;
-        
+
         console.log(`Thực thi: ${functionName}`, args);
-        
+
         let result;
         if (functionName === "find_top_players") {
           result = await executeFindTopPlayers(supabase, args);
         } else if (functionName === "get_player_count") {
           result = await executeGetPlayerCount(supabase, args);
         }
-        
+
         functionResponses.push({
           functionResponse: {
             name: functionName,
@@ -290,7 +311,7 @@ serve(async (req) => {
 
       // Gọi Gemini lần 2 với kết quả từ tools
       console.log("Gọi Gemini lần 2 với kết quả tools...");
-      
+
       const requestBody2 = {
         contents: [
           ...geminiMessages,
@@ -322,7 +343,7 @@ serve(async (req) => {
 
       const data2 = await response2.json();
       const finalText = data2.candidates?.[0]?.content?.parts?.[0]?.text || "Xin lỗi, tôi không thể trả lời câu hỏi này.";
-      
+
       return new Response(
         JSON.stringify({ response: finalText }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -330,7 +351,7 @@ serve(async (req) => {
     } else {
       // Không có tool calls, trả về trực tiếp
       const finalText = candidate.content?.parts?.[0]?.text || "Xin lỗi, tôi không thể trả lời câu hỏi này.";
-      
+
       return new Response(
         JSON.stringify({ response: finalText }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
