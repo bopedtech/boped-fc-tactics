@@ -238,8 +238,8 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
 
-    // Gọi Gemini với tool support
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+    // Gọi Gemini với tool support - using gemini-1.5-flash for stability
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
     const conversationHistory = messages || [];
     const query = userQuery || (conversationHistory.length > 0 ? conversationHistory[conversationHistory.length - 1].content : "");
@@ -279,7 +279,7 @@ Deno.serve(async (req) => {
     if (!response1.ok) {
       const errorText = await response1.text();
       console.error("Gemini error:", errorText);
-      throw new Error("Lỗi khi gọi Gemini API");
+      throw new Error(`Lỗi khi gọi Gemini API: ${response1.status} - ${errorText.substring(0, 200)}`);
     }
 
     const data1 = await response1.json();
@@ -348,7 +348,7 @@ Deno.serve(async (req) => {
       if (!response2.ok) {
         const errorText = await response2.text();
         console.error("Gemini error (call 2):", errorText);
-        throw new Error("Lỗi khi gọi Gemini API lần 2");
+        throw new Error(`Lỗi khi gọi Gemini API lần 2: ${response2.status} - ${errorText.substring(0, 200)}`);
       }
 
       const data2 = await response2.json();

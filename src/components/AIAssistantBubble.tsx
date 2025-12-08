@@ -268,23 +268,55 @@ const AIAssistantBubble = () => {
       const data = await response.json();
       const responseText = data.response || t("aiAssistant.cannotAnswer", "Xin lỗi, tôi không thể trả lời.");
 
-      // Parse response using regex to find JSON block
+      // Parse response using brace counting to correctly handle nested objects
       let players: Player[] | undefined = undefined;
       let suggestedQuestions: string[] | undefined = undefined;
       let displayContent = responseText;
+      let jsonStr = "";
 
-      // Try to find JSON with markdown code block
-      let jsonMatch = responseText.match(/```json\s*(\{[\s\S]*?\})\s*```/);
+      // 1. Try to find markdown code block first (most reliable)
+      const jsonBlockMatch = responseText.match(/```json\s*(\{[\s\S]*?\})\s*```/);
+      if (jsonBlockMatch) {
+          jsonStr = jsonBlockMatch[1];
+          displayContent = responseText.replace(jsonBlockMatch[0], '').trim();
+      } else {
+          // 2. Fallback: Look for the specific starting pattern
+          const patterns = ['{"playerCards"', '{"suggestedQuestions"'];
+          let startIndex = -1;
+          
+          for (const pattern of patterns) {
+              startIndex = responseText.indexOf(pattern);
+              if (startIndex !== -1) break;
+          }
 
-      // If not found, try to find raw JSON object
-      if (!jsonMatch) {
-        // Relaxed regex to catch JSON object that might start with { "playerCards": ... }
-        jsonMatch = responseText.match(/(\{\s*"playerCards"[\s\S]*?\})/);
+          if (startIndex !== -1) {
+              // Count braces to find the end of the JSON object
+              let braceCount = 0;
+              let endIndex = -1;
+              
+              for (let i = startIndex; i < responseText.length; i++) {
+                  if (responseText[i] === '{') {
+                      braceCount++;
+                  } else if (responseText[i] === '}') {
+                      braceCount--;
+                      if (braceCount === 0) {
+                          endIndex = i + 1;
+                          break;
+                      }
+                  }
+              }
+
+              if (endIndex !== -1) {
+                  jsonStr = responseText.substring(startIndex, endIndex);
+                  // Remove the JSON part from display text
+                  // We also clean up any leading/trailing whitespace left
+                  displayContent = (responseText.substring(0, startIndex) + responseText.substring(endIndex)).trim();
+              }
+          }
       }
 
-      if (jsonMatch) {
+      if (jsonStr) {
         try {
-          const jsonStr = jsonMatch[1];
           const jsonData = JSON.parse(jsonStr);
 
           if (jsonData.playerCards && Array.isArray(jsonData.playerCards)) {
@@ -319,18 +351,27 @@ const AIAssistantBubble = () => {
           if (jsonData.suggestedQuestions && Array.isArray(jsonData.suggestedQuestions)) {
             suggestedQuestions = jsonData.suggestedQuestions;
           }
-
-          // Remove JSON block from display
-          displayContent = responseText.replace(/```json\s*\{[\s\S]*?\}\s*```/, '')
-            .replace(/\{\s*"playerCards"[\s\S]*?\}/, '') // fallback removal
-            .trim();
         } catch (e) {
           console.error("Failed to parse AI response JSON:", e);
+          // If parsing fails, we might want to reset displayContent to show the raw text 
+          // so the user at least sees something (even if ugly) rather than a broken UI
+          // But usually keeping the cleaned text is better if the JSON was just garbage.
+          // However, if we failed to parse, we probably shouldn't hide the content if it wasn't JSON.
+          // In this case, since we found the braces, it's likely intended to be JSON.
         }
       }
 
       // Remove markdown formatting
       displayContent = displayContent.replace(/\*\*/g, '').replace(/\*/g, '');
+
+      // Fallback: If no suggestedQuestions from Gemini, generate default ones based on context
+      if (!suggestedQuestions || suggestedQuestions.length === 0) {
+        suggestedQuestions = [
+          t("aiAssistant.fallbackSuggest1", "Top cầu thủ chạy nhanh nhất"),
+          t("aiAssistant.fallbackSuggest2", "Hậu vệ hay nhất game"),
+          t("aiAssistant.fallbackSuggest3", "Ai sút hay nhất?")
+        ];
+      }
 
       setMessages(prev => [...prev, {
         role: "assistant",
@@ -513,21 +554,6 @@ const AIAssistantBubble = () => {
                       </p>
                     </div>
                   )}
-
-                  {/* Suggested Questions */}
-                  {message.suggestedQuestions && message.suggestedQuestions.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-1">
-                      {message.suggestedQuestions.map((question, idx) => (
-                        <button
-                          key={idx}
-                          className="text-xs bg-primary/10 text-primary hover:bg-primary/20 hover:scale-105 transition-all px-3 py-1.5 rounded-full border border-primary/20 text-left"
-                          onClick={() => handleSend(question)}
-                        >
-                          {question}
-                        </button>
-                      ))}
-                    </div>
-                  )}
                 </div>
               ))}
               {isLoading && (
@@ -540,6 +566,24 @@ const AIAssistantBubble = () => {
               <div ref={scrollRef} />
             </div>
           </ScrollArea>
+
+          {/* Suggested Questions - Fixed at Bottom */}
+         {messages.length > 0 && messages[messages.length - 1].suggestedQuestions && messages[messages.length - 1].suggestedQuestions!.length > 0 && !isLoading && (
+             <div className="px-6 pb-2 bg-background/80 backdrop-blur-sm">
+                <div className="max-w-5xl mx-auto flex flex-wrap gap-2 justify-center">
+                   {messages[messages.length - 1].suggestedQuestions!.map((question, idx) => (
+                      <button
+                        key={idx}
+                        className="text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 hover:scale-105 transition-all px-4 py-2 rounded-full shadow-md animate-in slide-in-from-bottom-2 fade-in"
+                        style={{ animationDelay: `${idx * 100}ms` }}
+                        onClick={() => handleSend(question)}
+                      >
+                         {question}
+                      </button>
+                   ))}
+                </div>
+             </div>
+          )}
 
           {/* Input */}
           <div className="p-6 border-t border-border bg-card/80 backdrop-blur-sm">
