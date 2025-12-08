@@ -53,13 +53,13 @@ const AIAssistantBubble = () => {
   const navigate = useNavigate();
 
   const randomGreetings = [
-    t("aiAssistant.greeting1", "Tìm cầu thủ có tốc độ nhanh nhất FC Mobile"),
-    t("aiAssistant.greeting2", "Bấm để nhận gợi ý về chiến thuật giả lập xếp hạng"),
-    t("aiAssistant.greeting3", "Tìm cầu thủ phù hợp với đội hình Tiki-Taka"),
-    t("aiAssistant.greeting4", "Gợi ý cầu thủ có giá trị tốt nhất theo vị trí"),
-    t("aiAssistant.greeting5", "Chiến thuật phòng ngự phản công hiệu quả"),
-    t("aiAssistant.greeting6", "So sánh 2 cầu thủ bất kỳ trong FC Mobile"),
-    t("aiAssistant.greeting7", "Xây dựng đội hình hoàn hảo cho budget của bạn"),
+    t("aiAssistant.greeting1", "Cầu thủ nào chạy nhanh nhất FC Mobile?"),
+    t("aiAssistant.greeting2", "Top 5 tiền đạo OVR cao nhất hiện tại"),
+    t("aiAssistant.greeting3", "Ai sút phạt hay nhất trong game?"),
+    t("aiAssistant.greeting4", "Hậu vệ nào phòng ngự tốt nhất?"),
+    t("aiAssistant.greeting5", "Top cầu thủ có chỉ số Physical cao"),
+    t("aiAssistant.greeting6", "So sánh Messi và Ronaldo phiên bản mới"),
+    t("aiAssistant.greeting7", "Thủ môn nào có phản xạ tốt nhất?"),
   ];
 
   const [isOpen, setIsOpen] = useState(false);
@@ -142,11 +142,11 @@ const AIAssistantBubble = () => {
       setMessages([
         {
           role: "assistant",
-          content: t("aiAssistant.welcome", "Xin chào! Tôi là trợ lý AI của Boped FC Tactics. Tôi có thể giúp bạn tìm cầu thủ, tư vấn đội hình, hoặc trả lời các câu hỏi về FC Mobile. Bạn cần giúp gì?"),
+          content: t("aiAssistant.welcome", "Xin chào! Tôi là trợ lý AI của Boped FC Tactics. Tôi có thể giúp bạn tìm cầu thủ theo chỉ số, so sánh cầu thủ, hoặc trả lời các câu hỏi về FC Mobile. Bạn cần giúp gì?"),
           suggestedQuestions: [
-            t("aiAssistant.suggest1", "Top cầu thủ chạy nhanh nhất"),
-            t("aiAssistant.suggest2", "Hậu vệ hay nhất game"),
-            t("aiAssistant.suggest3", "So sánh Messi và Ronaldo")
+            t("aiAssistant.suggest1", "Ai chạy nhanh nhất FC Mobile?"),
+            t("aiAssistant.suggest2", "Top 5 cầu thủ sút hay nhất"),
+            t("aiAssistant.suggest3", "Hậu vệ phòng ngự tốt nhất")
           ]
         }
       ]);
@@ -367,9 +367,9 @@ const AIAssistantBubble = () => {
       // Fallback: If no suggestedQuestions from Gemini, generate default ones based on context
       if (!suggestedQuestions || suggestedQuestions.length === 0) {
         suggestedQuestions = [
-          t("aiAssistant.fallbackSuggest1", "Top cầu thủ chạy nhanh nhất"),
-          t("aiAssistant.fallbackSuggest2", "Hậu vệ hay nhất game"),
-          t("aiAssistant.fallbackSuggest3", "Ai sút hay nhất?")
+          t("aiAssistant.fallbackSuggest1", "Ai chạy nhanh nhất FC Mobile?"),
+          t("aiAssistant.fallbackSuggest2", "Top 5 cầu thủ OVR cao nhất"),
+          t("aiAssistant.fallbackSuggest3", "Cầu thủ rê bóng hay nhất?")
         ];
       }
 
