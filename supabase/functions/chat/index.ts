@@ -1,4 +1,5 @@
-import { createClient } from "@supabase/supabase-js";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -82,9 +83,9 @@ QUY TẮC SỬ DỤNG CÔNG CỤ:
    - Nếu hỏi "Ai giỏi nhất/nhanh nhất/cao nhất?", đặt ascending là FALSE.
    - Nếu hỏi "Ai chậm nhất/thấp nhất/tệ nhất?", đặt ascending là TRUE.
 3. Sau khi nhận kết quả từ công cụ, hãy tổng hợp câu trả lời tự nhiên, rõ ràng và thân thiện bằng tiếng Việt.
-   - **Phần 1: Tập trung vào Top 1**. Nhận xét chi tiết về các chỉ số nổi bật của cầu thủ này (Tốc độ, Sút, v.v.), tại sao lại đứng đầu.
-   - **Phần 2: Nhận xét tóm tắt về các cầu thủ còn lại (Top 2-10)**. So sánh ngắn gọn (ví dụ: "Theo sau là X và Y với chỉ số cũng rất cao...").
-   - **Phần 3: Câu hỏi mở/Tương tác**. Hỏi người dùng xem họ có muốn xem chi tiết ai không, hoặc so sánh ai với ai.
+   - **Phần 1: Tập trung vào Top 1**. Nhận xét chi tiết về các chỉ số nổi bật của cầu thủ này.
+   - **Phần 2: Nhận xét tóm tắt về các cầu thủ còn lại (Top 2-10)**.
+   - **Phần 3: Câu hỏi mở/Tương tác**.
 4. QUAN TRỌNG: Trả lời với format JSON có playerCards và suggestedQuestions:
 
 Format response:
@@ -93,11 +94,6 @@ Format response:
   "suggestedQuestions": ["<câu hỏi gợi ý 1>", "<câu hỏi gợi ý 2>", "<câu hỏi gợi ý 3>"],
   "textResponse": "<phần giải thích văn bản>"
 }
-
-Về suggestedQuestions:
-- Dựa vào ngữ cảnh để gợi ý 3 câu hỏi tiếp theo thú vị để người dùng bấm vào hỏi tiếp.
-- Ví dụ: Nếu vừa hỏi về Tốc độ (PAC), gợi ý: "Ai sút hay nhất?", "So sánh [Top 1] và [Top 2]", "Xem chi tiết [Top 2]".
-- **Tối ưu hóa hành động**: Câu hỏi nên ngắn gọn, kích thích tò mò.
 `;
 
 const SYSTEM_INSTRUCTION_EN = `
@@ -107,35 +103,18 @@ Your task is to use Tools to query accurate data from the database.
 TOOL USAGE RULES:
 1. Always use tools when asked about actual data.
 2. When using find_top_players:
-   - Map natural language to stats:
-     * Speed/Fast/Pace = PAC
-     * Shooting/Finishing = SHO
-     * OVR/Rating = RATING
-     * Height = HEIGHT
-     * Passing = PAS
-     * Dribbling = DRI
-     * Defending/Defense = DEF
-     * Physical/Strength = PHY
+   - Map natural language to stats: Speed=PAC, Shooting=SHO, OVR=RATING, Height=HEIGHT, Passing=PAS, Dribbling=DRI, Defending=DEF, Physical=PHY
    - Default limit is 10. Only set limit=1 if asked "Who is THE ...".
    - If asked "Who is the best/fastest/tallest?", set ascending to FALSE.
    - If asked "Who is the worst/slowest/shortest?", set ascending to TRUE.
-3. After receiving tool results, provide a natural, clear, and friendly answer in English.
-   - **Part 1: Focus on Top 1**. Provide detailed commentary on this player's standout stats (Pace, Shooting, etc.), and why they are #1.
-   - **Part 2: Summary of the rest (Top 2-10)**. Brief comparison (e.g., "Following closely are X and Y with also very high stats...").
-   - **Part 3: Open-ended/Interactive**. Ask the user if they want to see details for anyone, or compare A vs B.
-4. IMPORTANT: Respond with JSON format containing playerCards and suggestedQuestions:
+3. After receiving tool results, provide a natural, clear, and friendly answer.
+4. IMPORTANT: Respond with JSON format:
 
-Response format:
 {
   "playerCards": [<list of players from tool results>],
   "suggestedQuestions": ["<suggestion 1>", "<suggestion 2>", "<suggestion 3>"],
   "textResponse": "<text explanation>"
 }
-
-About suggestedQuestions:
-- Suggest 3 interesting follow-up questions based on context for the user to click.
-- Example: If asked about Speed (PAC), suggest: "Who has best shooting?", "Compare [Top 1] vs [Top 2]", "Details for [Top 2]".
-- **Action-oriented**: Keep questions short and engaging.
 `;
 
 // Hàm thực thi công cụ
@@ -174,8 +153,7 @@ async function executeFindTopPlayers(supabase: any, args: { stat: string, limit?
     return { error: error.message };
   }
 
-  // Transform data để match với PlayerCard component
-  const players = data.map((p: any) => ({
+  const players = (data || []).map((p: any) => ({
     assetId: p.assetId,
     playerId: p.assetId,
     commonName: p.commonName,
@@ -190,10 +168,10 @@ async function executeFindTopPlayers(supabase: any, args: { stat: string, limit?
     avgGkStats: p.avgGkStats,
   }));
 
-  return { players, stat_name: stat, stat_value_key: args.stat };
+  return { players, stat_name: stat };
 }
 
-Deno.serve(async (req) => {
+serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -205,24 +183,20 @@ Deno.serve(async (req) => {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
-    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY không được cấu hình");
+    if (!GEMINI_API_KEY) {
+      throw new Error("GEMINI_API_KEY không được cấu hình");
+    }
 
     const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
 
-    // Gọi Gemini với tool support - using gemini-1.5-flash for stability
-    // Using gemini-1.5-flash-latest for better quota availability
     const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`;
 
     const conversationHistory = messages || [];
-    const query = userQuery || (conversationHistory.length > 0 ? conversationHistory[conversationHistory.length - 1].content : "");
 
-    // First call to Gemini
-    let geminiMessages = [
-      ...conversationHistory.map((msg: any) => ({
-        role: msg.role === "assistant" ? "model" : "user",
-        parts: [{ text: msg.content }]
-      }))
-    ];
+    let geminiMessages = conversationHistory.map((msg: any) => ({
+      role: msg.role === "assistant" ? "model" : "user",
+      parts: [{ text: msg.content }]
+    }));
 
     if (userQuery) {
       geminiMessages.push({
@@ -241,7 +215,7 @@ Deno.serve(async (req) => {
       }
     };
 
-    console.log("Gọi Gemini lần 1...");
+    console.log("Calling Gemini API...");
     const response1 = await fetch(geminiUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -252,23 +226,14 @@ Deno.serve(async (req) => {
       const errorText = await response1.text();
       console.error("Gemini error:", errorText);
       
-      // Parse error to check for rate limit
-      try {
-        const errorJson = JSON.parse(errorText);
-        if (response1.status === 429 || errorJson?.error?.code === 429) {
-          return new Response(
-            JSON.stringify({ 
-              error: "Đã vượt quá giới hạn API. Vui lòng đợi vài giây và thử lại.",
-              retryAfter: 10 
-            }),
-            { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
-        }
-      } catch (e) {
-        // Not JSON, continue with generic error
+      if (response1.status === 429) {
+        return new Response(
+          JSON.stringify({ error: "Đã vượt quá giới hạn API. Vui lòng đợi vài giây và thử lại.", retryAfter: 10 }),
+          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
       }
       
-      throw new Error(`Lỗi khi gọi Gemini API`);
+      throw new Error("Lỗi khi gọi Gemini API");
     }
 
     const data1 = await response1.json();
@@ -278,20 +243,18 @@ Deno.serve(async (req) => {
       throw new Error("Không nhận được phản hồi từ Gemini");
     }
 
-    // Kiểm tra xem có tool calls không
     const functionCalls = candidate.content?.parts?.filter((part: any) => part.functionCall);
 
     if (functionCalls && functionCalls.length > 0) {
-      console.log("Phát hiện tool calls:", functionCalls.length);
+      console.log("Tool calls detected:", functionCalls.length);
 
-      // Thực thi các tool calls
       const functionResponses = [];
 
       for (const call of functionCalls) {
         const functionName = call.functionCall.name;
         const args = call.functionCall.args;
 
-        console.log(`Thực thi: ${functionName}`, args);
+        console.log(`Executing: ${functionName}`, args);
 
         let result;
         if (functionName === "find_top_players") {
@@ -308,20 +271,13 @@ Deno.serve(async (req) => {
         });
       }
 
-      // Gọi Gemini lần 2 với kết quả từ tools
-      console.log("Gọi Gemini lần 2 với kết quả tools...");
+      console.log("Calling Gemini with tool results...");
 
       const requestBody2 = {
         contents: [
           ...geminiMessages,
-          {
-            role: "model",
-            parts: functionCalls
-          },
-          {
-            role: "user",
-            parts: functionResponses
-          }
+          { role: "model", parts: functionCalls },
+          { role: "user", parts: functionResponses }
         ],
         systemInstruction: {
           parts: [{ text: systemInstruction }]
@@ -338,18 +294,14 @@ Deno.serve(async (req) => {
         const errorText = await response2.text();
         console.error("Gemini error (call 2):", errorText);
         
-        // Check for rate limit on second call
         if (response2.status === 429) {
           return new Response(
-            JSON.stringify({ 
-              error: "Đã vượt quá giới hạn API. Vui lòng đợi vài giây và thử lại.",
-              retryAfter: 10 
-            }),
+            JSON.stringify({ error: "Đã vượt quá giới hạn API. Vui lòng đợi vài giây và thử lại.", retryAfter: 10 }),
             { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
           );
         }
         
-        throw new Error(`Lỗi khi gọi Gemini API lần 2`);
+        throw new Error("Lỗi khi gọi Gemini API lần 2");
       }
 
       const data2 = await response2.json();
@@ -360,7 +312,6 @@ Deno.serve(async (req) => {
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     } else {
-      // Không có tool calls, trả về trực tiếp
       const finalText = candidate.content?.parts?.[0]?.text || "Xin lỗi, tôi không thể trả lời câu hỏi này.";
 
       return new Response(
