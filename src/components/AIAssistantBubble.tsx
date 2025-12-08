@@ -142,7 +142,12 @@ const AIAssistantBubble = () => {
       setMessages([
         {
           role: "assistant",
-          content: t("aiAssistant.welcome", "Xin chào! Tôi là trợ lý AI của Boped FC Tactics. Tôi có thể giúp bạn tìm cầu thủ, tư vấn đội hình, hoặc trả lời các câu hỏi về FC Mobile. Bạn cần giúp gì?")
+          content: t("aiAssistant.welcome", "Xin chào! Tôi là trợ lý AI của Boped FC Tactics. Tôi có thể giúp bạn tìm cầu thủ, tư vấn đội hình, hoặc trả lời các câu hỏi về FC Mobile. Bạn cần giúp gì?"),
+          suggestedQuestions: [
+            t("aiAssistant.suggest1", "Top cầu thủ chạy nhanh nhất"),
+            t("aiAssistant.suggest2", "Hậu vệ hay nhất game"),
+            t("aiAssistant.suggest3", "So sánh Messi và Ronaldo")
+          ]
         }
       ]);
     }
@@ -455,18 +460,20 @@ const AIAssistantBubble = () => {
                         </div>
                       </div>
 
-                      {/* Remaining Players - List View */}
+                      {/* Remaining Players - Grid View */}
                       {message.players.length > 1 && (
-                        <div className="grid grid-cols-1 gap-2 w-full">
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 w-full">
                           {message.players.slice(1).map((player, idx) => (
                             <div
                               key={player.assetId}
-                              className="w-full cursor-pointer hover:bg-muted/50 rounded-lg transition-colors p-1"
+                              className="w-full cursor-pointer hover:scale-105 transition-transform"
                               onClick={() => setSelectedPlayer(player.assetId)}
                             >
-                              <div className="flex items-center gap-3 bg-card border border-border/50 rounded-lg p-2">
-                                <div className="font-bold text-muted-foreground w-6 text-center">#{idx + 2}</div>
-                                <PlayerCard player={player} variant="list" isSelected={false} />
+                              <div className="relative">
+                                <div className="absolute -top-2 -right-2 z-10 bg-muted-foreground/80 text-white px-1.5 py-0.5 rounded text-[10px] font-bold">
+                                  #{idx + 2}
+                                </div>
+                                <PlayerCard player={player} variant="medium" />
                               </div>
                             </div>
                           ))}
