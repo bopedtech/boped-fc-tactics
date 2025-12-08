@@ -17,9 +17,9 @@ export function AIChatIntroDialog({ open, onOpenChange }: AIChatIntroDialogProps
     const [exampleIndex, setExampleIndex] = useState(0);
 
     const examples = [
-        t("aiIntro.example1", "Tìm tiền đạo cắm giá rẻ lương cao?"),
-        t("aiIntro.example2", "Build đội hình Real Madrid 2014..."),
-        t("aiIntro.example3", "So sánh Rô béo và Rô điệu?"),
+        t("aiIntro.example1", "Ai chạy nhanh nhất FC Mobile?"),
+        t("aiIntro.example2", "Top 5 tiền đạo OVR cao nhất"),
+        t("aiIntro.example3", "So sánh Messi TOTY và Ronaldo TOTY?"),
     ];
 
     // Typing effect
