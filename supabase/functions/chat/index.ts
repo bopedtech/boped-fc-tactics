@@ -23,7 +23,7 @@ const tools = [
     functionDeclarations: [
       {
         name: "find_top_players",
-        description: "Tìm kiếm các cầu thủ hàng đầu (Top N) dựa trên một chỉ số. Mặc định luôn tìm 5 cầu thủ trừ khi người dùng hỏi đích danh 'ai nhất'.",
+        description: "Tìm kiếm các cầu thủ hàng đầu (Top N) dựa trên một chỉ số. Mặc định luôn tìm 10 cầu thủ trừ khi người dùng hỏi đích danh 'ai nhất' hoặc số lượng cụ thể.",
         parameters: {
           type: "OBJECT",
           properties: {
@@ -34,7 +34,7 @@ const tools = [
             },
             limit: {
               type: "INTEGER",
-              description: "Số lượng cầu thủ trả về. Mặc định là 5. Chỉ dùng 1 nếu câu hỏi là dạng 'Ai là người... nhất?' (ngôi thứ nhất).",
+              description: "Số lượng cầu thủ trả về. Mặc định là 10. Chỉ dùng 1 nếu câu hỏi là dạng 'Ai là người... nhất?' (ngôi thứ nhất).",
             },
             ascending: {
               type: "BOOLEAN",
@@ -77,11 +77,14 @@ QUY TẮC SỬ DỤNG CÔNG CỤ:
      * Rê bóng/Dribbling = DRI
      * Phòng thủ/Defending = DEF
      * Thể chất/Sức mạnh/Physical = PHY
-   - Nếu hỏi chung chung (top, những cầu thủ...), đặt limit là 5.
+   - Nếu hỏi chung chung (top, những cầu thủ...), đặt limit là 10.
    - Chỉ đặt limit = 1 khi hỏi cụ thể "Ai là người..." (số ít).
    - Nếu hỏi "Ai giỏi nhất/nhanh nhất/cao nhất?", đặt ascending là FALSE.
    - Nếu hỏi "Ai chậm nhất/thấp nhất/tệ nhất?", đặt ascending là TRUE.
 3. Sau khi nhận kết quả từ công cụ, hãy tổng hợp câu trả lời tự nhiên, rõ ràng và thân thiện bằng tiếng Việt.
+   - **Phần 1: Tập trung vào Top 1**. Nhận xét chi tiết về các chỉ số nổi bật của cầu thủ này (Tốc độ, Sút, v.v.), tại sao lại đứng đầu.
+   - **Phần 2: Nhận xét tóm tắt về các cầu thủ còn lại (Top 2-10)**. So sánh ngắn gọn (ví dụ: "Theo sau là X và Y với chỉ số cũng rất cao...").
+   - **Phần 3: Câu hỏi mở/Tương tác**. Hỏi người dùng xem họ có muốn xem chi tiết ai không, hoặc so sánh ai với ai.
 4. QUAN TRỌNG: Trả lời với format JSON có \`playerCards\` và \`suggestedQuestions\`:
 
 Format response:
@@ -96,8 +99,9 @@ Sau đó thêm phần giải thích văn bản ngắn gọn bên ngoài JSON (n�
 Tuy nhiên, để App hiển thị đẹp, bạn hãy trả về JSON block trước, sau đó là lời dẫn.
 
 Về \`suggestedQuestions\`:
-- Dựa vào ngữ cảnh để gợi ý 3 câu hỏi tiếp theo thú vị.
-- Ví dụ: Nếu vừa hỏi về Tốc độ (PAC), gợi ý hỏi về Sút (SHO), hoặc so sánh 2 cầu thủ trong list.
+- Dựa vào ngữ cảnh để gợi ý 3 câu hỏi tiếp theo thú vị để người dùng bấm vào hỏi tiếp.
+- Ví dụ: Nếu vừa hỏi về Tốc độ (PAC), gợi ý: "Ai sút hay nhất?", "So sánh [Top 1] và [Top 2]", "Xem chi tiết [Top 2]".
+- **Tối ưu hóa hành động**: Câu hỏi nên ngắn gọn, kích thích tò mò.
 
 VÍ DỤ RESPONSE TỐT:
 \`\`\`json
@@ -107,7 +111,9 @@ VÍ DỤ RESPONSE TỐT:
 }
 \`\`\`
 
-Dưới đây là danh sách 5 cầu thủ có tốc độ cao nhất FC Mobile. Mbappe dẫn đầu với chỉ số PAC 97...
+Cầu thủ chạy nhanh nhất trong FC Mobile chính là Kylian Mbappé với chỉ số Tốc độ (PAC) lên tới 97. Khả năng bứt tốc của anh ấy là không thể ngăn cản...
+Theo sát phía sau là Vinícius Jr. và Alphonso Davies, những "máy chạy" thực sự bên hành lang cánh. Các vị trí tiếp theo trong Top 10 cũng đều là những cái tên lừng lẫy...
+Bạn có muốn xem so sánh chi tiết giữa Mbappé và Vinícius Jr. không?
 `;
 
 const SYSTEM_INSTRUCTION_EN = `
@@ -126,10 +132,13 @@ TOOL USAGE RULES:
      * Dribbling = DRI
      * Defending/Defense = DEF
      * Physical/Strength = PHY
-   - Default limit is 5. Only set limit=1 if asked "Who is THE ...".
+   - Default limit is 10. Only set limit=1 if asked "Who is THE ...".
    - If asked "Who is the best/fastest/tallest?", set ascending to FALSE.
    - If asked "Who is the worst/slowest/shortest?", set ascending to TRUE.
 3. After receiving tool results, provide a natural, clear, and friendly answer in English.
+   - **Part 1: Focus on Top 1**. Provide detailed commentary on this player's standout stats (Pace, Shooting, etc.), and why they are #1.
+   - **Part 2: Summary of the rest (Top 2-10)**. Brief comparison (e.g., "Following closely are X and Y with also very high stats...").
+   - **Part 3: Open-ended/Interactive**. Ask the user if they want to see details for anyone, or compare A vs B.
 4. IMPORTANT: Respond with JSON format containing \`playerCards\` and \`suggestedQuestions\`:
 
 Response format:
@@ -143,7 +152,9 @@ Response format:
 Followed by a brief text explanation.
 
 About \`suggestedQuestions\`:
-- Suggest 3 interesting follow-up questions based on context.
+- Suggest 3 interesting follow-up questions based on context for the user to click.
+- Example: If asked about Speed (PAC), suggest: "Who has best shooting?", "Compare [Top 1] vs [Top 2]", "Details for [Top 2]".
+- **Action-oriented**: Keep questions short and engaging.
 
 GOOD RESPONSE EXAMPLE:
 \`\`\`json
@@ -175,7 +186,7 @@ async function executeGetPlayerCount(supabase: any, args: { filterPosition?: str
 }
 
 async function executeFindTopPlayers(supabase: any, args: { stat: string, limit?: number, ascending?: boolean }) {
-  const limit = args.limit || 5;
+  const limit = args.limit || 10;
   const ascending = args.ascending || false;
   const stat = args.stat;
 

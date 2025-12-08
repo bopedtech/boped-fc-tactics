@@ -204,8 +204,9 @@ const AIAssistantBubble = () => {
     }
   };
 
-  const handleSend = async () => {
-    if (!inputValue.trim() || isLoading) return;
+  const handleSend = async (content?: string) => {
+    const messageContent = typeof content === 'string' ? content : inputValue;
+    if (!messageContent.trim() || isLoading) return;
 
     // Check daily limits
     const TODAY = new Date().toISOString().split('T')[0];
@@ -235,9 +236,9 @@ const AIAssistantBubble = () => {
       localStorage.setItem(usageKey, (currentUsage + 1).toString());
     }
 
-    const userMessage: Message = { role: "user", content: inputValue };
+    const userMessage: Message = { role: "user", content: messageContent };
     setMessages(prev => [...prev, userMessage]);
-    setInputValue("");
+    if (!content) setInputValue(""); // Only clear input if sent manually
     setIsLoading(true);
 
     try {
@@ -249,7 +250,7 @@ const AIAssistantBubble = () => {
         },
         body: JSON.stringify({
           messages: [...messages, userMessage],
-          userQuery: inputValue,
+          userQuery: messageContent,
           locale: locale
         }),
       });
@@ -513,11 +514,7 @@ const AIAssistantBubble = () => {
                         <button
                           key={idx}
                           className="text-xs bg-primary/10 text-primary hover:bg-primary/20 hover:scale-105 transition-all px-3 py-1.5 rounded-full border border-primary/20 text-left"
-                          onClick={() => {
-                            setInputValue(question);
-                            // Optional: auto send
-                            // handleSend(); // Cannot call handleSend safely here due to closure/state, best to just populate input or use a separate effect
-                          }}
+                          onClick={() => handleSend(question)}
                         >
                           {question}
                         </button>
