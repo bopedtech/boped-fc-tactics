@@ -17,49 +17,47 @@ enum PlayerStat {
   PHYSICAL = "PHY",
 }
 
-// Tool definitions cho AI
+// Tool definitions cho Gemini
 const tools = [
   {
-    type: "function",
-    function: {
-      name: "find_top_players",
-      description: "Tìm kiếm các cầu thủ hàng đầu (Top N) dựa trên một chỉ số. Mặc định luôn tìm 10 cầu thủ trừ khi người dùng hỏi đích danh 'ai nhất' hoặc số lượng cụ thể.",
-      parameters: {
-        type: "object",
-        properties: {
-          stat: {
-            type: "string",
-            enum: Object.values(PlayerStat),
-            description: "Chỉ số dùng để xếp hạng: RATING (OVR), HEIGHT (chiều cao), PAC (tốc độ), SHO (sút), PAS (chuyền), DRI (rê bóng), DEF (phòng thủ), PHY (thể chất)",
+    functionDeclarations: [
+      {
+        name: "find_top_players",
+        description: "Tìm kiếm các cầu thủ hàng đầu (Top N) dựa trên một chỉ số. Mặc định luôn tìm 10 cầu thủ trừ khi người dùng hỏi đích danh 'ai nhất' hoặc số lượng cụ thể.",
+        parameters: {
+          type: "OBJECT",
+          properties: {
+            stat: {
+              type: "STRING",
+              enum: Object.values(PlayerStat),
+              description: "Chỉ số dùng để xếp hạng: RATING (OVR), HEIGHT (chiều cao), PAC (tốc độ), SHO (sút), PAS (chuyền), DRI (rê bóng), DEF (phòng thủ), PHY (thể chất)",
+            },
+            limit: {
+              type: "INTEGER",
+              description: "Số lượng cầu thủ trả về. Mặc định là 10. Chỉ dùng 1 nếu câu hỏi là dạng 'Ai là người... nhất?' (số ít).",
+            },
+            ascending: {
+              type: "BOOLEAN",
+              description: "Sắp xếp tăng dần. FALSE (mặc định) cho giỏi nhất. TRUE cho tệ nhất.",
+            }
           },
-          limit: {
-            type: "integer",
-            description: "Số lượng cầu thủ trả về. Mặc định là 10. Chỉ dùng 1 nếu câu hỏi là dạng 'Ai là người... nhất?' (số ít).",
-          },
-          ascending: {
-            type: "boolean",
-            description: "Sắp xếp tăng dần. false (mặc định) cho giỏi nhất. true cho tệ nhất.",
-          }
-        },
-        required: ["stat"],
-      },
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "get_player_count",
-      description: "Đếm tổng số lượng cầu thủ trong database, có thể lọc theo vị trí.",
-      parameters: {
-        type: "object",
-        properties: {
-          filterPosition: {
-            type: "string",
-            description: "Vị trí cụ thể (ví dụ: 'GK', 'ST', 'CM'). Nếu bỏ trống, đếm tất cả.",
-          },
+          required: ["stat"],
         },
       },
-    }
+      {
+        name: "get_player_count",
+        description: "Đếm tổng số lượng cầu thủ trong database, có thể lọc theo vị trí.",
+        parameters: {
+          type: "OBJECT",
+          properties: {
+            filterPosition: {
+              type: "STRING",
+              description: "Vị trí cụ thể (ví dụ: 'GK', 'ST', 'CM'). Nếu bỏ trống, đếm tất cả.",
+            },
+          },
+        },
+      }
+    ]
   }
 ];
 
@@ -81,8 +79,8 @@ QUY TẮC SỬ DỤNG CÔNG CỤ:
      * Thể chất/Sức mạnh/Physical = PHY
    - Nếu hỏi chung chung (top, những cầu thủ...), đặt limit là 10.
    - Chỉ đặt limit = 1 khi hỏi cụ thể "Ai là người..." (số ít).
-   - Nếu hỏi "Ai giỏi nhất/nhanh nhất/cao nhất?", đặt ascending là false.
-   - Nếu hỏi "Ai chậm nhất/thấp nhất/tệ nhất?", đặt ascending là true.
+   - Nếu hỏi "Ai giỏi nhất/nhanh nhất/cao nhất?", đặt ascending là FALSE.
+   - Nếu hỏi "Ai chậm nhất/thấp nhất/tệ nhất?", đặt ascending là TRUE.
 3. Sau khi nhận kết quả từ công cụ, hãy tổng hợp câu trả lời tự nhiên, rõ ràng và thân thiện bằng tiếng Việt.
    - **Phần 1: Tập trung vào Top 1**. Nhận xét chi tiết về các chỉ số nổi bật của cầu thủ này (Tốc độ, Sút, v.v.), tại sao lại đứng đầu.
    - **Phần 2: Nhận xét tóm tắt về các cầu thủ còn lại (Top 2-10)**. So sánh ngắn gọn (ví dụ: "Theo sau là X và Y với chỉ số cũng rất cao...").
@@ -119,8 +117,8 @@ TOOL USAGE RULES:
      * Defending/Defense = DEF
      * Physical/Strength = PHY
    - Default limit is 10. Only set limit=1 if asked "Who is THE ...".
-   - If asked "Who is the best/fastest/tallest?", set ascending to false.
-   - If asked "Who is the worst/slowest/shortest?", set ascending to true.
+   - If asked "Who is the best/fastest/tallest?", set ascending to FALSE.
+   - If asked "Who is the worst/slowest/shortest?", set ascending to TRUE.
 3. After receiving tool results, provide a natural, clear, and friendly answer in English.
    - **Part 1: Focus on Top 1**. Provide detailed commentary on this player's standout stats (Pace, Shooting, etc.), and why they are #1.
    - **Part 2: Summary of the rest (Top 2-10)**. Brief comparison (e.g., "Following closely are X and Y with also very high stats...").
@@ -203,89 +201,96 @@ Deno.serve(async (req) => {
   try {
     const { messages, userQuery, locale = "vi" } = await req.json();
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY không được cấu hình");
+    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY không được cấu hình");
 
     const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
+
+    // Gọi Gemini với tool support - using gemini-1.5-flash for stability
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
     const conversationHistory = messages || [];
     const query = userQuery || (conversationHistory.length > 0 ? conversationHistory[conversationHistory.length - 1].content : "");
 
-    const systemInstruction = locale === "en" ? SYSTEM_INSTRUCTION_EN : SYSTEM_INSTRUCTION_VI;
-
-    // Build messages for Lovable AI Gateway (OpenAI compatible format)
-    const aiMessages = [
-      { role: "system", content: systemInstruction },
+    // First call to Gemini
+    let geminiMessages = [
       ...conversationHistory.map((msg: any) => ({
-        role: msg.role,
-        content: msg.content
+        role: msg.role === "assistant" ? "model" : "user",
+        parts: [{ text: msg.content }]
       }))
     ];
 
     if (userQuery) {
-      aiMessages.push({ role: "user", content: userQuery });
+      geminiMessages.push({
+        role: "user",
+        parts: [{ text: userQuery }]
+      });
     }
 
-    console.log("Calling Lovable AI Gateway...");
+    const systemInstruction = locale === "en" ? SYSTEM_INSTRUCTION_EN : SYSTEM_INSTRUCTION_VI;
 
-    // First call to Lovable AI with tools
-    const response1 = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const requestBody = {
+      contents: geminiMessages,
+      tools: tools,
+      systemInstruction: {
+        parts: [{ text: systemInstruction }]
+      }
+    };
+
+    console.log("Gọi Gemini lần 1...");
+    const response1 = await fetch(geminiUrl, {
       method: "POST",
-      headers: {
-        "Authorization": `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: aiMessages,
-        tools: tools,
-        tool_choice: "auto",
-      }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(requestBody),
     });
 
     if (!response1.ok) {
       const errorText = await response1.text();
-      console.error("Lovable AI error:", errorText);
+      console.error("Gemini error:", errorText);
       
-      if (response1.status === 429) {
-        return new Response(
-          JSON.stringify({ error: "Đã vượt quá giới hạn yêu cầu. Vui lòng thử lại sau." }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      if (response1.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "Cần nạp thêm credits. Vui lòng kiểm tra workspace settings." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+      // Parse error to check for rate limit
+      try {
+        const errorJson = JSON.parse(errorText);
+        if (response1.status === 429 || errorJson?.error?.code === 429) {
+          return new Response(
+            JSON.stringify({ 
+              error: "Đã vượt quá giới hạn API. Vui lòng đợi vài giây và thử lại.",
+              retryAfter: 10 
+            }),
+            { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+      } catch (e) {
+        // Not JSON, continue with generic error
       }
       
-      throw new Error(`Lỗi AI Gateway: ${response1.status}`);
+      throw new Error(`Lỗi khi gọi Gemini API`);
     }
 
     const data1 = await response1.json();
-    const choice = data1.choices?.[0];
+    const candidate = data1.candidates?.[0];
 
-    if (!choice) {
-      throw new Error("Không nhận được phản hồi từ AI");
+    if (!candidate) {
+      throw new Error("Không nhận được phản hồi từ Gemini");
     }
 
-    // Check if there are tool calls
-    const toolCalls = choice.message?.tool_calls;
+    // Kiểm tra xem có tool calls không
+    const functionCalls = candidate.content?.parts?.filter((part: any) => part.functionCall);
 
-    if (toolCalls && toolCalls.length > 0) {
-      console.log("Tool calls detected:", toolCalls.length);
+    if (functionCalls && functionCalls.length > 0) {
+      console.log("Phát hiện tool calls:", functionCalls.length);
 
-      const toolResults = [];
+      // Thực thi các tool calls
+      const functionResponses = [];
 
-      for (const toolCall of toolCalls) {
-        const functionName = toolCall.function.name;
-        const args = JSON.parse(toolCall.function.arguments);
+      for (const call of functionCalls) {
+        const functionName = call.functionCall.name;
+        const args = call.functionCall.args;
 
-        console.log(`Executing: ${functionName}`, args);
+        console.log(`Thực thi: ${functionName}`, args);
 
         let result;
         if (functionName === "find_top_players") {
@@ -294,48 +299,68 @@ Deno.serve(async (req) => {
           result = await executeGetPlayerCount(supabase, args);
         }
 
-        toolResults.push({
-          tool_call_id: toolCall.id,
-          role: "tool",
-          content: JSON.stringify(result)
+        functionResponses.push({
+          functionResponse: {
+            name: functionName,
+            response: result
+          }
         });
       }
 
-      // Second call with tool results
-      console.log("Calling Lovable AI with tool results...");
+      // Gọi Gemini lần 2 với kết quả từ tools
+      console.log("Gọi Gemini lần 2 với kết quả tools...");
 
-      const response2 = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      const requestBody2 = {
+        contents: [
+          ...geminiMessages,
+          {
+            role: "model",
+            parts: functionCalls
+          },
+          {
+            role: "user",
+            parts: functionResponses
+          }
+        ],
+        systemInstruction: {
+          parts: [{ text: systemInstruction }]
+        }
+      };
+
+      const response2 = await fetch(geminiUrl, {
         method: "POST",
-        headers: {
-          "Authorization": `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
-          messages: [
-            ...aiMessages,
-            choice.message,
-            ...toolResults
-          ],
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestBody2),
       });
 
       if (!response2.ok) {
         const errorText = await response2.text();
-        console.error("Lovable AI error (call 2):", errorText);
-        throw new Error(`Lỗi AI Gateway lần 2: ${response2.status}`);
+        console.error("Gemini error (call 2):", errorText);
+        
+        // Check for rate limit on second call
+        if (response2.status === 429) {
+          return new Response(
+            JSON.stringify({ 
+              error: "Đã vượt quá giới hạn API. Vui lòng đợi vài giây và thử lại.",
+              retryAfter: 10 
+            }),
+            { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        
+        throw new Error(`Lỗi khi gọi Gemini API lần 2`);
       }
 
       const data2 = await response2.json();
-      const finalText = data2.choices?.[0]?.message?.content || "Xin lỗi, tôi không thể trả lời câu hỏi này.";
+      const finalText = data2.candidates?.[0]?.content?.parts?.[0]?.text || "Xin lỗi, tôi không thể trả lời câu hỏi này.";
 
       return new Response(
         JSON.stringify({ response: finalText }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     } else {
-      // No tool calls, return directly
-      const finalText = choice.message?.content || "Xin lỗi, tôi không thể trả lời câu hỏi này.";
+      // Không có tool calls, trả về trực tiếp
+      const finalText = candidate.content?.parts?.[0]?.text || "Xin lỗi, tôi không thể trả lời câu hỏi này.";
 
       return new Response(
         JSON.stringify({ response: finalText }),
