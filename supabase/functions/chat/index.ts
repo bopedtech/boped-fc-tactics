@@ -1,4 +1,5 @@
-// FC Mobile AI Chatbot - Using Lovable AI Gateway
+// FC Mobile AI Chatbot v2 - Using Lovable AI Gateway
+// Updated: Dynamic suggestions & rich responses
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
