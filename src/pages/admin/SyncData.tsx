@@ -3,7 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Loader2, Database, Trophy, Play } from "lucide-react";
+import { Loader2, Database, Trophy, Play, ArrowRightLeft, Trash2 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function SyncData() {
   const [syncingPlayers, setSyncingPlayers] = useState(false);
@@ -27,6 +28,11 @@ export default function SyncData() {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [translating, setTranslating] = useState(false);
   const [translationResult, setTranslationResult] = useState<any>(null);
+  
+  // Migration states
+  const [migrating, setMigrating] = useState(false);
+  const [migrationResult, setMigrationResult] = useState<any>(null);
+  const [clearExisting, setClearExisting] = useState(false);
 
   const handleSyncPlayers = async (mode: 'test' | 'full' = 'test') => {
     try {
@@ -322,6 +328,33 @@ export default function SyncData() {
     }
   };
 
+  const handleMigrateData = async () => {
+    try {
+      setMigrating(true);
+      setMigrationResult(null);
+      toast.info('Đang bắt đầu di chuyển dữ liệu từ Supabase cũ...');
+
+      const { data, error } = await supabase.functions.invoke('migrate-data', {
+        body: { clearExisting }
+      });
+
+      if (error) throw error;
+
+      setMigrationResult(data);
+      if (data.success) {
+        toast.success(`Di chuyển thành công! Tổng: ${data.message}`);
+      } else {
+        toast.warning(`Di chuyển hoàn tất với một số lỗi. Xem chi tiết bên dưới.`);
+      }
+    } catch (error: any) {
+      console.error('Migration error:', error);
+      setMigrationResult({ success: false, error: error.message });
+      toast.error('Lỗi khi di chuyển dữ liệu: ' + error.message);
+    } finally {
+      setMigrating(false);
+    }
+  };
+
   return (
     <div className="space-y-8">
       <div>
@@ -330,6 +363,85 @@ export default function SyncData() {
           Quản lý đồng bộ dữ liệu từ Renderz API và các nguồn bên ngoài
         </p>
       </div>
+
+      {/* Migration from Old Supabase - Full Width */}
+      <Card className="border-2 border-primary/50 bg-primary/5">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <ArrowRightLeft className="w-5 h-5 text-primary" />
+            <CardTitle className="text-primary">🔥 Di Chuyển Dữ Liệu từ Supabase Cũ</CardTitle>
+          </div>
+          <CardDescription>
+            Tự động di chuyển toàn bộ dữ liệu từ Supabase project cũ (nhdmgiyoienkixokcoue) sang Lovable Cloud hiện tại
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="clearExisting" 
+              checked={clearExisting}
+              onCheckedChange={(checked) => setClearExisting(checked as boolean)}
+            />
+            <label
+              htmlFor="clearExisting"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              <span className="flex items-center gap-2">
+                <Trash2 className="w-4 h-4 text-destructive" />
+                Xóa dữ liệu cũ trước khi import (cẩn thận!)
+              </span>
+            </label>
+          </div>
+          
+          <Button
+            onClick={handleMigrateData}
+            disabled={migrating}
+            className="w-full"
+            size="lg"
+          >
+            {migrating ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Đang di chuyển dữ liệu...
+              </>
+            ) : (
+              <>
+                <ArrowRightLeft className="mr-2 h-4 w-4" />
+                Bắt Đầu Di Chuyển Toàn Bộ Dữ Liệu
+              </>
+            )}
+          </Button>
+          
+          {migrationResult && (
+            <div className={`p-4 rounded-lg ${migrationResult.success ? 'bg-green-50 dark:bg-green-950' : 'bg-red-50 dark:bg-red-950'}`}>
+              <p className="text-sm font-medium">
+                {migrationResult.success ? '✓ Thành công' : '✗ Có lỗi'}
+              </p>
+              <p className="text-xs mt-1">
+                {migrationResult.message || migrationResult.error}
+              </p>
+              {migrationResult.results && (
+                <div className="mt-3 space-y-1">
+                  <p className="text-xs font-medium">Chi tiết theo bảng:</p>
+                  {Object.entries(migrationResult.results).map(([table, result]: [string, any]) => (
+                    <div key={table} className="text-xs flex justify-between">
+                      <span>{table}</span>
+                      <span className={result.success ? 'text-green-600' : 'text-red-600'}>
+                        {result.success ? `✓ ${result.count} rows` : `✗ ${result.error}`}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {migrationResult.failedTables && migrationResult.failedTables.length > 0 && (
+                <p className="text-xs mt-2 text-red-600">
+                  Bảng lỗi: {migrationResult.failedTables.join(', ')}
+                </p>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Import Dictionary - Full Width */}
       <Card>
