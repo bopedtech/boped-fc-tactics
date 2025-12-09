@@ -1,1 +1,40 @@
 project_id = "yvhwuobvdqxqpwkkohko"
+
+[functions.chat]
+verify_jwt = false
+
+[functions.sync-players]
+verify_jwt = false
+
+[functions.sync-leagues]
+verify_jwt = false
+
+[functions.sync-renderz-nations]
+verify_jwt = false
+
+[functions.sync-renderz-teams]
+verify_jwt = false
+
+[functions.sync-renderz-programs]
+verify_jwt = false
+
+[functions.sync-renderz-traits]
+verify_jwt = false
+
+[functions.sync-renderz-skillMoves]
+verify_jwt = false
+
+[functions.sync-renderz-celebrations]
+verify_jwt = false
+
+[functions.import-localization-dictionary]
+verify_jwt = false
+
+[functions.translate-localization]
+verify_jwt = false
+
+[functions.sync-all-daily]
+verify_jwt = false
+
+[functions.admin-stats]
+verify_jwt = false
