@@ -86,7 +86,7 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
         .order('displayName', { ascending: true });
       
       if (error) throw error;
-      setLeagues(data || []);
+      setLeagues((data as any) || []);
     } catch (error) {
       console.error('Error fetching leagues:', error);
     }
@@ -100,7 +100,7 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
         .order('displayName', { ascending: true });
       
       if (error) throw error;
-      setNations(data || []);
+      setNations((data as any) || []);
     } catch (error) {
       console.error('Error fetching nations:', error);
     }
@@ -114,7 +114,7 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
         .order('displayName', { ascending: true });
       
       if (error) throw error;
-      setTeams(data || []);
+      setTeams((data as any) || []);
     } catch (error) {
       console.error('Error fetching teams:', error);
     }
@@ -128,7 +128,7 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
         .order('displayName', { ascending: true });
       
       if (error) throw error;
-      setPrograms(data || []);
+      setPrograms((data as any) || []);
     } catch (error) {
       console.error('Error fetching programs:', error);
     }
@@ -142,7 +142,7 @@ export default function PlayerFilters({ filters, onFilterChange, onReset }: Play
         .order('displayName', { ascending: true });
       
       if (error) throw error;
-      setTraits(data || []);
+      setTraits((data as any) || []);
     } catch (error) {
       console.error('Error fetching traits:', error);
     }

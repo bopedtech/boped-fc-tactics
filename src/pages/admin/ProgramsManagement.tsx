@@ -113,7 +113,7 @@ export default function ProgramsManagement() {
         // Update
         const { error } = await supabase
           .from("programs")
-          .update(programData)
+          .update(programData as any)
           .eq("id", selectedProgram.id);
 
         if (error) throw error;
@@ -122,7 +122,7 @@ export default function ProgramsManagement() {
         // Create
         const { error } = await supabase
           .from("programs")
-          .insert(programData);
+          .insert(programData as any);
 
         if (error) throw error;
         toast.success("Tạo program mới thành công");

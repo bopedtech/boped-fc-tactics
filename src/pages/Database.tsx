@@ -141,7 +141,7 @@ export default function Database() {
         .select("id, displayName, image")
         .order("displayName", { ascending: true });
       if (error) throw error;
-      if (data) setCountriesData(data);
+      if (data) setCountriesData(data as any);
     } catch (error) {
       console.error("Error fetching nations:", error);
     }
@@ -154,7 +154,7 @@ export default function Database() {
         .select("id, displayName, image")
         .order("displayName", { ascending: true });
       if (error) throw error;
-      if (data) setTeamsData(data);
+      if (data) setTeamsData(data as any);
     } catch (error) {
       console.error("Error fetching teams:", error);
     }
@@ -167,15 +167,15 @@ export default function Database() {
         .select("id, displayName, image")
         .order("displayName", { ascending: true });
       if (error) throw error;
-      if (data) setLeaguesData(data);
+      if (data) setLeaguesData(data as any);
     } catch (error) {
       console.error("Error fetching leagues:", error);
     }
   };
 
   const fetchPlayersPage = async ({ pageParam = 0 }) => {
-    let query = supabase
-      .from("players")
+    let query = (supabase
+      .from("players") as any)
       .select("assetId, commonName, cardName, firstName, lastName, rating, position, nation, club, league, images, avgStats, avgGkStats, auctionable, rank, createdAt, source, height, weight, skillMovesLevel, weakFoot, foot, workRates, traits, potentialPositions", { count: "exact" })
       .eq("is_visible", true); // Only show visible players to users
 
