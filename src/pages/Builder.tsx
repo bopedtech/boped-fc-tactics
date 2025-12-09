@@ -36,10 +36,10 @@ interface Player {
 }
 
 interface Formation {
-  id: number;
+  id: string;
   name: string;
-  nameEn: string;
-  category: string;
+  nameEn?: string;
+  category?: string;
   positions: string[];
 }
 
@@ -262,7 +262,7 @@ export default function Builder() {
   };
 
   const handleFormationChange = (formationId: string) => {
-    const formation = formations.find(f => f.id === parseInt(formationId));
+    const formation = formations.find(f => f.id === formationId);
     if (formation) {
       setSelectedFormation(formation);
       // Clear lineup when changing formation

@@ -242,7 +242,7 @@ export default function Profile() {
           .insert({
             user_id: user.id,
             ...validatedData,
-          });
+          } as any);
 
         if (error) throw error;
       }

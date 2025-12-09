@@ -214,7 +214,7 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
             .maybeSingle();
           
           if (nationData) {
-            setNationInfo(nationData);
+            setNationInfo(nationData as any);
           }
         }
       }
@@ -230,7 +230,7 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
             .single();
           
           if (leagueData) {
-            setLeagueInfo(leagueData);
+            setLeagueInfo(leagueData as any);
           }
         }
       }
@@ -246,7 +246,7 @@ export default function PlayerDetailDialog({ assetId, open, onOpenChange }: Play
             .maybeSingle();
           
           if (clubData) {
-            setClubInfo(clubData);
+            setClubInfo(clubData as any);
           }
         }
       }
