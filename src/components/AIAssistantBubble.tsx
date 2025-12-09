@@ -364,13 +364,27 @@ const AIAssistantBubble = () => {
       // Remove markdown formatting
       displayContent = displayContent.replace(/\*\*/g, '').replace(/\*/g, '');
 
-      // Fallback: If no suggestedQuestions from Gemini, generate default ones based on context
+      // AI should always provide dynamic suggestedQuestions based on context
+      // Only use minimal fallback if AI completely fails
       if (!suggestedQuestions || suggestedQuestions.length === 0) {
-        suggestedQuestions = [
-          t("aiAssistant.fallbackSuggest1", "Ai chạy nhanh nhất FC Mobile?"),
-          t("aiAssistant.fallbackSuggest2", "Top 5 cầu thủ OVR cao nhất"),
-          t("aiAssistant.fallbackSuggest3", "Cầu thủ rê bóng hay nhất?")
-        ];
+        // Generate context-aware fallback based on the response content
+        const contentLower = displayContent.toLowerCase();
+        if (contentLower.includes('tốc độ') || contentLower.includes('nhanh') || contentLower.includes('pace') || contentLower.includes('speed')) {
+          suggestedQuestions = [
+            locale === 'vi' ? "Ai rê bóng hay nhất?" : "Best dribblers?",
+            locale === 'vi' ? "So sánh với Mbappé?" : "Compare with Mbappé?",
+          ];
+        } else if (contentLower.includes('tiền đạo') || contentLower.includes('striker') || contentLower.includes('st ')) {
+          suggestedQuestions = [
+            locale === 'vi' ? "Tiền vệ hỗ trợ tốt nhất?" : "Best supporting CAM?",
+            locale === 'vi' ? "Hậu vệ tấn công hay?" : "Attack-minded fullbacks?",
+          ];
+        } else {
+          suggestedQuestions = [
+            locale === 'vi' ? "Cầu thủ OVR cao nhất?" : "Highest OVR players?",
+            locale === 'vi' ? "Ai phòng ngự tốt nhất?" : "Best defenders?",
+          ];
+        }
       }
 
       setMessages(prev => [...prev, {
