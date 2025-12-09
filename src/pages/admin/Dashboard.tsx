@@ -25,26 +25,35 @@ export default function AdminDashboard() {
     try {
       setLoading(true);
 
-      // Fetch all stats in parallel
+      // Fetch table counts in parallel
       const [
         playersCount,
-        usersCount,
         squadsCount,
         leaguesCount,
         teamsCount,
         nationsCount,
       ] = await Promise.all([
         supabase.from("players").select("*", { count: "exact", head: true }),
-        supabase.auth.admin.listUsers(),
         supabase.from("squads").select("*", { count: "exact", head: true }),
         supabase.from("leagues").select("*", { count: "exact", head: true }),
         supabase.from("teams").select("*", { count: "exact", head: true }),
         supabase.from("nations").select("*", { count: "exact", head: true }),
       ]);
 
+      // Fetch user count securely via Edge Function
+      let userCount = 0;
+      try {
+        const { data: adminStats, error: adminError } = await supabase.functions.invoke('admin-stats');
+        if (!adminError && adminStats?.userCount) {
+          userCount = adminStats.userCount;
+        }
+      } catch (err) {
+        console.warn("Could not fetch user count from admin-stats:", err);
+      }
+
       setStats({
         totalPlayers: playersCount.count || 0,
-        totalUsers: usersCount.data?.users.length || 0,
+        totalUsers: userCount,
         totalSquads: squadsCount.count || 0,
         totalLeagues: leaguesCount.count || 0,
         totalTeams: teamsCount.count || 0,

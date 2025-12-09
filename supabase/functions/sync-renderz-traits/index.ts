@@ -37,6 +37,19 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Validate sync API key for security
+    const syncApiSecret = Deno.env.get('SYNC_API_SECRET');
+    const providedSecret = req.headers.get('x-sync-secret');
+    const isInternalCall = req.headers.get('x-internal-call') === 'true';
+    
+    if (syncApiSecret && !isInternalCall && providedSecret !== syncApiSecret) {
+      console.error('Unauthorized sync-renderz-traits attempt');
+      return new Response(
+        JSON.stringify({ success: false, error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);

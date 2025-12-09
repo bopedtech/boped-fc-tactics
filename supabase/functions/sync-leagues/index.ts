@@ -26,6 +26,19 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Validate sync API key for security
+    const syncApiSecret = Deno.env.get('SYNC_API_SECRET');
+    const providedSecret = req.headers.get('x-sync-secret');
+    const isInternalCall = req.headers.get('x-internal-call') === 'true';
+    
+    if (syncApiSecret && !isInternalCall && providedSecret !== syncApiSecret) {
+      console.error('Unauthorized sync attempt');
+      return new Response(
+        JSON.stringify({ success: false, error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     console.log('=== Starting Universal Leagues Sync ===');
 
     // Use Season 24 as reference to fetch universal leagues data
