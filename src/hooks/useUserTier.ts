@@ -35,11 +35,11 @@ export const useUserTier = (user: User | null): UserTierData => {
       }
 
       try {
-        const { data, error } = await supabase
-          .from('profiles')
+        const { data, error } = await (supabase
+          .from('profiles') as any)
           .select('subscriptionTier, aiPromptLimitDaily, subscriptionExpiresAt')
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle();
 
         // Check for admin role
         const { data: roles } = await supabase
@@ -52,6 +52,18 @@ export const useUserTier = (user: User | null): UserTierData => {
         const isAdmin = !!roles;
 
         if (error) throw error;
+
+        // If no profile exists, use defaults
+        if (!data) {
+          setTierData({
+            tier: 'FREE',
+            loading: false,
+            aiPromptLimitDaily: 5,
+            subscriptionExpiresAt: null,
+            isAdmin,
+          });
+          return;
+        }
 
         // Check if subscription is still valid
         const isExpired = data.subscriptionExpiresAt
