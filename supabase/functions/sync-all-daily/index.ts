@@ -12,6 +12,18 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Validate sync API key for security
+    const syncApiSecret = Deno.env.get('SYNC_API_SECRET');
+    const providedSecret = req.headers.get('x-sync-secret');
+    
+    if (syncApiSecret && providedSecret !== syncApiSecret) {
+      console.error('Unauthorized sync-all-daily attempt');
+      return new Response(
+        JSON.stringify({ success: false, error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     console.log('=== Starting Daily Sync Job ===');
     console.log('Triggered at:', new Date().toISOString());
     console.log('Vietnam Time:', new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' }));
@@ -39,6 +51,7 @@ Deno.serve(async (req) => {
             automated: true,
             scheduledRun: true 
           },
+          headers: { 'x-internal-call': 'true' }
         });
 
         const duration = Date.now() - startTime;

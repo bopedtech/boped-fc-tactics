@@ -214,6 +214,20 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Validate sync API key for security
+    const syncApiSecret = Deno.env.get('SYNC_API_SECRET');
+    const providedSecret = req.headers.get('x-sync-secret');
+    
+    // Allow if: no secret configured (dev mode), or secret matches, or called from another edge function
+    const isInternalCall = req.headers.get('x-internal-call') === 'true';
+    if (syncApiSecret && !isInternalCall && providedSecret !== syncApiSecret) {
+      console.error('Unauthorized sync attempt - invalid or missing x-sync-secret');
+      return new Response(
+        JSON.stringify({ success: false, error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const { mode = 'test', maxPages = 5 } = await req.json();
     
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
