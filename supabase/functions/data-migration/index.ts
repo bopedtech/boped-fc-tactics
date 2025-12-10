@@ -1,15 +1,14 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.2';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.75.1';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Tables to migrate (in order to respect dependencies)
 const TABLES_TO_MIGRATE = [
   'localization_dictionary',
   'nations',
-  'leagues', 
+  'leagues',
   'teams',
   'programs',
   'traits',
@@ -19,62 +18,60 @@ const TABLES_TO_MIGRATE = [
   'players',
 ];
 
-Deno.serve(async (req: Request) => {
+function getConflictColumn(table: string): string {
+  if (table === 'localization_dictionary') return 'key';
+  if (table === 'players') return 'playerId';
+  return 'id';
+}
+
+Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const body = await req.json().catch(() => ({}));
-    const { tables, clearExisting = false } = body;
-    
-    // Old Supabase project
+    const tables = body.tables || TABLES_TO_MIGRATE;
+    const clearExisting = body.clearExisting || false;
+
     const oldSupabaseUrl = Deno.env.get('OLD_SUPABASE_URL');
     const oldSupabaseKey = Deno.env.get('OLD_SUPABASE_SERVICE_ROLE_KEY');
-    
-    // Current Lovable Cloud project
     const newSupabaseUrl = Deno.env.get('SUPABASE_URL');
     const newSupabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
     console.log('Starting migration...');
     console.log('Old URL:', oldSupabaseUrl ? 'Set' : 'Missing');
-    console.log('Old Key:', oldSupabaseKey ? 'Set' : 'Missing');
     console.log('New URL:', newSupabaseUrl ? 'Set' : 'Missing');
-    console.log('New Key:', newSupabaseKey ? 'Set' : 'Missing');
 
     if (!oldSupabaseUrl || !oldSupabaseKey) {
-      throw new Error('Missing OLD_SUPABASE_URL or OLD_SUPABASE_SERVICE_ROLE_KEY');
+      return new Response(
+        JSON.stringify({ success: false, error: 'Missing OLD_SUPABASE_URL or OLD_SUPABASE_SERVICE_ROLE_KEY' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     if (!newSupabaseUrl || !newSupabaseKey) {
-      throw new Error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
+      return new Response(
+        JSON.stringify({ success: false, error: 'Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const oldClient = createClient(oldSupabaseUrl, oldSupabaseKey);
     const newClient = createClient(newSupabaseUrl, newSupabaseKey);
 
-    const tablesToMigrate = tables || TABLES_TO_MIGRATE;
     const results: Record<string, { success: boolean; count?: number; error?: string }> = {};
 
-    for (const table of tablesToMigrate) {
-      console.log(`Starting migration for table: ${table}`);
-      
+    for (const table of tables) {
+      console.log('Migrating table:', table);
+
       try {
-        // Clear existing data if requested
         if (clearExisting) {
-          console.log(`Clearing existing data in ${table}...`);
-          const { error: deleteError } = await newClient
-            .from(table)
-            .delete()
-            .neq('id', '00000000-0000-0000-0000-000000000000');
-          
-          if (deleteError) {
-            console.log(`Warning: Could not clear ${table}: ${deleteError.message}`);
-          }
+          console.log('Clearing existing data in', table);
+          await newClient.from(table).delete().neq('id', '00000000-0000-0000-0000-000000000000');
         }
 
-        // Fetch all data from old project (paginated for large tables)
-        let allData: unknown[] = [];
+        let allData: any[] = [];
         let page = 0;
         const pageSize = 1000;
         let hasMore = true;
@@ -86,13 +83,13 @@ Deno.serve(async (req: Request) => {
             .range(page * pageSize, (page + 1) * pageSize - 1);
 
           if (error) {
-            throw new Error(`Failed to fetch from ${table}: ${error.message}`);
+            throw new Error('Failed to fetch from ' + table + ': ' + error.message);
           }
 
           if (data && data.length > 0) {
-            allData = [...allData, ...data];
+            allData = allData.concat(data);
             page++;
-            console.log(`Fetched ${allData.length} rows from ${table}...`);
+            console.log('Fetched', allData.length, 'rows from', table);
           }
 
           hasMore = data !== null && data.length === pageSize;
@@ -100,40 +97,39 @@ Deno.serve(async (req: Request) => {
 
         if (allData.length === 0) {
           results[table] = { success: true, count: 0 };
-          console.log(`No data to migrate for ${table}`);
+          console.log('No data to migrate for', table);
           continue;
         }
 
-        // Insert data in batches
         const batchSize = 500;
         let insertedCount = 0;
 
         for (let i = 0; i < allData.length; i += batchSize) {
           const batch = allData.slice(i, i + batchSize);
-          
+
           const { error: insertError } = await newClient
             .from(table)
-            .upsert(batch, { 
+            .upsert(batch, {
               onConflict: getConflictColumn(table),
-              ignoreDuplicates: false 
+              ignoreDuplicates: false,
             });
 
           if (insertError) {
-            console.error(`Error inserting batch into ${table}: ${insertError.message}`);
-            throw new Error(`Failed to insert into ${table}: ${insertError.message}`);
+            console.error('Error inserting batch into', table, insertError.message);
+            throw new Error('Failed to insert into ' + table + ': ' + insertError.message);
           }
 
           insertedCount += batch.length;
-          console.log(`Inserted ${insertedCount}/${allData.length} rows into ${table}`);
+          console.log('Inserted', insertedCount, '/', allData.length, 'rows into', table);
         }
 
         results[table] = { success: true, count: insertedCount };
-        console.log(`Successfully migrated ${insertedCount} rows to ${table}`);
+        console.log('Successfully migrated', insertedCount, 'rows to', table);
 
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        console.error(`Error migrating ${table}:`, error);
-        results[table] = { success: false, error: errorMessage };
+        const msg = error instanceof Error ? error.message : String(error);
+        console.error('Error migrating', table, msg);
+        results[table] = { success: false, error: msg };
       }
     }
 
@@ -142,13 +138,13 @@ Deno.serve(async (req: Request) => {
       .reduce((sum, r) => sum + (r.count || 0), 0);
 
     const failedTables = Object.entries(results)
-      .filter(([, r]) => !r.success)
-      .map(([table]) => table);
+      .filter(([_, r]) => !r.success)
+      .map(([t]) => t);
 
     return new Response(
       JSON.stringify({
         success: failedTables.length === 0,
-        message: `Migration complete. Total rows migrated: ${totalMigrated}`,
+        message: 'Migration complete. Total rows migrated: ' + totalMigrated,
         results,
         failedTables,
       }),
@@ -156,25 +152,11 @@ Deno.serve(async (req: Request) => {
     );
 
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error('Migration error:', error);
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error('Migration error:', msg);
     return new Response(
-      JSON.stringify({ success: false, error: errorMessage }),
+      JSON.stringify({ success: false, error: msg }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
-
-// Helper function to get the primary key column for upsert
-function getConflictColumn(table: string): string {
-  switch (table) {
-    case 'localization_dictionary':
-      return 'key';
-    case 'formations':
-      return 'id';
-    case 'players':
-      return 'playerId';
-    default:
-      return 'id';
-  }
-}
