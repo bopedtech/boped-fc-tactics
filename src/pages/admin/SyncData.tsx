@@ -334,7 +334,7 @@ export default function SyncData() {
       setMigrationResult(null);
       toast.info('Đang bắt đầu di chuyển dữ liệu từ Supabase cũ...');
 
-      const { data, error } = await supabase.functions.invoke('migrate-data', {
+      const { data, error } = await supabase.functions.invoke('data-migration', {
         body: { clearExisting }
       });
 

@@ -39,5 +39,5 @@ verify_jwt = false
 [functions.admin-stats]
 verify_jwt = false
 
-[functions.migrate-data]
+[functions.data-migration]
 verify_jwt = false
