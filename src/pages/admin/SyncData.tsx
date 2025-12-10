@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { toast } from "sonner";
 import { Loader2, Database, Trophy, Play, ArrowRightLeft, Trash2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import * as syncService from "@/services/sync-service";
 
 export default function SyncData() {
   const [syncingPlayers, setSyncingPlayers] = useState(false);
@@ -34,60 +35,31 @@ export default function SyncData() {
   const [migrationResult, setMigrationResult] = useState<any>(null);
   const [clearExisting, setClearExisting] = useState(false);
 
-  const handleSyncPlayers = async (mode: 'test' | 'full' = 'test') => {
+  // ===================== PLAYERS - Direct API Call =====================
+  const handleSyncPlayers = async () => {
     try {
       setSyncingPlayers(true);
       setPlayersResult(null);
-      
-      let totalSyncedOverall = 0;
-      let totalPages = 0;
-      let hasMore = true;
-      let iterations = 0;
-      const MAX_ITERATIONS = 334; // Allow up to 1000 pages (334 iterations × 3 pages)
-      
-      toast.info(`Đang bắt đầu đồng bộ cầu thủ (${mode === 'test' ? '5 trang test' : 'toàn bộ'})...`);
+      toast.info('Đang bắt đầu đồng bộ cầu thủ từ Renderz API...');
 
-      while (hasMore && iterations < MAX_ITERATIONS) {
-        iterations++;
-        
-        const { data, error } = await supabase.functions.invoke('sync-players', {
-          body: { 
-            mode: mode,
-            maxPages: mode === 'test' ? 5 : undefined
-          }
-        });
-
-        if (error) throw error;
-
-        // Update overall totals
-        totalSyncedOverall = data.totalPlayers || totalSyncedOverall;
-        totalPages += data.totalPages || 0;
-        hasMore = data.hasMore && !data.isComplete;
-        
-        // Show progress
-        if (data.isComplete) {
-          toast.success(`🎉 Hoàn tất đồng bộ! Tổng cộng ${totalSyncedOverall} cầu thủ đã được đồng bộ.`);
-          break;
-        } else if (hasMore) {
-          toast.info(`Đã đồng bộ ${data.batchPlayers} cầu thủ (Tổng: ${totalSyncedOverall}, ${totalPages} trang). Tiếp tục...`);
-          // Small delay between batches
-          await new Promise(resolve => setTimeout(resolve, 2000));
+      const result = await syncService.syncPlayers((progress) => {
+        if (progress.isComplete) {
+          toast.success(`🎉 Hoàn tất! Đã đồng bộ ${progress.totalSynced} cầu thủ`);
+        } else if (progress.totalSynced % 500 === 0) {
+          toast.info(`Đã đồng bộ ${progress.totalSynced} cầu thủ...`);
         }
-      }
-
-      if (iterations >= MAX_ITERATIONS && hasMore) {
-        toast.warning(`Đã đạt giới hạn ${MAX_ITERATIONS} lần gọi. Vui lòng chạy lại để tiếp tục từ vị trí đã dừng.`);
-      }
-
-      setPlayersResult({ 
-        success: true, 
-        totalPlayers: totalSyncedOverall,
-        totalPages: totalPages,
-        message: `Đã hoàn thành đồng bộ ${totalSyncedOverall} cầu thủ từ ${totalPages} trang`
       });
-    } catch (error) {
+
+      setPlayersResult(result);
+      if (result.success) {
+        toast.success(result.message);
+      } else {
+        toast.error(result.error || result.message);
+      }
+    } catch (error: any) {
       console.error("Error syncing players:", error);
-      toast.error("Lỗi khi đồng bộ cầu thủ: " + (error as Error).message);
+      toast.error("Lỗi khi đồng bộ cầu thủ: " + error.message);
+      setPlayersResult({ success: false, error: error.message });
     } finally {
       setSyncingPlayers(false);
     }
@@ -105,6 +77,7 @@ export default function SyncData() {
     }
   };
 
+  // Import dictionary - still uses edge function for now
   const handleImportDictionary = async () => {
     try {
       setSyncingDict(true);
@@ -127,14 +100,30 @@ export default function SyncData() {
       
       toast.info(`Đang import ${Object.keys(dictionaryData).length} mục...`);
       
-      const { data, error } = await supabase.functions.invoke('import-localization-dictionary', {
-        body: dictionaryData
-      });
+      // Direct import to database
+      const entries = Object.entries(dictionaryData).map(([key, value]) => ({
+        key,
+        value_en: value as string,
+        source: 'import',
+        updated_at: new Date().toISOString()
+      }));
       
-      if (error) throw error;
+      // Batch upsert
+      const batchSize = 500;
+      let imported = 0;
       
-      setDictSyncResult(data);
-      toast.success(`✓ Đã import ${data.totalImported} mục từ điển`);
+      for (let i = 0; i < entries.length; i += batchSize) {
+        const batch = entries.slice(i, i + batchSize);
+        const { error } = await supabase
+          .from('localization_dictionary')
+          .upsert(batch, { onConflict: 'key' });
+        
+        if (error) throw error;
+        imported += batch.length;
+      }
+      
+      setDictSyncResult({ success: true, totalImported: imported });
+      toast.success(`✓ Đã import ${imported} mục từ điển`);
       setUploadedFile(null);
     } catch (error: any) {
       console.error('Dictionary import error:', error);
@@ -145,146 +134,175 @@ export default function SyncData() {
     }
   };
 
+  // ===================== LEAGUES - Direct API Call =====================
   const handleSyncLeagues = async () => {
     try {
       setSyncingLeagues(true);
       setLeaguesResult(null);
-      toast.info('Đang đồng bộ dữ liệu giải đấu toàn cục...');
+      toast.info('Đang đồng bộ dữ liệu giải đấu...');
 
-      const { data, error } = await supabase.functions.invoke('sync-leagues');
-
-      if (error) throw error;
-
-      setLeaguesResult(data);
-      toast.success("Đồng bộ giải đấu thành công!");
-    } catch (error) {
+      const result = await syncService.syncLeagues();
+      setLeaguesResult(result);
+      
+      if (result.success) {
+        toast.success(result.message);
+      } else {
+        toast.error(result.error || result.message);
+      }
+    } catch (error: any) {
       console.error("Error syncing leagues:", error);
-      toast.error("Lỗi khi đồng bộ giải đấu: " + (error as Error).message);
+      toast.error("Lỗi khi đồng bộ giải đấu: " + error.message);
+      setLeaguesResult({ success: false, error: error.message });
     } finally {
       setSyncingLeagues(false);
     }
   };
 
+  // ===================== NATIONS - Direct API Call =====================
   const handleSyncNations = async () => {
     try {
       setSyncingNations(true);
       setNationsResult(null);
       toast.info('Đang đồng bộ dữ liệu quốc gia...');
 
-      const { data, error } = await supabase.functions.invoke('sync-renderz-nations');
-
-      if (error) throw error;
-
-      setNationsResult(data);
-      toast.success("Đồng bộ quốc gia thành công!");
-    } catch (error) {
+      const result = await syncService.syncNations();
+      setNationsResult(result);
+      
+      if (result.success) {
+        toast.success(result.message);
+      } else {
+        toast.error(result.error || result.message);
+      }
+    } catch (error: any) {
       console.error("Error syncing nations:", error);
-      toast.error("Lỗi khi đồng bộ quốc gia: " + (error as Error).message);
+      toast.error("Lỗi khi đồng bộ quốc gia: " + error.message);
+      setNationsResult({ success: false, error: error.message });
     } finally {
       setSyncingNations(false);
     }
   };
 
+  // ===================== TEAMS - Direct API Call =====================
   const handleSyncTeams = async () => {
     try {
       setSyncingTeams(true);
       setTeamsResult(null);
       toast.info('Đang đồng bộ dữ liệu câu lạc bộ...');
 
-      const { data, error } = await supabase.functions.invoke('sync-renderz-teams');
-
-      if (error) throw error;
-
-      setTeamsResult(data);
-      toast.success("Đồng bộ câu lạc bộ thành công!");
-    } catch (error) {
+      const result = await syncService.syncTeams();
+      setTeamsResult(result);
+      
+      if (result.success) {
+        toast.success(result.message);
+      } else {
+        toast.error(result.error || result.message);
+      }
+    } catch (error: any) {
       console.error("Error syncing teams:", error);
-      toast.error("Lỗi khi đồng bộ câu lạc bộ: " + (error as Error).message);
+      toast.error("Lỗi khi đồng bộ câu lạc bộ: " + error.message);
+      setTeamsResult({ success: false, error: error.message });
     } finally {
       setSyncingTeams(false);
     }
   };
 
+  // ===================== TRAITS - Direct API Call =====================
   const handleSyncTraits = async () => {
     try {
       setSyncingTraits(true);
       setTraitsResult(null);
-      toast.info('Đang đồng bộ dữ liệu chỉ số ẩn...');
+      toast.info('Đang đồng bộ dữ liệu đặc điểm...');
 
-      const { data, error } = await supabase.functions.invoke('sync-renderz-traits');
-
-      if (error) throw error;
-
-      setTraitsResult(data);
-      toast.success("Đồng bộ chỉ số ẩn thành công!");
-    } catch (error) {
+      const result = await syncService.syncTraits();
+      setTraitsResult(result);
+      
+      if (result.success) {
+        toast.success(result.message);
+      } else {
+        toast.error(result.error || result.message);
+      }
+    } catch (error: any) {
       console.error("Error syncing traits:", error);
-      toast.error("Lỗi khi đồng bộ chỉ số ẩn: " + (error as Error).message);
+      toast.error("Lỗi khi đồng bộ đặc điểm: " + error.message);
+      setTraitsResult({ success: false, error: error.message });
     } finally {
       setSyncingTraits(false);
     }
   };
 
+  // ===================== PROGRAMS - Direct API Call =====================
   const handleSyncPrograms = async () => {
     try {
       setSyncingPrograms(true);
       setProgramsResult(null);
-      toast.info('Đang đồng bộ dữ liệu chương trình/sự kiện...');
+      toast.info('Đang đồng bộ dữ liệu chương trình...');
 
-      const { data, error } = await supabase.functions.invoke('sync-renderz-programs');
-
-      if (error) throw error;
-
-      setProgramsResult(data);
-      toast.success("Đồng bộ chương trình thành công!");
-    } catch (error) {
+      const result = await syncService.syncPrograms();
+      setProgramsResult(result);
+      
+      if (result.success) {
+        toast.success(result.message);
+      } else {
+        toast.error(result.error || result.message);
+      }
+    } catch (error: any) {
       console.error("Error syncing programs:", error);
-      toast.error("Lỗi khi đồng bộ chương trình: " + (error as Error).message);
+      toast.error("Lỗi khi đồng bộ chương trình: " + error.message);
+      setProgramsResult({ success: false, error: error.message });
     } finally {
       setSyncingPrograms(false);
     }
   };
 
+  // ===================== CELEBRATIONS - Direct API Call =====================
   const handleSyncCelebrations = async () => {
     try {
       setSyncingCelebrations(true);
       setCelebrationsResult(null);
       toast.info('Đang đồng bộ dữ liệu ăn mừng...');
 
-      const { data, error } = await supabase.functions.invoke('sync-renderz-celebrations');
-
-      if (error) throw error;
-
-      setCelebrationsResult(data);
-      toast.success("Đồng bộ ăn mừng thành công!");
-    } catch (error) {
+      const result = await syncService.syncCelebrations();
+      setCelebrationsResult(result);
+      
+      if (result.success) {
+        toast.success(result.message);
+      } else {
+        toast.error(result.error || result.message);
+      }
+    } catch (error: any) {
       console.error("Error syncing celebrations:", error);
-      toast.error("Lỗi khi đồng bộ ăn mừng: " + (error as Error).message);
+      toast.error("Lỗi khi đồng bộ ăn mừng: " + error.message);
+      setCelebrationsResult({ success: false, error: error.message });
     } finally {
       setSyncingCelebrations(false);
     }
   };
 
+  // ===================== SKILL MOVES - Direct API Call =====================
   const handleSyncSkillMoves = async () => {
     try {
       setSyncingSkillMoves(true);
       setSkillMovesResult(null);
       toast.info('Đang đồng bộ dữ liệu kỹ năng...');
 
-      const { data, error } = await supabase.functions.invoke('sync-renderz-skillMoves');
-
-      if (error) throw error;
-
-      setSkillMovesResult(data);
-      toast.success("Đồng bộ kỹ năng thành công!");
-    } catch (error) {
+      const result = await syncService.syncSkillMoves();
+      setSkillMovesResult(result);
+      
+      if (result.success) {
+        toast.success(result.message);
+      } else {
+        toast.error(result.error || result.message);
+      }
+    } catch (error: any) {
       console.error("Error syncing skill moves:", error);
-      toast.error("Lỗi khi đồng bộ kỹ năng: " + (error as Error).message);
+      toast.error("Lỗi khi đồng bộ kỹ năng: " + error.message);
+      setSkillMovesResult({ success: false, error: error.message });
     } finally {
       setSyncingSkillMoves(false);
     }
   };
 
+  // Translation - still uses edge function
   const handleTranslateLocalization = async () => {
     try {
       setTranslating(true);
@@ -293,7 +311,7 @@ export default function SyncData() {
       let totalTranslated = 0;
       let hasMore = true;
       let iterations = 0;
-      const MAX_ITERATIONS = 10; // Prevent infinite loops
+      const MAX_ITERATIONS = 10;
       
       toast.info('Đang bắt đầu dịch từ điển sang tiếng Việt...');
 
@@ -309,7 +327,6 @@ export default function SyncData() {
         
         if (hasMore) {
           toast.info(`Đã dịch ${totalTranslated} bản ghi, còn ${data.remaining} bản ghi. Tiếp tục...`);
-          // Small delay between batches
           await new Promise(resolve => setTimeout(resolve, 1000));
         }
       }
@@ -328,6 +345,7 @@ export default function SyncData() {
     }
   };
 
+  // Migration - still uses edge function
   const handleMigrateData = async () => {
     try {
       setMigrating(true);
@@ -360,7 +378,7 @@ export default function SyncData() {
       <div>
         <h1 className="text-4xl font-bold mb-2">Đồng Bộ Dữ Liệu</h1>
         <p className="text-muted-foreground">
-          Quản lý đồng bộ dữ liệu từ Renderz API và các nguồn bên ngoài
+          Đồng bộ trực tiếp từ Renderz API đến database (không qua Edge Functions)
         </p>
       </div>
 
@@ -372,7 +390,7 @@ export default function SyncData() {
             <CardTitle className="text-primary">🔥 Di Chuyển Dữ Liệu từ Supabase Cũ</CardTitle>
           </div>
           <CardDescription>
-            Tự động di chuyển toàn bộ dữ liệu từ Supabase project cũ (nhdmgiyoienkixokcoue) sang Lovable Cloud hiện tại
+            Tự động di chuyển toàn bộ dữ liệu từ Supabase project cũ sang Lovable Cloud hiện tại
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -477,9 +495,7 @@ export default function SyncData() {
                   ) : (
                     <>
                       <span className="text-primary font-medium">Chọn file JSON</span>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Format: {`{\\"LeagueName_1\\": \\"3F Superliga\\", ...}`}
-                      </p>
+                      <span className="text-muted-foreground"> hoặc sử dụng file mặc định</span>
                     </>
                   )}
                 </div>
@@ -499,353 +515,307 @@ export default function SyncData() {
               ) : (
                 <>
                   <Database className="mr-2 h-4 w-4" />
-                  {uploadedFile ? 'Import File Đã Chọn' : 'Import Từ Public Folder'}
+                  {uploadedFile ? 'Import File Đã Chọn' : 'Import Từ File Mặc Định'}
                 </>
               )}
             </Button>
           </div>
           
           {dictSyncResult && (
-            <div className={`p-4 rounded-lg ${dictSyncResult.success ? 'bg-green-50 dark:bg-green-950' : 'bg-red-50 dark:bg-red-950'}`}>
-              <p className="text-sm font-medium">
-                {dictSyncResult.success ? '✓ Thành công' : '✗ Lỗi'}
+            <div className={`p-3 rounded-lg ${dictSyncResult.success ? 'bg-green-50 dark:bg-green-950' : 'bg-red-50 dark:bg-red-950'}`}>
+              <p className="text-sm">
+                {dictSyncResult.success 
+                  ? `✓ Đã import ${dictSyncResult.totalImported} mục`
+                  : `✗ ${dictSyncResult.error}`}
               </p>
-              <p className="text-xs mt-1">
-                {dictSyncResult.message}
-              </p>
-              {dictSyncResult.totalImported && (
-                <p className="text-xs mt-1">
-                  Đã import: {dictSyncResult.totalImported} / {dictSyncResult.totalEntries} mục
-                </p>
-              )}
             </div>
           )}
-        </CardContent>
-      </Card>
 
-      {/* Translate Dictionary - Full Width */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Database className="w-5 h-5" />
-            <CardTitle>2. Dịch Từ Điển Sang Tiếng Việt</CardTitle>
-          </div>
-          <CardDescription>
-            Dịch toàn bộ từ điển bản địa hóa từ tiếng Anh sang tiếng Việt bằng AI
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Button
-            onClick={handleTranslateLocalization}
-            disabled={translating}
-            className="w-full"
-          >
-            {translating ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Đang dịch...
-              </>
-            ) : (
-              <>
-                <Database className="mr-2 h-4 w-4" />
-                Dịch Toàn Bộ Sang Tiếng Việt
-              </>
+          {/* Translation Section */}
+          <div className="pt-4 border-t">
+            <p className="text-sm text-muted-foreground mb-3">
+              Dịch từ điển sang tiếng Việt bằng AI
+            </p>
+            <Button
+              onClick={handleTranslateLocalization}
+              disabled={translating}
+              variant="secondary"
+              className="w-full"
+            >
+              {translating ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Đang dịch...
+                </>
+              ) : (
+                'Dịch Sang Tiếng Việt'
+              )}
+            </Button>
+            {translationResult && (
+              <div className="mt-2 p-3 rounded-lg bg-green-50 dark:bg-green-950">
+                <p className="text-sm">✓ {translationResult.message}</p>
+              </div>
             )}
-          </Button>
-          
-          {translationResult && (
-            <div className={`p-4 rounded-lg ${translationResult.success ? 'bg-green-50 dark:bg-green-950' : 'bg-red-50 dark:bg-red-950'}`}>
-              <p className="text-sm font-medium">
-                {translationResult.success ? '✓ Thành công' : '✗ Lỗi'}
-              </p>
-              <p className="text-xs mt-1">
-                {translationResult.message}
-              </p>
-              {translationResult.translated && (
-                <p className="text-xs mt-1">
-                  Đã dịch: {translationResult.translated} / {translationResult.totalRecords} bản ghi
-                </p>
-              )}
-            </div>
-          )}
+          </div>
         </CardContent>
       </Card>
 
-      {/* Grid Layout for Sync Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Sync Players Card */}
+      {/* Sync Grid */}
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Programs */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Trophy className="w-5 h-5" />
+              <CardTitle className="text-lg">2. Chương Trình</CardTitle>
+            </div>
+            <CardDescription>Đồng bộ programs từ Renderz</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button
+              onClick={handleSyncPrograms}
+              disabled={syncingPrograms}
+              className="w-full"
+            >
+              {syncingPrograms ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Đang đồng bộ...
+                </>
+              ) : (
+                'Đồng Bộ Programs'
+              )}
+            </Button>
+            {programsResult && (
+              <div className={`mt-3 p-3 rounded-lg text-sm ${programsResult.success ? 'bg-green-50 dark:bg-green-950' : 'bg-red-50 dark:bg-red-950'}`}>
+                {programsResult.success ? `✓ ${programsResult.message}` : `✗ ${programsResult.error}`}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Leagues */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Trophy className="w-5 h-5" />
+              <CardTitle className="text-lg">3. Giải Đấu</CardTitle>
+            </div>
+            <CardDescription>Đồng bộ leagues từ Renderz</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button
+              onClick={handleSyncLeagues}
+              disabled={syncingLeagues}
+              className="w-full"
+            >
+              {syncingLeagues ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Đang đồng bộ...
+                </>
+              ) : (
+                'Đồng Bộ Leagues'
+              )}
+            </Button>
+            {leaguesResult && (
+              <div className={`mt-3 p-3 rounded-lg text-sm ${leaguesResult.success ? 'bg-green-50 dark:bg-green-950' : 'bg-red-50 dark:bg-red-950'}`}>
+                {leaguesResult.success ? `✓ ${leaguesResult.message}` : `✗ ${leaguesResult.error}`}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Nations */}
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
               <Database className="w-5 h-5" />
-              <CardTitle>Đồng Bộ Cầu Thủ</CardTitle>
+              <CardTitle className="text-lg">4. Quốc Gia</CardTitle>
             </div>
-            <CardDescription>
-              Đồng bộ dữ liệu cầu thủ từ Renderz API
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex gap-2">
-              <Button 
-                onClick={() => handleSyncPlayers('test')}
-                disabled={syncingPlayers}
-                variant="outline"
-                className="flex-1"
-              >
-                {syncingPlayers ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                ) : (
-                  <Play className="w-4 h-4 mr-2" />
-                )}
-                Test (5 trang)
-              </Button>
-              <Button 
-                onClick={() => handleSyncPlayers('full')}
-                disabled={syncingPlayers}
-                className="flex-1"
-              >
-                {syncingPlayers ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                ) : (
-                  <Database className="w-4 h-4 mr-2" />
-                )}
-                Toàn Bộ
-              </Button>
-            </div>
-
-            {playersResult && (
-              <div className="bg-muted p-4 rounded-lg space-y-2">
-                <p className="text-sm font-semibold text-green-600">✅ {playersResult.message}</p>
-                <div className="text-xs space-y-1">
-                  <p>• Tổng cầu thủ: {playersResult.playersProcessed}</p>
-                  <p>• Đã import: {playersResult.playersImported}</p>
-                  <p>• Đã cập nhật: {playersResult.playersUpdated}</p>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Rest of sync cards */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Trophy className="w-5 h-5" />
-              <CardTitle>Đồng Bộ Giải Đấu</CardTitle>
-            </div>
-            <CardDescription>
-              Đồng bộ dữ liệu giải đấu từ Renderz API
-            </CardDescription>
+            <CardDescription>Đồng bộ nations từ Renderz</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={handleSyncLeagues} disabled={syncingLeagues} className="w-full">
-              {syncingLeagues ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <Database className="w-4 h-4 mr-2" />
-              )}
-              Đồng Bộ Giải Đấu
-            </Button>
-            {leaguesResult && (
-              <div className="bg-muted p-4 rounded-lg space-y-2">
-                <p className="text-sm font-semibold text-green-600">✅ {leaguesResult.message}</p>
-                <div className="text-xs space-y-1">
-                  <p>• Tổng giải đấu: {leaguesResult.leaguesProcessed}</p>
-                  <p>• Đã import: {leaguesResult.leaguesImported}</p>
-                  <p>• Đã cập nhật: {leaguesResult.leaguesUpdated}</p>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Trophy className="w-5 h-5" />
-              <CardTitle>Đồng Bộ Quốc Gia</CardTitle>
-            </div>
-            <CardDescription>
-              Đồng bộ dữ liệu quốc gia từ Renderz API
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button onClick={handleSyncNations} disabled={syncingNations} className="w-full">
+            <Button
+              onClick={handleSyncNations}
+              disabled={syncingNations}
+              className="w-full"
+            >
               {syncingNations ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Đang đồng bộ...
+                </>
               ) : (
-                <Database className="w-4 h-4 mr-2" />
+                'Đồng Bộ Nations'
               )}
-              Đồng Bộ Quốc Gia
             </Button>
             {nationsResult && (
-              <div className="bg-muted p-4 rounded-lg space-y-2">
-                <p className="text-sm font-semibold text-green-600">✅ {nationsResult.message}</p>
-                <div className="text-xs space-y-1">
-                  <p>• Tổng quốc gia: {nationsResult.nationsProcessed}</p>
-                  <p>• Đã import: {nationsResult.nationsImported}</p>
-                  <p>• Đã cập nhật: {nationsResult.nationsUpdated}</p>
-                </div>
+              <div className={`mt-3 p-3 rounded-lg text-sm ${nationsResult.success ? 'bg-green-50 dark:bg-green-950' : 'bg-red-50 dark:bg-red-950'}`}>
+                {nationsResult.success ? `✓ ${nationsResult.message}` : `✗ ${nationsResult.error}`}
               </div>
             )}
           </CardContent>
         </Card>
 
+        {/* Teams */}
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Trophy className="w-5 h-5" />
-              <CardTitle>Đồng Bộ Câu Lạc Bộ</CardTitle>
+              <Database className="w-5 h-5" />
+              <CardTitle className="text-lg">5. Câu Lạc Bộ</CardTitle>
             </div>
-            <CardDescription>
-              Đồng bộ dữ liệu câu lạc bộ từ Renderz API
-            </CardDescription>
+            <CardDescription>Đồng bộ teams từ Renderz</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={handleSyncTeams} disabled={syncingTeams} className="w-full">
+            <Button
+              onClick={handleSyncTeams}
+              disabled={syncingTeams}
+              className="w-full"
+            >
               {syncingTeams ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Đang đồng bộ...
+                </>
               ) : (
-                <Database className="w-4 h-4 mr-2" />
+                'Đồng Bộ Teams'
               )}
-              Đồng Bộ Câu Lạc Bộ
             </Button>
             {teamsResult && (
-              <div className="bg-muted p-4 rounded-lg space-y-2">
-                <p className="text-sm font-semibold text-green-600">✅ {teamsResult.message}</p>
-                <div className="text-xs space-y-1">
-                  <p>• Tổng câu lạc bộ: {teamsResult.teamsProcessed}</p>
-                  <p>• Đã import: {teamsResult.teamsImported}</p>
-                  <p>• Đã cập nhật: {teamsResult.teamsUpdated}</p>
-                </div>
+              <div className={`mt-3 p-3 rounded-lg text-sm ${teamsResult.success ? 'bg-green-50 dark:bg-green-950' : 'bg-red-50 dark:bg-red-950'}`}>
+                {teamsResult.success ? `✓ ${teamsResult.message}` : `✗ ${teamsResult.error}`}
               </div>
             )}
           </CardContent>
         </Card>
 
+        {/* Traits */}
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Trophy className="w-5 h-5" />
-              <CardTitle>Đồng Bộ Chỉ Số Ẩn</CardTitle>
+              <Database className="w-5 h-5" />
+              <CardTitle className="text-lg">6. Đặc Điểm</CardTitle>
             </div>
-            <CardDescription>
-              Đồng bộ dữ liệu chỉ số ẩn từ Renderz API
-            </CardDescription>
+            <CardDescription>Đồng bộ traits từ Renderz</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={handleSyncTraits} disabled={syncingTraits} className="w-full">
+            <Button
+              onClick={handleSyncTraits}
+              disabled={syncingTraits}
+              className="w-full"
+            >
               {syncingTraits ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Đang đồng bộ...
+                </>
               ) : (
-                <Database className="w-4 h-4 mr-2" />
+                'Đồng Bộ Traits'
               )}
-              Đồng Bộ Chỉ Số Ẩn
             </Button>
             {traitsResult && (
-              <div className="bg-muted p-4 rounded-lg space-y-2">
-                <p className="text-sm font-semibold text-green-600">✅ {traitsResult.message}</p>
-                <div className="text-xs space-y-1">
-                  <p>• Tổng chỉ số ẩn: {traitsResult.traitsProcessed}</p>
-                  <p>• Đã import: {traitsResult.traitsImported}</p>
-                  <p>• Đã cập nhật: {traitsResult.traitsUpdated}</p>
-                </div>
+              <div className={`mt-3 p-3 rounded-lg text-sm ${traitsResult.success ? 'bg-green-50 dark:bg-green-950' : 'bg-red-50 dark:bg-red-950'}`}>
+                {traitsResult.success ? `✓ ${traitsResult.message}` : `✗ ${traitsResult.error}`}
               </div>
             )}
           </CardContent>
         </Card>
 
+        {/* Celebrations */}
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Trophy className="w-5 h-5" />
-              <CardTitle>Đồng Bộ Chương Trình</CardTitle>
+              <Play className="w-5 h-5" />
+              <CardTitle className="text-lg">7. Ăn Mừng</CardTitle>
             </div>
-            <CardDescription>
-              Đồng bộ dữ liệu chương trình từ Renderz API
-            </CardDescription>
+            <CardDescription>Đồng bộ celebrations từ Renderz</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={handleSyncPrograms} disabled={syncingPrograms} className="w-full">
-              {syncingPrograms ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <Database className="w-4 h-4 mr-2" />
-              )}
-              Đồng Bộ Chương Trình
-            </Button>
-            {programsResult && (
-              <div className="bg-muted p-4 rounded-lg space-y-2">
-                <p className="text-sm font-semibold text-green-600">✅ {programsResult.message}</p>
-                <div className="text-xs space-y-1">
-                  <p>• Tổng chương trình: {programsResult.programsProcessed}</p>
-                  <p>• Đã import: {programsResult.programsImported}</p>
-                  <p>• Đã cập nhật: {programsResult.programsUpdated}</p>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Trophy className="w-5 h-5" />
-              <CardTitle>Đồng Bộ Ăn Mừng</CardTitle>
-            </div>
-            <CardDescription>
-              Đồng bộ dữ liệu ăn mừng từ Renderz API
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button onClick={handleSyncCelebrations} disabled={syncingCelebrations} className="w-full">
+            <Button
+              onClick={handleSyncCelebrations}
+              disabled={syncingCelebrations}
+              className="w-full"
+            >
               {syncingCelebrations ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Đang đồng bộ...
+                </>
               ) : (
-                <Database className="w-4 h-4 mr-2" />
+                'Đồng Bộ Celebrations'
               )}
-              Đồng Bộ Ăn Mừng
             </Button>
             {celebrationsResult && (
-              <div className="bg-muted p-4 rounded-lg space-y-2">
-                <p className="text-sm font-semibold text-green-600">✅ {celebrationsResult.message}</p>
-                <div className="text-xs space-y-1">
-                  <p>• Tổng ăn mừng: {celebrationsResult.celebrationsProcessed}</p>
-                  <p>• Đã import: {celebrationsResult.celebrationsImported}</p>
-                  <p>• Đã cập nhật: {celebrationsResult.celebrationsUpdated}</p>
-                </div>
+              <div className={`mt-3 p-3 rounded-lg text-sm ${celebrationsResult.success ? 'bg-green-50 dark:bg-green-950' : 'bg-red-50 dark:bg-red-950'}`}>
+                {celebrationsResult.success ? `✓ ${celebrationsResult.message}` : `✗ ${celebrationsResult.error}`}
               </div>
             )}
           </CardContent>
         </Card>
 
+        {/* Skill Moves */}
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Trophy className="w-5 h-5" />
-              <CardTitle>Đồng Bộ Kỹ Năng</CardTitle>
+              <Play className="w-5 h-5" />
+              <CardTitle className="text-lg">8. Kỹ Năng</CardTitle>
+            </div>
+            <CardDescription>Đồng bộ skill moves từ Renderz</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button
+              onClick={handleSyncSkillMoves}
+              disabled={syncingSkillMoves}
+              className="w-full"
+            >
+              {syncingSkillMoves ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Đang đồng bộ...
+                </>
+              ) : (
+                'Đồng Bộ Skill Moves'
+              )}
+            </Button>
+            {skillMovesResult && (
+              <div className={`mt-3 p-3 rounded-lg text-sm ${skillMovesResult.success ? 'bg-green-50 dark:bg-green-950' : 'bg-red-50 dark:bg-red-950'}`}>
+                {skillMovesResult.success ? `✓ ${skillMovesResult.message}` : `✗ ${skillMovesResult.error}`}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Players */}
+        <Card className="md:col-span-2 lg:col-span-3">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Database className="w-5 h-5" />
+              <CardTitle className="text-lg">9. Cầu Thủ (Cuối cùng)</CardTitle>
             </div>
             <CardDescription>
-              Đồng bộ dữ liệu kỹ năng từ Renderz API
+              Đồng bộ tất cả cầu thủ từ Renderz API - chạy sau khi đã đồng bộ các dữ liệu khác
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={handleSyncSkillMoves} disabled={syncingSkillMoves} className="w-full">
-              {syncingSkillMoves ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            <Button
+              onClick={handleSyncPlayers}
+              disabled={syncingPlayers}
+              className="w-full"
+              size="lg"
+            >
+              {syncingPlayers ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Đang đồng bộ cầu thủ...
+                </>
               ) : (
-                <Database className="w-4 h-4 mr-2" />
+                'Đồng Bộ Tất Cả Cầu Thủ'
               )}
-              Đồng Bộ Kỹ Năng
             </Button>
-            {skillMovesResult && (
-              <div className="bg-muted p-4 rounded-lg space-y-2">
-                <p className="text-sm font-semibold text-green-600">✅ {skillMovesResult.message}</p>
-                <div className="text-xs space-y-1">
-                  <p>• Tổng kỹ năng: {skillMovesResult.skillMovesProcessed}</p>
-                  <p>• Đã import: {skillMovesResult.skillMovesImported}</p>
-                  <p>• Đã cập nhật: {skillMovesResult.skillMovesUpdated}</p>
-                </div>
+            {playersResult && (
+              <div className={`mt-3 p-3 rounded-lg text-sm ${playersResult.success ? 'bg-green-50 dark:bg-green-950' : 'bg-red-50 dark:bg-red-950'}`}>
+                {playersResult.success ? `✓ ${playersResult.message}` : `✗ ${playersResult.error}`}
               </div>
             )}
           </CardContent>
