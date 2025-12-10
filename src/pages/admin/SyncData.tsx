@@ -35,30 +35,70 @@ export default function SyncData() {
   const [migrationResult, setMigrationResult] = useState<any>(null);
   const [clearExisting, setClearExisting] = useState(false);
 
-  // ===================== PLAYERS - Direct API Call =====================
+  // ===================== PLAYERS - Client-Driven Pagination =====================
   const handleSyncPlayers = async () => {
+    let cursor = null;
+    let isRunning = true;
+    let totalSynced = 0;
+    let page = 1;
+
     try {
       setSyncingPlayers(true);
       setPlayersResult(null);
-      toast.info('Đang bắt đầu đồng bộ cầu thủ từ Renderz API...');
+      toast.info('🚀 Đang khởi động đồng bộ cầu thủ...');
 
-      const result = await syncService.syncPlayers((progress) => {
-        if (progress.isComplete) {
-          toast.success(`🎉 Hoàn tất! Đã đồng bộ ${progress.totalSynced} cầu thủ`);
-        } else if (progress.totalSynced % 500 === 0) {
-          toast.info(`Đã đồng bộ ${progress.totalSynced} cầu thủ...`);
+      while (isRunning) {
+        console.log(`Fetching Page ${page}...`);
+
+        // Gọi Edge Function
+        const { data, error } = await supabase.functions.invoke('sync-players', {
+          body: { cursor }
+        });
+
+        // Xử lý lỗi kết nối
+        if (error) {
+          console.error("Function Error:", error);
+          toast.error(`Lỗi kết nối tại trang ${page}: ${error.message}`);
+          setPlayersResult({ success: false, error: error.message });
+          break;
         }
-      });
 
-      setPlayersResult(result);
-      if (result.success) {
-        toast.success(result.message);
-      } else {
-        toast.error(result.error || result.message);
+        // Xử lý lỗi logic từ Edge Function
+        if (data.error) {
+          console.error("Logic Error:", data.error);
+          toast.error(`Lỗi xử lý: ${data.error}`);
+          setPlayersResult({ success: false, error: data.error });
+          break;
+        }
+
+        // Cập nhật trạng thái
+        totalSynced += data.processed;
+        cursor = data.nextCursor;
+
+        // Thông báo tiến độ
+        if (data.processed > 0) {
+          toast.info(`Trang ${page}: Đã đồng bộ ${data.processed} cầu thủ (Tổng: ${totalSynced})`);
+        }
+
+        // Logic dừng
+        if (data.done || !cursor) {
+          isRunning = false;
+          toast.success(`🎉 Hoàn tất! Đã đồng bộ ${totalSynced} cầu thủ.`);
+          setPlayersResult({ 
+            success: true, 
+            message: `Đã đồng bộ ${totalSynced} cầu thủ từ ${page} trang`,
+            totalPlayers: totalSynced,
+            totalPages: page
+          });
+        } else {
+          page++;
+          // Delay 500ms để tránh spam server
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
       }
     } catch (error: any) {
-      console.error("Error syncing players:", error);
-      toast.error("Lỗi khi đồng bộ cầu thủ: " + error.message);
+      console.error("System Error:", error);
+      toast.error("Lỗi nghiêm trọng: " + error.message);
       setPlayersResult({ success: false, error: error.message });
     } finally {
       setSyncingPlayers(false);
