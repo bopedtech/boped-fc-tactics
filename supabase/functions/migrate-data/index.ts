@@ -19,13 +19,14 @@ const TABLES_TO_MIGRATE = [
   'players',
 ];
 
-Deno.serve(async (req) => {
+Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { tables, clearExisting = false } = await req.json().catch(() => ({}));
+    const body = await req.json().catch(() => ({}));
+    const { tables, clearExisting = false } = body;
     
     // Old Supabase project
     const oldSupabaseUrl = Deno.env.get('OLD_SUPABASE_URL');
@@ -34,6 +35,12 @@ Deno.serve(async (req) => {
     // Current Lovable Cloud project
     const newSupabaseUrl = Deno.env.get('SUPABASE_URL');
     const newSupabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+
+    console.log('Starting migration...');
+    console.log('Old URL:', oldSupabaseUrl ? 'Set' : 'Missing');
+    console.log('Old Key:', oldSupabaseKey ? 'Set' : 'Missing');
+    console.log('New URL:', newSupabaseUrl ? 'Set' : 'Missing');
+    console.log('New Key:', newSupabaseKey ? 'Set' : 'Missing');
 
     if (!oldSupabaseUrl || !oldSupabaseKey) {
       throw new Error('Missing OLD_SUPABASE_URL or OLD_SUPABASE_SERVICE_ROLE_KEY');
@@ -59,7 +66,7 @@ Deno.serve(async (req) => {
           const { error: deleteError } = await newClient
             .from(table)
             .delete()
-            .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all rows
+            .neq('id', '00000000-0000-0000-0000-000000000000');
           
           if (deleteError) {
             console.log(`Warning: Could not clear ${table}: ${deleteError.message}`);
@@ -67,7 +74,7 @@ Deno.serve(async (req) => {
         }
 
         // Fetch all data from old project (paginated for large tables)
-        let allData: any[] = [];
+        let allData: unknown[] = [];
         let page = 0;
         const pageSize = 1000;
         let hasMore = true;
@@ -88,7 +95,7 @@ Deno.serve(async (req) => {
             console.log(`Fetched ${allData.length} rows from ${table}...`);
           }
 
-          hasMore = data && data.length === pageSize;
+          hasMore = data !== null && data.length === pageSize;
         }
 
         if (allData.length === 0) {
@@ -123,7 +130,7 @@ Deno.serve(async (req) => {
         results[table] = { success: true, count: insertedCount };
         console.log(`Successfully migrated ${insertedCount} rows to ${table}`);
 
-      } catch (error: unknown) {
+      } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         console.error(`Error migrating ${table}:`, error);
         results[table] = { success: false, error: errorMessage };
@@ -148,7 +155,7 @@ Deno.serve(async (req) => {
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
-  } catch (error: unknown) {
+  } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     console.error('Migration error:', error);
     return new Response(
