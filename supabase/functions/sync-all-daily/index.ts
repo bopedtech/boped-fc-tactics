@@ -36,6 +36,7 @@ Deno.serve(async (req) => {
     const syncFunctions = [
       'sync-renderz-programs',
       'sync-players',
+      'sync-player-details', // New: Sync detailed player data (stats, prices, evolution)
     ];
 
     const results: Array<{ function: string; status: string; message?: string; error?: string }> = [];

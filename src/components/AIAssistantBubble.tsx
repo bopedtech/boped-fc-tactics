@@ -266,103 +266,163 @@ const AIAssistantBubble = () => {
       }
 
       const data = await response.json();
-      const responseText = data.response || t("aiAssistant.cannotAnswer", "Xin lỗi, tôi không thể trả lời.");
+      const responseData = data.response;
 
-      // Parse response using brace counting to correctly handle nested objects
+      // Parse response - handle both object (new format) and string (old format)
       let players: Player[] | undefined = undefined;
       let suggestedQuestions: string[] | undefined = undefined;
-      let displayContent = responseText;
-      let jsonStr = "";
+      let displayContent = "";
 
-      // 1. Try to find markdown code block first (most reliable)
-      const jsonBlockMatch = responseText.match(/```json\s*(\{[\s\S]*?\})\s*```/);
-      if (jsonBlockMatch) {
-          jsonStr = jsonBlockMatch[1];
-          displayContent = responseText.replace(jsonBlockMatch[0], '').trim();
+      // Check if response is an object (new format with playerCards from DB)
+      console.log("AI Response data:", responseData);
+      console.log("Response type:", typeof responseData);
+      if (typeof responseData === 'object' && responseData !== null) {
+        console.log("New format - playerCards:", responseData.playerCards);
+        // New format: { playerCards: [...], textResponse: "...", suggestedQuestions: [...] }
+        if (responseData.playerCards && Array.isArray(responseData.playerCards)) {
+          console.log("First player:", responseData.playerCards[0]);
+          players = responseData.playerCards.map((p: any) => ({
+            assetId: p.assetId || p.player_id,
+            playerId: p.playerId || p.assetId || p.player_id,
+            rating: p.rating,
+            position: p.position,
+            commonName: p.commonName || p.name,
+            firstName: p.firstName,
+            lastName: p.lastName,
+            cardName: p.cardName || p.name,
+            club: typeof p.club === 'string' ? { name: p.club } : p.club,
+            nation: typeof p.nation === 'string' ? { name: p.nation } : p.nation,
+            league: typeof p.league === 'string' ? { name: p.league } : p.league,
+            images: p.images || {
+              playerCardImage: `https://images-bucket.renderz.app/player_${p.assetId || p.player_id}_0`
+            },
+            stats: p.stats || {
+              pace: p.pace,
+              shooting: p.shooting,
+              passing: p.passing,
+              dribbling: p.dribbling,
+              defending: p.defending,
+              physical: p.physical
+            },
+            avgStats: p.avgStats,
+            avgGkStats: p.avgGkStats,
+            foot: p.foot || p.weak_foot,
+            skillMovesLevel: p.skillMovesLevel || p.skill_moves,
+            weakFoot: p.weakFoot || p.weak_foot,
+            height: p.height,
+            weight: p.weight,
+            workRates: p.workRates,
+            traits: p.traits,
+            source: p.source,
+            auctionable: p.auctionable
+          }));
+        }
+        if (responseData.suggestedQuestions && Array.isArray(responseData.suggestedQuestions)) {
+          suggestedQuestions = responseData.suggestedQuestions;
+        }
+        displayContent = responseData.textResponse || t("aiAssistant.cannotAnswer", "Xin lỗi, tôi không thể trả lời.");
       } else {
-          // 2. Fallback: Look for the specific starting pattern
-          const patterns = ['{"playerCards"', '{"suggestedQuestions"'];
-          let startIndex = -1;
-          
-          for (const pattern of patterns) {
-              startIndex = responseText.indexOf(pattern);
-              if (startIndex !== -1) break;
+        // Old format: response is a string that may contain JSON
+        const responseText = responseData || t("aiAssistant.cannotAnswer", "Xin lỗi, tôi không thể trả lời.");
+        displayContent = responseText;
+        let jsonStr = "";
+
+        // 1. Try to find markdown code block first (most reliable)
+        const jsonBlockMatch = responseText.match(/```json\s*(\{[\s\S]*?\})\s*```/);
+        if (jsonBlockMatch) {
+            jsonStr = jsonBlockMatch[1];
+            displayContent = responseText.replace(jsonBlockMatch[0], '').trim();
+        } else {
+            // 2. Fallback: Look for the specific starting pattern
+            const patterns = ['{"playerCards"', '{"suggestedQuestions"'];
+            let startIndex = -1;
+            
+            for (const pattern of patterns) {
+                startIndex = responseText.indexOf(pattern);
+                if (startIndex !== -1) break;
+            }
+
+            if (startIndex !== -1) {
+                // Count braces to find the end of the JSON object
+                let braceCount = 0;
+                let endIndex = -1;
+                
+                for (let i = startIndex; i < responseText.length; i++) {
+                    if (responseText[i] === '{') {
+                        braceCount++;
+                    } else if (responseText[i] === '}') {
+                        braceCount--;
+                        if (braceCount === 0) {
+                            endIndex = i + 1;
+                            break;
+                        }
+                    }
+                }
+
+                if (endIndex !== -1) {
+                    jsonStr = responseText.substring(startIndex, endIndex);
+                    displayContent = (responseText.substring(0, startIndex) + responseText.substring(endIndex)).trim();
+                }
+            }
+        }
+
+        if (jsonStr) {
+          try {
+            const jsonData = JSON.parse(jsonStr);
+
+            if (jsonData.playerCards && Array.isArray(jsonData.playerCards)) {
+              players = jsonData.playerCards.map((p: any) => ({
+                assetId: p.assetId || p.player_id,
+                playerId: p.playerId || p.assetId || p.player_id,
+                rating: p.rating,
+                position: p.position,
+                commonName: p.commonName || p.name,
+                firstName: p.firstName,
+                lastName: p.lastName,
+                cardName: p.cardName || p.name,
+                club: typeof p.club === 'string' ? { name: p.club } : p.club,
+                nation: typeof p.nation === 'string' ? { name: p.nation } : p.nation,
+                league: typeof p.league === 'string' ? { name: p.league } : p.league,
+                images: p.images || {
+                  playerCardImage: `https://images-bucket.renderz.app/player_${p.assetId || p.player_id}_0`
+                },
+                stats: p.stats || {
+                  pace: p.pace,
+                  shooting: p.shooting,
+                  passing: p.passing,
+                  dribbling: p.dribbling,
+                  defending: p.defending,
+                  physical: p.physical
+                },
+                avgStats: p.avgStats,
+                avgGkStats: p.avgGkStats,
+                foot: p.foot || p.weak_foot,
+                skillMovesLevel: p.skillMovesLevel || p.skill_moves,
+                weakFoot: p.weakFoot || p.weak_foot,
+                height: p.height,
+                weight: p.weight,
+                workRates: p.workRates,
+                traits: p.traits,
+                source: p.source,
+                auctionable: p.auctionable
+              }));
+            }
+
+            if (jsonData.suggestedQuestions && Array.isArray(jsonData.suggestedQuestions)) {
+              suggestedQuestions = jsonData.suggestedQuestions;
+            }
+          } catch (e) {
+            console.error("Failed to parse AI response JSON:", e);
           }
-
-          if (startIndex !== -1) {
-              // Count braces to find the end of the JSON object
-              let braceCount = 0;
-              let endIndex = -1;
-              
-              for (let i = startIndex; i < responseText.length; i++) {
-                  if (responseText[i] === '{') {
-                      braceCount++;
-                  } else if (responseText[i] === '}') {
-                      braceCount--;
-                      if (braceCount === 0) {
-                          endIndex = i + 1;
-                          break;
-                      }
-                  }
-              }
-
-              if (endIndex !== -1) {
-                  jsonStr = responseText.substring(startIndex, endIndex);
-                  // Remove the JSON part from display text
-                  // We also clean up any leading/trailing whitespace left
-                  displayContent = (responseText.substring(0, startIndex) + responseText.substring(endIndex)).trim();
-              }
-          }
-      }
-
-      if (jsonStr) {
-        try {
-          const jsonData = JSON.parse(jsonStr);
-
-          if (jsonData.playerCards && Array.isArray(jsonData.playerCards)) {
-            players = jsonData.playerCards.map((p: any) => ({
-              assetId: p.assetId,
-              playerId: p.playerId || p.assetId,
-              rating: p.rating,
-              position: p.position,
-              commonName: p.commonName,
-              firstName: p.firstName,
-              lastName: p.lastName,
-              cardName: p.cardName,
-              club: p.club,
-              nation: p.nation,
-              league: p.league,
-              images: p.images,
-              stats: p.stats,
-              avgStats: p.avgStats,
-              avgGkStats: p.avgGkStats,
-              foot: p.foot,
-              skillMovesLevel: p.skillMovesLevel,
-              weakFoot: p.weakFoot,
-              height: p.height,
-              weight: p.weight,
-              workRates: p.workRates,
-              traits: p.traits,
-              source: p.source,
-              auctionable: p.auctionable
-            }));
-          }
-
-          if (jsonData.suggestedQuestions && Array.isArray(jsonData.suggestedQuestions)) {
-            suggestedQuestions = jsonData.suggestedQuestions;
-          }
-        } catch (e) {
-          console.error("Failed to parse AI response JSON:", e);
-          // If parsing fails, we might want to reset displayContent to show the raw text 
-          // so the user at least sees something (even if ugly) rather than a broken UI
-          // But usually keeping the cleaned text is better if the JSON was just garbage.
-          // However, if we failed to parse, we probably shouldn't hide the content if it wasn't JSON.
-          // In this case, since we found the braces, it's likely intended to be JSON.
         }
       }
 
       // Remove markdown formatting
       displayContent = displayContent.replace(/\*\*/g, '').replace(/\*/g, '');
+      
+      // Remove any JSON arrays that might be embedded in the response (e.g., suggested questions printed as text)
+      // Match patterns like: ["text", "text", "text"] or ['text', 'text']
+      displayContent = displayContent.replace(/\[\s*["'][^"']*["']\s*(?:,\s*["'][^"']*["']\s*)*\]/g, '').trim();
 
       // AI should always provide dynamic suggestedQuestions based on context
       // Only use minimal fallback if AI completely fails
@@ -446,7 +506,7 @@ const AIAssistantBubble = () => {
           {/* Main bubble button */}
           <div
             className={cn(
-              "h-16 w-16 rounded-full shadow-2xl bg-white cursor-pointer relative overflow-hidden group border-2 border-primary/30",
+              "h-20 w-20 rounded-full shadow-2xl bg-white cursor-pointer relative overflow-hidden group border-2 border-primary/30",
               !isDragging && "hover:scale-110 transition-all"
             )}
           >
@@ -457,7 +517,7 @@ const AIAssistantBubble = () => {
                 className="w-full h-full object-contain pointer-events-none"
               />
             </div>
-            <Sparkles className="h-4 w-4 absolute -bottom-0.5 -right-0.5 text-primary bg-white rounded-full p-0.5 shadow-lg animate-pulse" />
+            <Sparkles className="h-5 w-5 absolute -bottom-0.5 -right-0.5 text-primary bg-white rounded-full p-0.5 shadow-lg animate-pulse" />
           </div>
         </div>
       )}
@@ -498,42 +558,27 @@ const AIAssistantBubble = () => {
                   )}
                 >
                   {/* Player Cards */}
-                  {message.players && message.players.length > 0 && (
-                    <div className="flex flex-col gap-4 max-w-full w-full">
-                      {/* Top 1 Player - Featured */}
-                      <div className="flex justify-center md:justify-start">
-                        <div
-                          className="w-[180px] md:w-[200px] cursor-pointer hover:scale-105 transition-transform"
-                          onClick={() => setSelectedPlayer(message.players![0].assetId)}
-                        >
-                          <div className="relative">
-                            <div className="absolute -top-3 -right-3 z-10 bg-yellow-400 text-black font-bold px-2 py-1 rounded-full text-xs shadow-lg animate-bounce">
-                              TOP 1
+                    {message.players && message.players.length > 0 && (
+                    <div className="flex flex-col gap-4 w-full">
+                      {/* Player Cards - Exact same structure as Database.tsx */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                        {message.players.map((player, idx) => (
+                          <div key={player.assetId || idx} className="max-w-[280px] mx-auto relative">
+                            {/* Ranking badge */}
+                            <div className={`absolute -top-2 -right-2 z-10 px-2 py-1 rounded-full text-xs font-bold shadow-lg ${
+                              idx === 0 
+                                ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-black' 
+                                : 'bg-muted-foreground/80 text-white'
+                            }`}>
+                              {idx === 0 ? '🏆 #1' : `#${idx + 1}`}
                             </div>
-                            <PlayerCard player={message.players[0]} variant="medium" />
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Remaining Players - Grid View */}
-                      {message.players.length > 1 && (
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 w-full">
-                          {message.players.slice(1).map((player, idx) => (
-                            <div
-                              key={player.assetId}
-                              className="w-full cursor-pointer hover:scale-105 transition-transform"
+                            <PlayerCard
+                              player={player}
                               onClick={() => setSelectedPlayer(player.assetId)}
-                            >
-                              <div className="relative">
-                                <div className="absolute -top-2 -right-2 z-10 bg-muted-foreground/80 text-white px-1.5 py-0.5 rounded text-[10px] font-bold">
-                                  #{idx + 2}
-                                </div>
-                                <PlayerCard player={player} variant="medium" />
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                            />
+                          </div>
+                        ))}
+                      </div>
 
                       {/* View More Button */}
                       <div className="flex justify-center mt-2">

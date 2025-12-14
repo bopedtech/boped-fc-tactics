@@ -6,17 +6,29 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Search, Loader2, Shield, Eye, UserX, UserCheck } from "lucide-react";
+import { Search, Loader2, Shield, Eye, UserX, UserCheck, Trash2, Ban, ShieldCheck } from "lucide-react";
+
+interface User {
+  id: string;
+  email: string;
+  email_confirmed_at: string | null;
+  created_at: string;
+  last_sign_in_at: string | null;
+  banned_until: string | null;
+  profile: any;
+  roles: string[];
+}
 
 export default function UsersManagement() {
-  const [users, setUsers] = useState<any[]>([]);
-  const [profiles, setProfiles] = useState<any[]>([]);
-  const [userRoles, setUserRoles] = useState<Map<string, string[]>>(new Map());
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedUser, setSelectedUser] = useState<any>(null);
-  const [selectedProfile, setSelectedProfile] = useState<any>(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
     fetchUsers();
@@ -26,30 +38,15 @@ export default function UsersManagement() {
     try {
       setLoading(true);
 
-      // Fetch profiles and roles
-      const [profilesRes, rolesRes] = await Promise.all([
-        supabase.from("profiles").select("*"),
-        supabase.from("user_roles").select("*"),
-      ]);
-
-      if (profilesRes.error) throw profilesRes.error;
-      if (rolesRes.error) throw rolesRes.error;
-
-      setProfiles(profilesRes.data || []);
-
-      // Create roles map
-      const rolesMap = new Map<string, string[]>();
-      (rolesRes.data || []).forEach((role: any) => {
-        const existing = rolesMap.get(role.user_id) || [];
-        rolesMap.set(role.user_id, [...existing, role.role]);
+      const { data, error } = await supabase.functions.invoke('admin-users', {
+        method: 'GET',
       });
-      setUserRoles(rolesMap);
 
-      // Fetch auth users (admin only)
-      const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
-      if (authError) throw authError;
+      if (error) throw error;
 
-      setUsers(authData.users || []);
+      if (data?.users) {
+        setUsers(data.users);
+      }
     } catch (error) {
       console.error("Error fetching users:", error);
       toast.error("Không thể tải danh sách người dùng");
@@ -58,10 +55,90 @@ export default function UsersManagement() {
     }
   };
 
-  const handleViewUser = (user: any) => {
-    const profile = profiles.find((p) => p.user_id === user.id);
-    setSelectedUser(user);
-    setSelectedProfile(profile);
+  const handleToggleBan = async (user: User) => {
+    const isBanned = !!user.banned_until;
+    setActionLoading(user.id);
+
+    try {
+      const { error } = await supabase.functions.invoke('admin-users/toggle-ban', {
+        method: 'POST',
+        body: { userId: user.id, ban: !isBanned },
+      });
+
+      if (error) throw error;
+
+      toast.success(isBanned ? "Đã bỏ cấm người dùng" : "Đã cấm người dùng");
+      fetchUsers();
+    } catch (error) {
+      console.error("Error toggling ban:", error);
+      toast.error("Không thể thực hiện thao tác");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!userToDelete) return;
+
+    setActionLoading(userToDelete.id);
+    try {
+      const { error } = await supabase.functions.invoke('admin-users', {
+        method: 'DELETE',
+        body: { userId: userToDelete.id },
+      });
+
+      if (error) throw error;
+
+      toast.success("Đã xóa người dùng");
+      setDeleteDialogOpen(false);
+      setUserToDelete(null);
+      fetchUsers();
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      toast.error("Không thể xóa người dùng");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleAddRole = async (userId: string, role: string) => {
+    setActionLoading(userId);
+    try {
+      const { error } = await supabase.functions.invoke('admin-users/add-role', {
+        method: 'POST',
+        body: { userId, role },
+      });
+
+      if (error) throw error;
+
+      toast.success("Đã thêm quyền");
+      fetchUsers();
+    } catch (error) {
+      console.error("Error adding role:", error);
+      toast.error("Không thể thêm quyền");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleRemoveRole = async (userId: string, role: string) => {
+    setActionLoading(userId);
+    try {
+      const { error } = await supabase.functions.invoke('admin-users/remove-role', {
+        method: 'POST',
+        body: { userId, role },
+      });
+
+      if (error) throw error;
+
+      toast.success("Đã xóa quyền");
+      fetchUsers();
+    } catch (error) {
+      console.error("Error removing role:", error);
+      toast.error("Không thể xóa quyền");
+    } finally {
+      setActionLoading(null);
+    }
   };
 
   const filteredUsers = users.filter((user) => {
@@ -69,17 +146,18 @@ export default function UsersManagement() {
     const query = searchQuery.toLowerCase();
     return (
       user.email?.toLowerCase().includes(query) ||
-      profiles.find((p) => p.user_id === user.id)?.display_name?.toLowerCase().includes(query)
+      user.profile?.display_name?.toLowerCase().includes(query)
     );
   });
 
-  const getUserRoles = (userId: string) => {
-    return userRoles.get(userId) || [];
-  };
-
-  const getProfile = (userId: string) => {
-    return profiles.find((p) => p.user_id === userId);
-  };
+  const adminCount = users.filter(u => u.roles.includes('super_admin') || u.roles.includes('admin')).length;
+  const bannedCount = users.filter(u => !!u.banned_until).length;
+  const activeToday = users.filter(u => {
+    if (!u.last_sign_in_at) return false;
+    const lastSignIn = new Date(u.last_sign_in_at);
+    const today = new Date();
+    return lastSignIn.toDateString() === today.toDateString();
+  }).length;
 
   if (loading) {
     return (
@@ -113,19 +191,15 @@ export default function UsersManagement() {
             <CardTitle className="text-sm font-medium">Admins</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">
-              {Array.from(userRoles.values()).filter((roles) =>
-                roles.includes("super_admin")
-              ).length}
-            </div>
+            <div className="text-3xl font-bold">{adminCount}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Có Profile</CardTitle>
+            <CardTitle className="text-sm font-medium">Bị cấm</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{profiles.length}</div>
+            <div className="text-3xl font-bold text-destructive">{bannedCount}</div>
           </CardContent>
         </Card>
         <Card>
@@ -133,13 +207,7 @@ export default function UsersManagement() {
             <CardTitle className="text-sm font-medium">Active Today</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">
-              {users.filter((u) => {
-                const lastSignIn = new Date(u.last_sign_in_at || 0);
-                const today = new Date();
-                return lastSignIn.toDateString() === today.toDateString();
-              }).length}
-            </div>
+            <div className="text-3xl font-bold text-green-500">{activeToday}</div>
           </CardContent>
         </Card>
       </div>
@@ -173,24 +241,24 @@ export default function UsersManagement() {
                   <TableHead>Email</TableHead>
                   <TableHead>Tên hiển thị</TableHead>
                   <TableHead>Roles</TableHead>
-                  <TableHead>Đăng ký</TableHead>
+                  <TableHead>Trạng thái</TableHead>
                   <TableHead>Đăng nhập cuối</TableHead>
                   <TableHead className="text-right">Thao tác</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredUsers.map((user) => {
-                  const profile = getProfile(user.id);
-                  const roles = getUserRoles(user.id);
+                  const isBanned = !!user.banned_until;
+                  const isLoading = actionLoading === user.id;
 
                   return (
-                    <TableRow key={user.id}>
+                    <TableRow key={user.id} className={isBanned ? "opacity-50" : ""}>
                       <TableCell className="font-medium">{user.email}</TableCell>
-                      <TableCell>{profile?.display_name || "-"}</TableCell>
+                      <TableCell>{user.profile?.display_name || "-"}</TableCell>
                       <TableCell>
-                        <div className="flex gap-1">
-                          {roles.length > 0 ? (
-                            roles.map((role) => (
+                        <div className="flex gap-1 flex-wrap">
+                          {user.roles.length > 0 ? (
+                            user.roles.map((role) => (
                               <Badge key={role} variant="secondary">
                                 <Shield className="h-3 w-3 mr-1" />
                                 {role}
@@ -201,8 +269,20 @@ export default function UsersManagement() {
                           )}
                         </div>
                       </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {new Date(user.created_at).toLocaleDateString("vi-VN")}
+                      <TableCell>
+                        {isBanned ? (
+                          <Badge variant="destructive">
+                            <Ban className="h-3 w-3 mr-1" />
+                            Bị cấm
+                          </Badge>
+                        ) : user.email_confirmed_at ? (
+                          <Badge variant="default" className="bg-green-600">
+                            <UserCheck className="h-3 w-3 mr-1" />
+                            Active
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline">Chưa xác nhận</Badge>
+                        )}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {user.last_sign_in_at
@@ -210,13 +290,39 @@ export default function UsersManagement() {
                           : "Chưa đăng nhập"}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleViewUser(user)}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
+                        <div className="flex justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setSelectedUser(user)}
+                            disabled={isLoading}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleToggleBan(user)}
+                            disabled={isLoading}
+                          >
+                            {isBanned ? (
+                              <UserCheck className="h-4 w-4 text-green-500" />
+                            ) : (
+                              <Ban className="h-4 w-4 text-orange-500" />
+                            )}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              setUserToDelete(user);
+                              setDeleteDialogOpen(true);
+                            }}
+                            disabled={isLoading}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
@@ -261,63 +367,75 @@ export default function UsersManagement() {
                 </div>
               </div>
 
-              {selectedProfile && (
-                <>
-                  <div className="border-t pt-4">
-                    <h3 className="font-semibold mb-4">Thông Tin Profile</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Tên hiển thị</p>
-                        <p>{selectedProfile.display_name || "-"}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Tên đầy đủ</p>
-                        <p>{selectedProfile.full_name || "-"}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Tuổi</p>
-                        <p>{selectedProfile.age || "-"}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Kinh nghiệm</p>
-                        <p>{selectedProfile.fc_mobile_experience || "-"}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Sơ đồ yêu thích</p>
-                        <p>{selectedProfile.favorite_formation || "-"}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Vị trí yêu thích</p>
-                        <p>{selectedProfile.favorite_position || "-"}</p>
-                      </div>
-                    </div>
-                    {selectedProfile.bio && (
-                      <div className="mt-4">
-                        <p className="text-sm font-medium text-muted-foreground">Giới thiệu</p>
-                        <p className="mt-1 text-sm">{selectedProfile.bio}</p>
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
-
-              {getUserRoles(selectedUser.id).length > 0 && (
+              {selectedUser.profile && (
                 <div className="border-t pt-4">
-                  <h3 className="font-semibold mb-4">Quyền hạn</h3>
-                  <div className="flex gap-2">
-                    {getUserRoles(selectedUser.id).map((role) => (
-                      <Badge key={role} variant="secondary">
-                        <Shield className="h-3 w-3 mr-1" />
-                        {role}
-                      </Badge>
-                    ))}
+                  <h3 className="font-semibold mb-4">Thông Tin Profile</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Tên hiển thị</p>
+                      <p>{selectedUser.profile.display_name || "-"}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Tên đầy đủ</p>
+                      <p>{selectedUser.profile.full_name || "-"}</p>
+                    </div>
                   </div>
                 </div>
               )}
+
+              <div className="border-t pt-4">
+                <h3 className="font-semibold mb-4">Quyền hạn</h3>
+                <div className="flex gap-2 flex-wrap">
+                  {selectedUser.roles.map((role) => (
+                    <Badge key={role} variant="secondary" className="gap-1">
+                      <Shield className="h-3 w-3" />
+                      {role}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-4 w-4 ml-1 hover:bg-destructive/20"
+                        onClick={() => handleRemoveRole(selectedUser.id, role)}
+                      >
+                        ×
+                      </Button>
+                    </Badge>
+                  ))}
+                  {!selectedUser.roles.includes('admin') && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAddRole(selectedUser.id, 'admin')}
+                    >
+                      <ShieldCheck className="h-3 w-3 mr-1" />
+                      Thêm Admin
+                    </Button>
+                  )}
+                </div>
+              </div>
             </div>
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Xác nhận xóa người dùng</AlertDialogTitle>
+            <AlertDialogDescription>
+              Bạn có chắc chắn muốn xóa người dùng{" "}
+              <span className="font-bold">{userToDelete?.email}</span>?
+              Hành động này không thể hoàn tác và sẽ xóa tất cả dữ liệu liên quan.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Hủy</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
+              Xóa
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

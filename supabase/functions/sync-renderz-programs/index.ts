@@ -18,6 +18,7 @@ interface ProgramData {
   id: string;
   name: string;
   image?: string;
+  addedOn?: string;
   [key: string]: any;
 }
 
@@ -27,6 +28,7 @@ interface TransformedProgram {
   localizationKey: string;
   image: string | null;
   rawData: any;
+  createdAt: string;
   updatedAt: string;
 }
 
@@ -104,17 +106,24 @@ Deno.serve(async (req) => {
       const localizationKey = program.name;
       const displayName = translationMap.get(localizationKey);
 
-      // Fallback mechanism with warning
+      // Generate fallback name from program ID if no translation found
+      // e.g., "PROGRAM_GE26" -> "GE 26", "PROGRAM_UCL25" -> "UCL 25"
+      let fallbackName = localizationKey;
       if (!displayName) {
         console.warn(`No translation found for key: ${localizationKey}`);
+        // Try to generate a readable name from program ID
+        const idPart = program.id.replace(/^PROGRAM_/, '');
+        // Insert space before trailing numbers for better readability
+        fallbackName = idPart.replace(/([A-Z]+)(\d+)$/, '$1 $2');
       }
 
       return {
         id: program.id,
-        displayName: displayName || localizationKey,
+        displayName: displayName || fallbackName,
         localizationKey,
         image: program.image || null,
         rawData: program,
+        createdAt: program.addedOn || new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
     });

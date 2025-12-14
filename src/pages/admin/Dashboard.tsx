@@ -15,6 +15,15 @@ export default function AdminDashboard() {
     totalTeams: 0,
     totalNations: 0,
   });
+  const [recentActivity, setRecentActivity] = useState<{
+    lastPlayerUpdate: string | null;
+    latestPlayer: string | null;
+    recentSquadsCount: number;
+  }>({
+    lastPlayerUpdate: null,
+    latestPlayer: null,
+    recentSquadsCount: 0,
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -32,12 +41,16 @@ export default function AdminDashboard() {
         leaguesCount,
         teamsCount,
         nationsCount,
+        latestPlayerRes,
+        recentSquadsRes,
       ] = await Promise.all([
         supabase.from("players").select("*", { count: "exact", head: true }),
         supabase.from("squads").select("*", { count: "exact", head: true }),
         supabase.from("leagues").select("*", { count: "exact", head: true }),
         supabase.from("teams").select("*", { count: "exact", head: true }),
         supabase.from("nations").select("*", { count: "exact", head: true }),
+        supabase.from("players").select("commonName, updatedAt").order("updatedAt", { ascending: false }).limit(1).single(),
+        supabase.from("squads").select("*", { count: "exact", head: true }).gte("created_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()),
       ]);
 
       // Fetch user count securely via Edge Function
@@ -58,6 +71,13 @@ export default function AdminDashboard() {
         totalLeagues: leaguesCount.count || 0,
         totalTeams: teamsCount.count || 0,
         totalNations: nationsCount.count || 0,
+      });
+
+      // Set recent activity
+      setRecentActivity({
+        lastPlayerUpdate: latestPlayerRes.data?.updatedAt || null,
+        latestPlayer: latestPlayerRes.data?.commonName || null,
+        recentSquadsCount: recentSquadsRes.count || 0,
       });
     } catch (error) {
       console.error("Error fetching stats:", error);
@@ -157,18 +177,34 @@ export default function AdminDashboard() {
         <CardContent>
           <div className="space-y-4">
             <div className="flex items-center gap-4 p-3 rounded-lg bg-muted/50">
-              <Activity className="h-5 w-5 text-blue-500" />
+              <Database className="h-5 w-5 text-green-500" />
               <div className="flex-1">
-                <p className="text-sm font-medium">{t("admin.dashboard.recentActivity.systemStatus.title", "Hệ thống đang hoạt động bình thường")}</p>
-                <p className="text-xs text-muted-foreground">{t("admin.dashboard.recentActivity.systemStatus.subtitle", "Tất cả dịch vụ đang online")}</p>
+                <p className="text-sm font-medium">
+                  {recentActivity.latestPlayer 
+                    ? `Cầu thủ cập nhật gần nhất: ${recentActivity.latestPlayer}`
+                    : t("admin.dashboard.recentActivity.databaseUpdated.title", "Database đã được cập nhật")}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {recentActivity.lastPlayerUpdate
+                    ? `Lúc ${new Date(recentActivity.lastPlayerUpdate).toLocaleString("vi-VN")}`
+                    : t("admin.dashboard.recentActivity.databaseUpdated.subtitle", "Dữ liệu cầu thủ mới nhất")}
+                </p>
               </div>
             </div>
             
             <div className="flex items-center gap-4 p-3 rounded-lg bg-muted/50">
-              <Database className="h-5 w-5 text-green-500" />
+              <Activity className="h-5 w-5 text-blue-500" />
               <div className="flex-1">
-                <p className="text-sm font-medium">{t("admin.dashboard.recentActivity.databaseUpdated.title", "Database đã được cập nhật")}</p>
-                <p className="text-xs text-muted-foreground">{t("admin.dashboard.recentActivity.databaseUpdated.subtitle", "Dữ liệu cầu thủ mới nhất")}</p>
+                <p className="text-sm font-medium">
+                  {recentActivity.recentSquadsCount > 0
+                    ? `${recentActivity.recentSquadsCount} đội hình mới trong 24h qua`
+                    : t("admin.dashboard.recentActivity.systemStatus.title", "Hệ thống đang hoạt động bình thường")}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {recentActivity.recentSquadsCount > 0
+                    ? "Người dùng đang tích cực tạo đội hình"
+                    : t("admin.dashboard.recentActivity.systemStatus.subtitle", "Tất cả dịch vụ đang online")}
+                </p>
               </div>
             </div>
           </div>

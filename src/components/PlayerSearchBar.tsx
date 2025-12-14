@@ -64,8 +64,11 @@ const PlayerSearchBar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<number | null>(null);
   const [hasMoreResults, setHasMoreResults] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
   const navigate = useNavigate();
   const searchRef = useRef<HTMLDivElement>(null);
+  const PLAYERS_PER_PAGE = 10;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -87,21 +90,45 @@ const PlayerSearchBar = () => {
         setPlayers([]);
         setIsOpen(false);
         setHasMoreResults(false);
+        setTotalCount(0);
         return;
       }
 
-      // Get 10 results to check if there are more than 9
-      const { data, error, count } = await supabase
-        .from("players")
-        .select("*", { count: 'exact' })
-        .or(`commonName.ilike.%${query}%,firstName.ilike.%${query}%,lastName.ilike.%${query}%`)
-        .eq("is_visible", true)
-        .order("rating", { ascending: false })
-        .limit(10);
+      // Try smart search RPC first (accent-insensitive)
+      let data: any[] | null = null;
+      let count: number | null = null;
+      let error: any = null;
+
+      const rpcResult = await (supabase.rpc as any)('search_players_smart', {
+        search_query: query.trim(),
+        page_limit: PLAYERS_PER_PAGE,
+        page_offset: 0,
+        sort_by: 'rating',
+        sort_order: 'DESC'
+      });
+      const rpcData = rpcResult.data as any[] | null;
+      const rpcError = rpcResult.error;
+
+      if (!rpcError && rpcData && Array.isArray(rpcData) && rpcData.length > 0) {
+        data = rpcData;
+        count = rpcData[0]?.total_count || rpcData.length;
+      } else {
+        // Fallback to original search if RPC fails
+        const result = await supabase
+          .from("players")
+          .select("*", { count: 'exact' })
+          .or(`commonName.ilike.%${query}%,firstName.ilike.%${query}%,lastName.ilike.%${query}%`)
+          .eq("is_visible", true)
+          .order("rating", { ascending: false })
+          .range(0, PLAYERS_PER_PAGE - 1);
+        
+        data = result.data;
+        count = result.count;
+        error = result.error;
+      }
 
       if (!error && data) {
-        const displayPlayers = data.slice(0, 9);
-        setPlayers(displayPlayers.map(p => ({
+        const mappedPlayers = data.map(p => ({
           assetId: p.assetId,
           playerId: p.playerId,
           commonName: p.commonName,
@@ -126,8 +153,10 @@ const PlayerSearchBar = () => {
           traits: Array.isArray(p.traits) ? p.traits : [],
           source: p.source,
           auctionable: p.auctionable
-        })));
-        setHasMoreResults(data.length > 9 || (count !== null && count > 9));
+        }));
+        setPlayers(mappedPlayers);
+        setTotalCount(count || 0);
+        setHasMoreResults((count || 0) > PLAYERS_PER_PAGE);
         setIsOpen(data.length > 0);
       }
     };
@@ -135,6 +164,80 @@ const PlayerSearchBar = () => {
     const timeoutId = setTimeout(searchPlayers, 300);
     return () => clearTimeout(timeoutId);
   }, [query]);
+
+  const loadMorePlayers = async () => {
+    if (loadingMore || !hasMoreResults) return;
+    
+    setLoadingMore(true);
+    try {
+      const nextOffset = players.length;
+      
+      // Try smart search RPC for load more
+      const rpcResult = await (supabase.rpc as any)('search_players_smart', {
+        search_query: query.trim(),
+        page_limit: PLAYERS_PER_PAGE,
+        page_offset: nextOffset,
+        sort_by: 'rating',
+        sort_order: 'DESC'
+      });
+      const rpcData = rpcResult.data as any[] | null;
+      const rpcError = rpcResult.error;
+
+      let data: any[] | null = null;
+      let error: any = null;
+
+      if (!rpcError && rpcData && Array.isArray(rpcData)) {
+        data = rpcData;
+      } else {
+        // Fallback to original search
+        const result = await supabase
+          .from("players")
+          .select("*")
+          .or(`commonName.ilike.%${query}%,firstName.ilike.%${query}%,lastName.ilike.%${query}%`)
+          .eq("is_visible", true)
+          .order("rating", { ascending: false })
+          .range(nextOffset, nextOffset + PLAYERS_PER_PAGE - 1);
+        
+        data = result.data;
+        error = result.error;
+      }
+
+      if (!error && data) {
+        const newPlayers = data.map(p => ({
+          assetId: p.assetId,
+          playerId: p.playerId,
+          commonName: p.commonName,
+          firstName: p.firstName,
+          lastName: p.lastName,
+          rating: p.rating,
+          position: p.position,
+          images: p.images,
+          stats: (p.stats || {}) as PlayerStats,
+          club: p.club,
+          nation: p.nation,
+          league: p.league,
+          cardName: p.cardName,
+          avgStats: p.avgStats,
+          avgGkStats: p.avgGkStats,
+          foot: p.foot,
+          skillMovesLevel: p.skillMovesLevel,
+          weakFoot: p.weakFoot,
+          height: p.height,
+          weight: p.weight,
+          workRates: p.workRates,
+          traits: Array.isArray(p.traits) ? p.traits : [],
+          source: p.source,
+          auctionable: p.auctionable
+        }));
+        setPlayers(prev => [...prev, ...newPlayers]);
+        setHasMoreResults(players.length + newPlayers.length < totalCount);
+      }
+    } catch (error) {
+      console.error("Error loading more players:", error);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   const handlePlayerClick = (assetId: number) => {
     setSelectedPlayer(assetId);
@@ -194,16 +297,15 @@ const PlayerSearchBar = () => {
         {isOpen && players.length > 0 && (
           <div className="mt-4 w-full">
             <div className="rounded-2xl border-2 border-primary/20 shadow-2xl bg-card/95 backdrop-blur-sm p-6 max-h-[60vh] overflow-y-auto">
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {players.map((player) => (
                   <div 
                     key={player.assetId}
-                    className="cursor-pointer hover:scale-105 transition-transform"
+                    className="max-w-[280px] mx-auto cursor-pointer hover:scale-[1.02] transition-transform"
                     onClick={() => handlePlayerClick(player.assetId)}
                   >
                     <PlayerCard 
                       player={player} 
-                      variant="medium"
                     />
                   </div>
                 ))}
@@ -211,11 +313,15 @@ const PlayerSearchBar = () => {
               {hasMoreResults && (
                 <div className="mt-6 pt-4 text-center border-t border-border/50">
                   <Button
-                    onClick={() => navigate(`/database?search=${encodeURIComponent(query)}`)}
+                    onClick={loadMorePlayers}
                     variant="outline"
                     className="w-full"
+                    disabled={loadingMore}
                   >
-                    {t("hero.viewMore", "Xem thêm kết quả tìm kiếm")}
+                    {loadingMore 
+                      ? t("hero.loading", "Đang tải...") 
+                      : t("hero.loadMore", "Tải thêm")
+                    }
                   </Button>
                 </div>
               )}

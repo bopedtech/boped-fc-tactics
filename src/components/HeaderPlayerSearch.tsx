@@ -54,17 +54,34 @@ export default function HeaderPlayerSearch({ isMobile = false }: HeaderPlayerSea
         return;
       }
 
-      const { data, error } = await supabase
-        .from("players")
-        .select("assetId, commonName, firstName, lastName, rating, position, images")
-        .or(`commonName.ilike.%${query}%,firstName.ilike.%${query}%,lastName.ilike.%${query}%`)
-        .eq("is_visible", true)
-        .order("rating", { ascending: false })
-        .limit(8);
+      // Try smart search RPC first (accent-insensitive)
+      const rpcResult = await (supabase.rpc as any)('search_players_smart', {
+        search_query: query.trim(),
+        page_limit: 8,
+        page_offset: 0,
+        sort_by: 'rating',
+        sort_order: 'DESC'
+      });
+      const rpcData = rpcResult.data as any[] | null;
+      const rpcError = rpcResult.error;
 
-      if (!error && data) {
-        setPlayers(data);
-        setIsOpen(data.length > 0);
+      if (!rpcError && rpcData && Array.isArray(rpcData) && rpcData.length > 0) {
+        setPlayers(rpcData);
+        setIsOpen(rpcData.length > 0);
+      } else {
+        // Fallback to original search if RPC fails
+        const { data, error } = await supabase
+          .from("players")
+          .select("assetId, commonName, firstName, lastName, rating, position, images")
+          .or(`commonName.ilike.%${query}%,firstName.ilike.%${query}%,lastName.ilike.%${query}%`)
+          .eq("is_visible", true)
+          .order("rating", { ascending: false })
+          .limit(8);
+
+        if (!error && data) {
+          setPlayers(data);
+          setIsOpen(data.length > 0);
+        }
       }
     };
 

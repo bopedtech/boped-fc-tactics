@@ -14,6 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import PlayerDetailDialog from "@/components/PlayerDetailDialog";
 import PlayerFormDialog from "@/components/admin/PlayerFormDialog";
+import PlayerCard from "@/components/PlayerCard";
 
 export default function PlayersManagement() {
   const [players, setPlayers] = useState<any[]>([]);
@@ -62,10 +63,10 @@ export default function PlayersManagement() {
       // Apply sorting
       switch (sortBy) {
         case "newest":
-          playersQuery = playersQuery.order("createdAt", { ascending: false });
+          playersQuery = playersQuery.order("added", { ascending: false, nullsFirst: false });
           break;
         case "oldest":
-          playersQuery = playersQuery.order("createdAt", { ascending: true });
+          playersQuery = playersQuery.order("added", { ascending: true, nullsFirst: false });
           break;
         case "ovr-high":
           playersQuery = playersQuery.order("rating", { ascending: false });
@@ -407,7 +408,14 @@ export default function PlayersManagement() {
                         <TableRow key={player.assetId}>
                           <TableCell className="font-mono text-xs">{player.assetId}</TableCell>
                           <TableCell>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-3">
+                              {/* Full Player Card (large variant) - Click to view details */}
+                              <div className="shrink-0 cursor-pointer max-w-[120px]" onClick={() => setSelectedPlayer(player)}>
+                                <PlayerCard 
+                                  player={player}
+                                  showStats={false}
+                                />
+                              </div>
                               <div className="flex flex-col gap-1">
                                 <div className="flex items-center gap-2">
                                   <span className="font-medium text-sm">{getPlayerName(player)}</span>

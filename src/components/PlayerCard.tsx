@@ -71,6 +71,7 @@ interface PlayerCardProps {
   isAlternativePosition?: boolean;
   requiredPosition?: string;
   selectedRank?: number;
+  isDetailView?: boolean;
 }
 
 const getRankColor = (rank?: number) => {
@@ -98,6 +99,7 @@ export default function PlayerCard({
   isAlternativePosition = false,
   requiredPosition,
   selectedRank = 1,
+  isDetailView = false,
 }: PlayerCardProps) {
   const { t, locale } = useT();
   const [imageError, setImageError] = React.useState(false);
@@ -153,10 +155,19 @@ export default function PlayerCard({
 
   // Check for valid player image
   let playerImage = player.images?.playerCardImage;
-  const isPlaceholderImage = playerImage === "image not found" || !playerImage || imageError;
+  
+  // Try to construct image URL from asset ID if missing
+  if (!playerImage || playerImage === "image not found") {
+    playerImage = `https://images-bucket.renderz.app/player_${player.assetId}_0`;
+  }
+
+  const isPlaceholderImage = !playerImage || imageError;
   if (isPlaceholderImage) {
     playerImage = DEFAULT_PLAYER_IMAGE;
   }
+
+  // Ensure we have a display name
+  const displayName = player.cardName || player.commonName || player.firstName || player.lastName || `Player ${player.assetId}`;
 
   // Check if this is an icon card
   const shouldHideClub = player.league?.name?.toLowerCase() === 'leaguename_2118';
@@ -244,32 +255,43 @@ export default function PlayerCard({
               />
             </div>
 
+            {/* Untradeable Icon - Top Right */}
+            {player.auctionable === false && (
+              <div className="absolute top-1 right-1 z-20">
+                <img
+                  src="https://images-bucket.renderz.app/common_23_untradeable_icon"
+                  alt="Untradeable"
+                  className="w-4 h-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
+                />
+              </div>
+            )}
+
             {/* OVR and Position - Top Left */}
             <div className="absolute top-2 left-2 z-20">
               <div className="flex flex-col items-start">
-                <div className="text-xl font-black text-white leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,1)]">
+                <div className="text-base font-black text-white leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,1)]">
                   {finalOvr}
                 </div>
-                <div className="text-[10px] font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,1)] mt-0.5">
+                <div className="text-[8px] font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,1)] mt-0.5">
                   {player.position}
                 </div>
               </div>
             </div>
 
             {/* Player Name - Bottom */}
-            <div className="absolute bottom-8 left-0 right-0 px-1 z-10">
+            <div className="absolute bottom-5 left-0 right-0 px-1 z-20">
               <div className="text-center">
-                <div className="text-[10px] font-black text-white line-clamp-1 drop-shadow-[0_2px_4px_rgba(0,0,0,1)] uppercase tracking-wide">
-                  {player.commonName}
+                <div className="text-[7px] font-bold text-white line-clamp-1 drop-shadow-[0_1px_2px_rgba(0,0,0,1)] uppercase tracking-wide">
+                  {displayName}
                 </div>
               </div>
             </div>
 
             {/* Nation and Club Icons - Bottom */}
-            <div className="absolute bottom-1 left-0 right-0 px-2 z-10">
-              <div className="flex items-center justify-center gap-2">
+            <div className="absolute bottom-1 left-0 right-0 px-1 z-10">
+              <div className="flex items-center justify-center gap-1">
                 {flagImage && (
-                  <div className="w-5 h-4 rounded overflow-hidden shadow-lg">
+                  <div className="w-3 h-2 rounded-sm overflow-hidden shadow-sm">
                     <img
                       src={flagImage}
                       alt={t("player.nation")}
@@ -278,7 +300,7 @@ export default function PlayerCard({
                   </div>
                 )}
                 {teamLogoUrl && (
-                  <div className="w-4 h-4 rounded-full overflow-hidden shadow-lg">
+                  <div className="w-2.5 h-2.5 rounded-full overflow-hidden shadow-sm">
                     <img
                       src={teamLogoUrl}
                       alt={t("player.club")}
@@ -342,8 +364,15 @@ export default function PlayerCard({
           {/* Player Info - Center */}
           <div className="flex-1 min-w-0">
             {/* Player Name */}
-            <div className={`font-black text-base uppercase truncate transition-colors tracking-wide ${!isSelected && 'group-hover:text-primary'}`}>
-              {player.commonName}
+            <div className={`font-black text-base uppercase truncate transition-colors tracking-wide flex items-center gap-2 ${!isSelected && 'group-hover:text-primary'}`}>
+              {displayName}
+              {player.auctionable === false && (
+                <img
+                  src="https://images-bucket.renderz.app/common_23_untradeable_icon"
+                  alt="Untradeable"
+                  className="w-4 h-4 inline-block"
+                />
+              )}
               {isSelected && <span className="ml-2 text-xs text-muted-foreground normal-case">({t("player.selected") || "Đã chọn"})</span>}
             </div>
 
@@ -498,7 +527,7 @@ export default function PlayerCard({
               <div className="absolute inset-0 flex items-center justify-center">
                 <img
                   src={playerImage}
-                  alt={player.cardName || player.commonName}
+                  alt={displayName}
                   className="drop-shadow-[0_10px_20px_rgba(0,0,0,0.9)] w-full h-full object-cover object-center"
                   onError={(e) => {
                     if (!imageError) {
@@ -509,11 +538,11 @@ export default function PlayerCard({
               </div>
 
               {/* Bottom Section: Name + Icons */}
-              <div className="absolute left-0 right-0 z-10 px-3 bottom-[56px]">
+              <div className={`absolute left-0 right-0 z-10 px-3 ${isDetailView ? 'bottom-[70px]' : 'bottom-[56px]'}`}>
                 {/* Player Name */}
                 <div className="text-center mb-2">
                   <h3 className="font-black text-xl leading-none text-white drop-shadow-[0_3px_6px_rgba(0,0,0,1)] uppercase tracking-wider">
-                    {player.cardName || player.commonName}
+                    {displayName}
                   </h3>
                 </div>
 
@@ -620,6 +649,17 @@ export default function PlayerCard({
         )}
 
         <div className="relative h-full flex flex-col">
+          {/* Untradeable Icon - Top Right */}
+          {player.auctionable === false && (
+            <div className="absolute top-3 right-3 z-20">
+              <img
+                src="https://images-bucket.renderz.app/common_23_untradeable_icon"
+                alt="Untradeable"
+                className="w-6 h-6 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
+              />
+            </div>
+          )}
+
           {/* OVR + Position */}
           <div className="absolute top-6 left-6 z-20">
             <div className="flex flex-col items-start">
@@ -639,7 +679,7 @@ export default function PlayerCard({
           <div className="absolute inset-0 flex items-center justify-center">
             <img
               src={playerImage}
-              alt={player.cardName || player.commonName}
+              alt={displayName}
               className="drop-shadow-[0_8px_16px_rgba(0,0,0,0.9)] w-full h-full object-cover object-center"
               onError={(e) => {
                 if (!imageError) {
@@ -653,7 +693,7 @@ export default function PlayerCard({
           <div className="absolute left-0 right-0 z-10 px-2 bottom-[40px]">
             <div className="text-center mb-1.5">
               <h3 className="font-black text-base leading-none text-white drop-shadow-[0_3px_6px_rgba(0,0,0,1)] uppercase tracking-wide">
-                {player.cardName || player.commonName}
+                {displayName}
               </h3>
             </div>
 

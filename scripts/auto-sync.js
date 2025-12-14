@@ -75,10 +75,52 @@ async function syncPlayers() {
     }
 }
 
+async function syncPlayerDetails() {
+    console.log('\n=== Starting Player Details Sync ===');
+    let hasMore = true;
+    let iterations = 0;
+    let totalSynced = 0;
+    const MAX_ITERATIONS = 500; // Safety limit
+
+    try {
+        while (hasMore && iterations < MAX_ITERATIONS) {
+            iterations++;
+            console.log(`\n--- Player Details Iteration ${iterations} ---`);
+
+            const data = await invokeFunction('sync-player-details');
+
+            if (!data) {
+                console.error('No data returned from sync-player-details');
+                break;
+            }
+
+            totalSynced += data.synced || 0;
+            console.log(`Batch Result: Synced ${data.synced || 0} players (Total: ${totalSynced})`);
+
+            // If synced = 0, all players have details
+            hasMore = (data.synced || 0) > 0;
+
+            if (!hasMore) {
+                console.log('🎉 All players have details synced!');
+                break;
+            }
+
+            // Wait between batches to avoid rate limiting
+            console.log('Waiting 2s before next batch...');
+            await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+
+        console.log(`Player Details Sync Complete! Total synced: ${totalSynced}`);
+    } catch (error) {
+        console.error('Error in syncPlayerDetails:', error.message);
+    }
+}
+
 async function runSyncJob() {
     console.log(`\n[${new Date().toISOString()}] Starting Sync Job...`);
     await syncPrograms();
     await syncPlayers();
+    await syncPlayerDetails(); // NEW: Sync player details after players
     console.log(`[${new Date().toISOString()}] Sync Job Finished.`);
 }
 

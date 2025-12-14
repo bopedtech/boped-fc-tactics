@@ -1,6 +1,5 @@
-// FC Mobile AI Chatbot v2 - Using Lovable AI Gateway
-// Updated: Dynamic suggestions & rich responses
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+// FC Mobile AI Chatbot v2 - Using Google Gemini 2.5 Flash
+// Updated: Direct Gemini API with function calling
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -20,49 +19,65 @@ enum PlayerStat {
   PHYSICAL = "PHY",
 }
 
-// Tool definitions cho OpenAI format (Lovable AI Gateway)
-const tools = [
+// Tool definitions for Gemini native format
+const geminiTools = [
   {
-    type: "function",
-    function: {
-      name: "find_top_players",
-      description: "Tìm kiếm các cầu thủ hàng đầu (Top N) dựa trên một chỉ số. Mặc định luôn tìm 10 cầu thủ trừ khi người dùng hỏi đích danh 'ai nhất' hoặc số lượng cụ thể.",
-      parameters: {
-        type: "object",
-        properties: {
-          stat: {
-            type: "string",
-            enum: Object.values(PlayerStat),
-            description: "Chỉ số dùng để xếp hạng: RATING (OVR), HEIGHT (chiều cao), PAC (tốc độ), SHO (sút), PAS (chuyền), DRI (rê bóng), DEF (phòng thủ), PHY (thể chất)",
+    functionDeclarations: [
+      {
+        name: "find_top_players",
+        description: "Tìm kiếm các cầu thủ hàng đầu (Top N) dựa trên một chỉ số. Mặc định luôn tìm 10 cầu thủ trừ khi người dùng hỏi đích danh 'ai nhất' hoặc số lượng cụ thể.",
+        parameters: {
+          type: "object",
+          properties: {
+            stat: {
+              type: "string",
+              enum: Object.values(PlayerStat),
+              description: "Chỉ số dùng để xếp hạng: RATING (OVR), HEIGHT (chiều cao), PAC (tốc độ), SHO (sút), PAS (chuyền), DRI (rê bóng), DEF (phòng thủ), PHY (thể chất)",
+            },
+            limit: {
+              type: "integer",
+              description: "Số lượng cầu thủ trả về. Mặc định là 10. Chỉ dùng 1 nếu câu hỏi là dạng 'Ai là người... nhất?' (số ít).",
+            },
+            ascending: {
+              type: "boolean",
+              description: "Sắp xếp tăng dần. false (mặc định) cho giỏi nhất. true cho tệ nhất.",
+            }
           },
-          limit: {
-            type: "integer",
-            description: "Số lượng cầu thủ trả về. Mặc định là 10. Chỉ dùng 1 nếu câu hỏi là dạng 'Ai là người... nhất?' (số ít).",
-          },
-          ascending: {
-            type: "boolean",
-            description: "Sắp xếp tăng dần. false (mặc định) cho giỏi nhất. true cho tệ nhất.",
-          }
-        },
-        required: ["stat"],
-      },
-    },
-  },
-  {
-    type: "function",
-    function: {
-      name: "get_player_count",
-      description: "Đếm tổng số lượng cầu thủ trong database, có thể lọc theo vị trí.",
-      parameters: {
-        type: "object",
-        properties: {
-          filterPosition: {
-            type: "string",
-            description: "Vị trí cụ thể (ví dụ: 'GK', 'ST', 'CM'). Nếu bỏ trống, đếm tất cả.",
-          },
+          required: ["stat"],
         },
       },
-    },
+      {
+        name: "search_player_by_name",
+        description: "Tìm kiếm cầu thủ theo tên. Dùng khi người dùng hỏi về một cầu thủ cụ thể như 'Gullit', 'Messi', 'Ronaldo', hoặc 'các thẻ của X'.",
+        parameters: {
+          type: "object",
+          properties: {
+            name: {
+              type: "string",
+              description: "Tên cầu thủ cần tìm (có thể là họ, tên hoặc tên đầy đủ)",
+            },
+            limit: {
+              type: "integer",
+              description: "Số lượng kết quả trả về. Mặc định là 5.",
+            }
+          },
+          required: ["name"],
+        },
+      },
+      {
+        name: "get_player_count",
+        description: "Đếm tổng số lượng cầu thủ trong database, có thể lọc theo vị trí.",
+        parameters: {
+          type: "object",
+          properties: {
+            filterPosition: {
+              type: "string",
+              description: "Vị trí cụ thể (ví dụ: 'GK', 'ST', 'CM'). Nếu bỏ trống, đếm tất cả.",
+            },
+          },
+        },
+      }
+    ]
   }
 ];
 
@@ -70,10 +85,18 @@ const SYSTEM_INSTRUCTION_VI = `
 Bạn là trợ lý AI chuyên gia phân tích dữ liệu FC Mobile của Boped FC Tactics - trang web cơ sở dữ liệu cầu thủ FC Mobile hàng đầu.
 Nhiệm vụ của bạn là sử dụng các công cụ (Tools) để truy vấn dữ liệu chính xác từ database và tư vấn cho người chơi.
 
+**QUAN TRỌNG - SỬ DỤNG NGỮ CẢNH CUỘC TRÒ CHUYỆN:**
+1. Bạn PHẢI đọc kỹ lịch sử chat trước khi trả lời.
+2. Khi người dùng xác nhận ngắn gọn như "có", "ừ", "yes", "ok", "đúng rồi" → HÃY xem lại tin nhắn trước đó để hiểu họ đang xác nhận điều gì, và thực hiện hành động tương ứng.
+3. Nếu trước đó bạn đã đề cập một cầu thủ cụ thể (ví dụ: "Bạn có muốn tìm Gullit?") và người dùng xác nhận → DÙNG search_player_by_name với tên cầu thủ đó.
+4. Nếu người dùng hỏi về "cầu thủ đó", "người đó", "anh ấy" → TÌM trong lịch sử chat để xác định họ đang nói về ai.
+5. Luôn duy trì ngữ cảnh cuộc trò chuyện - không trả lời như thể đây là tin nhắn đầu tiên.
+
 QUY TẮC SỬ DỤNG CÔNG CỤ:
 1. Luôn sử dụng công cụ khi hỏi về dữ liệu thực tế.
-2. Khi sử dụng find_top_players:
-   - Ánh xạ ngôn ngữ tự nhiên sang chỉ số:
+2. Khi người dùng hỏi về một cầu thủ CỤ THỂ theo TÊN (Gullit, Messi, etc.) → DÙNG search_player_by_name
+3. Khi người dùng hỏi về TOP/XẾP HẠNG theo chỉ số → DÙNG find_top_players
+4. Khi sử dụng find_top_players - ánh xạ ngôn ngữ tự nhiên:
      * Tốc độ/Chạy nhanh/Pace = PAC
      * Sút/Dứt điểm/Shooting = SHO
      * OVR/Rating = RATING
@@ -103,14 +126,13 @@ QUY TẮC TRẢ LỜI (CỰC KỲ QUAN TRỌNG - TUÂN THỦ NGHIÊM NGẶT):
    - **Đề xuất đội hình/chiến thuật**: "Kết hợp tốt với tiền vệ có chuyền bóng cao như De Bruyne"
 
 3. **CÂU HỎI GỢI Ý ĐỘNG (QUAN TRỌNG NHẤT)**:
-   - suggestedQuestions PHẢI được tạo dựa trên ngữ cảnh cuộc trò chuyện HIỆN TẠI
-   - Phân tích nội dung câu hỏi và câu trả lời vừa rồi để gợi ý câu hỏi liên quan:
-     * Nếu vừa hỏi về tốc độ → gợi ý: "Cầu thủ rê bóng hay nhất?", "So sánh với Mbappé?", "Tiền vệ nào chạy nhanh?"
-     * Nếu vừa hỏi về tiền đạo → gợi ý: "Tiền vệ hỗ trợ tốt nhất?", "Hậu vệ cánh nào tấn công tốt?", "Thủ môn nào phản xạ nhanh?"
-     * Nếu vừa hỏi về 1 cầu thủ cụ thể → gợi ý: "So sánh với [cầu thủ cùng vị trí]?", "Còn ai cùng CLB [tên CLB]?", "Cầu thủ [quốc gia] nào hay?"
-     * Nếu vừa hỏi về CLB → gợi ý về cầu thủ khác CLB đó, đối thủ, hoặc giải đấu
-   - TUYỆT ĐỐI KHÔNG lặp lại câu hỏi đã hỏi trong lịch sử chat
-   - Câu hỏi gợi ý phải ngắn gọn, hấp dẫn (dưới 30 ký tự)
+   - suggestedQuestions PHẢI được tạo dựa trên KẾT QUẢ VỪA TRẢ RA
+   - VÍ DỤ CỤ THỂ:
+     * Nếu vừa trả về top 5 cầu thủ sút hay nhất (Pelé, Ronaldo...) → gợi ý PHẢI liên quan: "So sánh Pelé và Ronaldo?", "Ai sút phạt hay nhất?", "Tiền đạo nào đá phạt đền tốt?"
+     * Nếu vừa nói về Mbappé → gợi ý: "So sánh Mbappé với Haaland?", "Cầu thủ PSG nào hay?", "Tiền đạo Pháp tốt nhất?"
+     * Nếu trả về top 5 tốc độ → gợi ý: "Ai rê bóng tốt nhất?", "Tiền vệ nào nhanh?", "So sánh với Vinicius?"
+   - CÂU HỎI GỢI Ý PHẢI NGẮN GỌN (dưới 25 ký tự), HẤP DẪN, và LIÊN QUAN TRỰC TIẾP đến cầu thủ/chủ đề vừa nhắc tới
+   - TUYỆT ĐỐI KHÔNG dùng câu hỏi chung chung như "Hậu vệ tấn công hay?" khi vừa nói về cầu thủ sút
 
 4. **GIỌNG VĂN THÂN THIỆN**: 
    - Viết như đang trò chuyện với bạn bè đam mê FC Mobile
@@ -193,28 +215,52 @@ async function executeGetPlayerCount(supabase: any, args: { filterPosition?: str
   return { total_players: count };
 }
 
-async function executeFindTopPlayers(supabase: any, args: { stat: string, limit?: number, ascending?: boolean }) {
-  const limit = args.limit || 10;
-  const ascending = args.ascending || false;
-  const stat = args.stat;
+async function executeSearchPlayerByName(supabase: any, args: { name: string, limit?: number }) {
+  const searchName = args.name;
+  const limit = args.limit || 5;
 
-  console.log(`Calling RPC: stat=${stat}, limit=${limit}, ascending=${ascending}`);
+  console.log(`Searching for player: "${searchName}", limit=${limit}`);
 
-  const { data, error } = await supabase.rpc('get_top_players_by_stat', {
-    stat_key: stat,
-    limit_count: limit,
-    sort_asc: ascending
+  // Use the smart search RPC which handles accent-insensitive search
+  const { data, error } = await supabase.rpc('search_players_smart', {
+    search_term: searchName,
+    result_limit: limit
   });
 
   if (error) {
-    console.error("RPC Error:", error);
-    return { error: error.message };
+    console.error("Search RPC Error:", error);
+    // Fallback to basic ilike search
+    const { data: fallbackData, error: fallbackError } = await supabase
+      .from('players')
+      .select('assetId:assetId, commonName, cardName, firstName, lastName, rating, position, club, nation, league, images, stats, avgStats, avgGkStats')
+      .or(`commonName.ilike.%${searchName}%,cardName.ilike.%${searchName}%,firstName.ilike.%${searchName}%,lastName.ilike.%${searchName}%`)
+      .eq('is_visible', true)
+      .order('rating', { ascending: false })
+      .limit(limit);
+
+    if (fallbackError) {
+      return { error: fallbackError.message };
+    }
+
+    if (!fallbackData || fallbackData.length === 0) {
+      return { players: [], message: `Không tìm thấy cầu thủ nào với tên "${searchName}"` };
+    }
+
+    return { players: fallbackData, search_term: searchName };
   }
 
-  const players = (data || []).map((p: any) => ({
+  if (!data || data.length === 0) {
+    return { players: [], message: `Không tìm thấy cầu thủ nào với tên "${searchName}"` };
+  }
+
+  // Map to consistent format
+  const players = data.map((p: any) => ({
     assetId: p.assetId,
     playerId: p.assetId,
-    commonName: p.commonName,
+    commonName: p.commonName || p.cardName || `${p.firstName} ${p.lastName}`,
+    cardName: p.cardName,
+    firstName: p.firstName,
+    lastName: p.lastName,
     rating: p.rating,
     position: p.position,
     club: p.club,
@@ -226,10 +272,136 @@ async function executeFindTopPlayers(supabase: any, args: { stat: string, limit?
     avgGkStats: p.avgGkStats,
   }));
 
-  return { players, stat_name: stat };
+  // Deduplicate - same player with tradeable/untradeable status should count as 1
+  // Key: commonName + rating + position + cardBackground (to distinguish programs)
+  const seenPlayers = new Set<string>();
+  const uniquePlayers = players.filter((p: any) => {
+    const bgKey = p.images?.playerCardBackground || 'default';
+    const key = `${p.commonName}-${p.rating}-${p.position}-${bgKey}`;
+    if (seenPlayers.has(key)) {
+      return false;
+    }
+    seenPlayers.add(key);
+    return true;
+  });
+
+  console.log(`Found ${players.length} players for "${searchName}", after dedup: ${uniquePlayers.length}`);
+  return { players: uniquePlayers, search_term: searchName };
 }
 
-serve(async (req) => {
+async function executeFindTopPlayers(supabase: any, args: { stat: string, limit?: number, ascending?: boolean }) {
+  const requestedLimit = args.limit || 10;
+  const ascending = args.ascending || false;
+  const stat = args.stat;
+
+  // Fetch 2x the limit to ensure enough players after deduplication
+  const fetchLimit = requestedLimit * 2;
+
+  console.log(`Calling RPC: stat=${stat}, limit=${fetchLimit} (requested: ${requestedLimit}), ascending=${ascending}`);
+
+  // Call V2 RPC to ensure we get all name fields
+  const { data, error } = await supabase.rpc('get_top_players_v2', {
+    stat_key: stat,
+    limit_count: fetchLimit,
+    sort_asc: ascending
+  });
+
+  if (error) {
+    console.error("RPC Error:", error);
+    return { error: error.message };
+  }
+
+  // Debug: Log first player from RPC to check data structure
+  if (data && data.length > 0) {
+    console.log("First player from RPC V2:", JSON.stringify(data[0], null, 2));
+  }
+
+  const players = (data || []).map((p: any) => {
+    // Robust display name fallback
+    let displayName = p.commonName;
+    
+    // If commonName is empty/null, try cardName
+    if (!displayName || displayName.trim() === '') {
+        displayName = p.cardName;
+    }
+    
+    // If still empty, try firstName + lastName
+    if ((!displayName || displayName.trim() === '') && p.firstName && p.lastName) {
+        displayName = `${p.firstName} ${p.lastName}`;
+    }
+    
+    // If still empty, try parts of names
+    if (!displayName || displayName.trim() === '') {
+        displayName = p.lastName || p.firstName || p.cardName || 'Unknown Player';
+    }
+
+    return {
+      assetId: p.assetId,
+      playerId: p.assetId,
+      commonName: displayName,
+      cardName: p.cardName,
+      firstName: p.firstName,
+      lastName: p.lastName,
+      rating: p.rating,
+      position: p.position,
+      club: p.club,
+      nation: p.nation,
+      league: p.league,
+      images: p.images,
+      stats: p.stats,
+      avgStats: p.avgStats,
+      avgGkStats: p.avgGkStats,
+    };
+  });
+
+  // Debug: Log first processed player
+  if (players.length > 0) {
+    console.log("First processed player:", JSON.stringify(players[0], null, 2));
+  }
+
+  // Deduplicate - same player with tradeable/untradeable status should count as 1
+  // Key: commonName + rating + position + cardBackground (to distinguish different program cards)
+  const seenPlayers = new Set<string>();
+  const uniquePlayers = players.filter((p: any) => {
+    const bgKey = p.images?.playerCardBackground || 'default';
+    const key = `${p.commonName}-${p.rating}-${p.position}-${bgKey}`;
+    if (seenPlayers.has(key)) {
+      return false;
+    }
+    seenPlayers.add(key);
+    return true;
+  });
+
+  // Trim to requested limit after deduplication
+  const finalPlayers = uniquePlayers.slice(0, requestedLimit);
+
+  console.log(`Players after dedup: ${uniquePlayers.length}, returning: ${finalPlayers.length}`);
+
+  return { players: finalPlayers, stat_name: stat };
+}
+
+// Convert chat history to Gemini format
+function convertToGeminiContents(messages: any[], userQuery?: string) {
+  const contents: any[] = [];
+  
+  for (const msg of messages || []) {
+    contents.push({
+      role: msg.role === "assistant" ? "model" : "user",
+      parts: [{ text: msg.content }]
+    });
+  }
+
+  if (userQuery) {
+    contents.push({
+      role: "user",
+      parts: [{ text: userQuery }]
+    });
+  }
+
+  return contents;
+}
+
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -237,51 +409,51 @@ serve(async (req) => {
   try {
     const { messages, userQuery, locale = "vi" } = await req.json();
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY không được cấu hình");
+    if (!GEMINI_API_KEY) {
+      throw new Error("GEMINI_API_KEY không được cấu hình");
     }
 
     const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
 
     const systemInstruction = locale === "en" ? SYSTEM_INSTRUCTION_EN : SYSTEM_INSTRUCTION_VI;
+    const contents = convertToGeminiContents(messages, userQuery);
 
-    // Build messages for Lovable AI Gateway (OpenAI format)
-    const aiMessages = [
-      { role: "system", content: systemInstruction },
-      ...(messages || []).map((msg: any) => ({
-        role: msg.role,
-        content: msg.content
-      }))
-    ];
-
-    if (userQuery) {
-      aiMessages.push({ role: "user", content: userQuery });
-    }
-
-    console.log("Calling Lovable AI Gateway...");
+    console.log("Calling Gemini 2.5 Flash API...");
 
     // First call - detect tool usage
-    const response1 = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: aiMessages,
-        tools: tools,
-        tool_choice: "auto",
-      }),
-    });
+    const response1 = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          systemInstruction: {
+            parts: [{ text: systemInstruction }]
+          },
+          contents: contents,
+          tools: geminiTools,
+          toolConfig: {
+            functionCallingConfig: {
+              mode: "AUTO"
+            }
+          },
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 8192,
+          }
+        }),
+      }
+    );
 
     if (!response1.ok) {
       const errorText = await response1.text();
-      console.error("Lovable AI error:", errorText);
+      console.error("Gemini API error:", errorText);
 
       if (response1.status === 429) {
         return new Response(
@@ -290,99 +462,134 @@ serve(async (req) => {
         );
       }
 
-      if (response1.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "Hết hạn mức sử dụng AI. Vui lòng liên hệ quản trị viên." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-
-      throw new Error("Lỗi khi gọi AI API");
+      throw new Error("Lỗi khi gọi Gemini API");
     }
 
     const data1 = await response1.json();
-    const choice = data1.choices?.[0];
+    const candidate = data1.candidates?.[0];
 
-    if (!choice) {
+    if (!candidate) {
       throw new Error("Không nhận được phản hồi từ AI");
     }
 
-    const toolCalls = choice.message?.tool_calls;
+    const firstPart = candidate.content?.parts?.[0];
+    
+    // Check if there's a function call
+    if (firstPart?.functionCall) {
+      const functionCall = firstPart.functionCall;
+      console.log("Function call detected:", functionCall.name);
 
-    if (toolCalls && toolCalls.length > 0) {
-      console.log("Tool calls detected:", toolCalls.length);
+      const functionName = functionCall.name;
+      const args = functionCall.args;
 
-      const toolResults = [];
+      console.log(`Executing: ${functionName}`, args);
 
-      for (const call of toolCalls) {
-        const functionName = call.function.name;
-        const args = JSON.parse(call.function.arguments);
-
-        console.log(`Executing: ${functionName}`, args);
-
-        let result;
-        if (functionName === "find_top_players") {
-          result = await executeFindTopPlayers(supabase, args);
-        } else if (functionName === "get_player_count") {
-          result = await executeGetPlayerCount(supabase, args);
+      let result: any;
+      let playersFromDb: any[] = [];
+      
+      if (functionName === "find_top_players") {
+        result = await executeFindTopPlayers(supabase, args);
+        if (result.players) {
+          playersFromDb = result.players;
         }
-
-        toolResults.push({
-          tool_call_id: call.id,
-          role: "tool",
-          content: JSON.stringify(result),
-        });
+      } else if (functionName === "search_player_by_name") {
+        result = await executeSearchPlayerByName(supabase, args);
+        if (result.players) {
+          playersFromDb = result.players;
+        }
+      } else if (functionName === "get_player_count") {
+        result = await executeGetPlayerCount(supabase, args);
       }
 
-      console.log("Calling Lovable AI with tool results...");
+      console.log("Function result players count:", playersFromDb.length);
+      console.log("Calling Gemini with function result...");
 
-      // Second call - with tool results
-      const response2 = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
-          messages: [
-            ...aiMessages,
-            choice.message,
-            ...toolResults,
-          ],
-        }),
-      });
+      // Second call - with function result
+      const response2 = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            systemInstruction: {
+              parts: [{ text: systemInstruction }]
+            },
+            contents: [
+              ...contents,
+              {
+                role: "model",
+                parts: [{ functionCall: functionCall }]
+              },
+              {
+                role: "user",
+                parts: [{
+                  functionResponse: {
+                    name: functionName,
+                    response: result
+                  }
+                }]
+              }
+            ],
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 8192,
+            }
+          }),
+        }
+      );
 
       if (!response2.ok) {
         const errorText = await response2.text();
-        console.error("Lovable AI error (call 2):", errorText);
-
-        if (response2.status === 429) {
-          return new Response(
-            JSON.stringify({ error: "Đã vượt quá giới hạn API. Vui lòng đợi vài giây và thử lại.", retryAfter: 10 }),
-            { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
-        }
-
-        if (response2.status === 402) {
-          return new Response(
-            JSON.stringify({ error: "Hết hạn mức sử dụng AI. Vui lòng liên hệ quản trị viên." }),
-            { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
-        }
-
-        throw new Error("Lỗi khi gọi AI API lần 2");
+        console.error("Gemini API error (call 2):", errorText);
+        throw new Error("Lỗi khi gọi Gemini API lần 2");
       }
 
       const data2 = await response2.json();
-      const finalText = data2.choices?.[0]?.message?.content || "Xin lỗi, tôi không thể trả lời câu hỏi này.";
+      let aiText = data2.candidates?.[0]?.content?.parts?.[0]?.text || "";
+
+      // Extract suggested questions from AI response if available
+      let suggestedQuestions: string[] = [];
+      try {
+        // Try to find JSON in the response
+        const jsonMatch = aiText.match(/\{[\s\S]*"suggestedQuestions"[\s\S]*\}/);
+        if (jsonMatch) {
+          const jsonData = JSON.parse(jsonMatch[0]);
+          if (jsonData.suggestedQuestions) {
+            suggestedQuestions = jsonData.suggestedQuestions;
+          }
+          if (jsonData.textResponse) {
+            aiText = jsonData.textResponse;
+          }
+        }
+      } catch (e) {
+        console.log("Could not parse suggestions from AI:", e);
+      }
+
+      // Clean up any remaining JSON from text
+      aiText = aiText.replace(/```json[\s\S]*?```/g, '').replace(/\{[\s\S]*"playerCards"[\s\S]*\}/g, '').trim();
+      
+      if (!aiText) {
+        aiText = "Đây là kết quả tìm kiếm của bạn!";
+      }
+
+      // Build final response with playerCards from database (not from AI)
+      const finalResponse = {
+        playerCards: playersFromDb,
+        suggestedQuestions: suggestedQuestions.length > 0 ? suggestedQuestions : undefined,
+        textResponse: aiText
+      };
+
+      console.log("Final response playerCards count:", finalResponse.playerCards.length);
 
       return new Response(
-        JSON.stringify({ response: finalText }),
+        JSON.stringify({ response: finalResponse }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     } else {
-      const finalText = choice.message?.content || "Xin lỗi, tôi không thể trả lời câu hỏi này.";
+      // No function call, just return the text response
+      const finalText = firstPart?.text || "Xin lỗi, tôi không thể trả lời câu hỏi này.";
 
       return new Response(
         JSON.stringify({ response: finalText }),
