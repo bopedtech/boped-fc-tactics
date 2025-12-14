@@ -38,6 +38,3 @@ verify_jwt = false
 
 [functions.admin-stats]
 verify_jwt = false
-
-[functions.data-migration]
-verify_jwt = false
