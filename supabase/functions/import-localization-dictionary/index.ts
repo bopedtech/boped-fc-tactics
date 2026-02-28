@@ -22,8 +22,9 @@ Deno.serve(async (req) => {
     const syncApiSecret = Deno.env.get('SYNC_API_SECRET');
     const providedSecret = req.headers.get('x-sync-secret');
     const isInternalCall = req.headers.get('x-internal-call') === 'true';
+    const hasAuthHeader = req.headers.get('authorization')?.startsWith('Bearer ');
     
-    if (syncApiSecret && !isInternalCall && providedSecret !== syncApiSecret) {
+    if (syncApiSecret && !isInternalCall && !hasAuthHeader && providedSecret !== syncApiSecret) {
       console.error('Unauthorized import-localization-dictionary attempt');
       return new Response(
         JSON.stringify({ success: false, error: 'Unauthorized' }),

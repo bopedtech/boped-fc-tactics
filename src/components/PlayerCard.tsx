@@ -143,9 +143,8 @@ export default function PlayerCard({
   const finalOvr = displayOvr ?? player.rating;
   const rankColorClass = getRankColor(player.rank);
 
-  // Default silhouette image
-  // Default silhouette image
-  const DEFAULT_PLAYER_IMAGE = "https://images-bucket.renderz.app/player_23_0";
+  // Default silhouette image (local asset fallback)
+  const DEFAULT_PLAYER_IMAGE = defaultPlayerImage;
 
   // Get images
   const flagImage = player.images?.flagImage || player.nation?.image;
@@ -153,12 +152,19 @@ export default function PlayerCard({
   const teamLogoUrl = player.images?.clubImage || player.club?.image;
   const cardBackground = player.images?.playerCardBackground;
 
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
+  const untradeableIconUrl = supabaseUrl
+    ? `${supabaseUrl}/storage/v1/object/public/player-media/common/untradeable_icon.png`
+    : "https://images-v2.renderz.app/common_23_untradeable_icon";
+
   // Check for valid player image
   let playerImage = player.images?.playerCardImage;
-  
-  // Try to construct image URL from asset ID if missing
-  if (!playerImage || playerImage === "image not found") {
-    playerImage = `https://images-bucket.renderz.app/player_${player.assetId}_0`;
+
+  // Use self-hosted Supabase URL if not found or if it's an old renderz URL
+  if (!playerImage || playerImage === "image not found" || (typeof playerImage === "string" && playerImage.includes("renderz.app"))) {
+    playerImage = supabaseUrl
+      ? `${supabaseUrl}/storage/v1/object/public/player-media/players/${player.assetId}.png`
+      : `https://images-v2.renderz.app/player_${player.assetId}_0`;
   }
 
   const isPlaceholderImage = !playerImage || imageError;
@@ -259,7 +265,7 @@ export default function PlayerCard({
             {player.auctionable === false && (
               <div className="absolute top-1 right-1 z-20">
                 <img
-                  src="https://images-bucket.renderz.app/common_23_untradeable_icon"
+                  src={untradeableIconUrl}
                   alt="Untradeable"
                   className="w-4 h-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
                 />
@@ -343,6 +349,20 @@ export default function PlayerCard({
         onClick={!isSelected ? onClick : undefined}
       >
         <div className="flex items-center gap-4">
+          {/* Player Card Thumbnail */}
+          <div className="w-16 h-20 shrink-0 relative overflow-hidden rounded-md border border-border/50 bg-gradient-to-br from-amber-600/30 via-yellow-500/20 to-amber-700/30">
+            {cardBackground && (
+              <img src={cardBackground} alt="" className="absolute inset-0 w-full h-full object-cover" />
+            )}
+            <img
+              src={playerImage}
+              alt={displayName}
+              className="relative w-full h-full object-cover object-center"
+              onError={(e) => {
+                if (!imageError) setImageError(true);
+              }}
+            />
+          </div>
           {/* OVR and Position */}
           <div className="text-center shrink-0">
             <div className="flex flex-col items-center">
@@ -368,7 +388,7 @@ export default function PlayerCard({
               {displayName}
               {player.auctionable === false && (
                 <img
-                  src="https://images-bucket.renderz.app/common_23_untradeable_icon"
+                  src={untradeableIconUrl}
                   alt="Untradeable"
                   className="w-4 h-4 inline-block"
                 />
@@ -504,7 +524,7 @@ export default function PlayerCard({
               {player.auctionable === false && (
                 <div className="absolute top-4 right-4 z-20">
                   <img
-                    src="https://images-bucket.renderz.app/common_23_untradeable_icon"
+                    src={untradeableIconUrl}
                     alt="Untradeable"
                     className="w-10 h-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
                   />
@@ -653,7 +673,7 @@ export default function PlayerCard({
           {player.auctionable === false && (
             <div className="absolute top-3 right-3 z-20">
               <img
-                src="https://images-bucket.renderz.app/common_23_untradeable_icon"
+                src={untradeableIconUrl}
                 alt="Untradeable"
                 className="w-6 h-6 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
               />

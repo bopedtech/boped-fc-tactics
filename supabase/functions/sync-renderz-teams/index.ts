@@ -42,8 +42,9 @@ Deno.serve(async (req) => {
     const syncApiSecret = Deno.env.get('SYNC_API_SECRET');
     const providedSecret = req.headers.get('x-sync-secret');
     const isInternalCall = req.headers.get('x-internal-call') === 'true';
-    
-    if (syncApiSecret && !isInternalCall && providedSecret !== syncApiSecret) {
+    const hasAuthHeader = req.headers.get('authorization')?.startsWith('Bearer ');
+
+    if (syncApiSecret && !isInternalCall && !hasAuthHeader && providedSecret !== syncApiSecret) {
       console.error('Unauthorized sync-renderz-teams attempt');
       return new Response(
         JSON.stringify({ success: false, error: 'Unauthorized' }),
@@ -68,7 +69,7 @@ Deno.serve(async (req) => {
     }
 
     const renderzData = await renderzResponse.json();
-    
+
     if (renderzData.error) {
       throw new Error(`Renderz API returned error: ${renderzData.error}`);
     }
@@ -102,20 +103,43 @@ Deno.serve(async (req) => {
     console.log(`Found ${translationMap.size} translations`);
 
     // 4. Enrich and map data explicitly
-    const transformedTeams: TransformedTeam[] = teamsData.map(team => {
+    const { data: existingRecords } = await supabase.from('teams').select('id, image');
+    const existingImagesMap = new Map((existingRecords || []).map((r: any) => [r.id, r.image]));
+
+    const transformedTeams: TransformedTeam[] = [];
+    for (const team of teamsData) {
       const localizationKey = team.name;
       const displayName = translationMap.get(localizationKey) || localizationKey;
 
-      return {
+      let imageUrl = team.image || null;
+      const existingImage = existingImagesMap.get(team.id);
+
+      if (existingImage && !existingImage.includes('renderz.app')) {
+        imageUrl = existingImage;
+      } else if (imageUrl && imageUrl.includes('renderz.app')) {
+        try {
+          const imgResp = await fetch(imageUrl, { headers: RENDERZ_HEADERS });
+          if (imgResp.ok) {
+            const imgBuffer = await imgResp.arrayBuffer();
+            const { error: uploadError } = await supabase.storage.from('player-media').upload(`teams/${team.id}.png`, imgBuffer, { contentType: 'image/png', upsert: true });
+            if (!uploadError) {
+              const { data: publicUrlData } = supabase.storage.from('player-media').getPublicUrl(`teams/${team.id}.png`);
+              imageUrl = publicUrlData.publicUrl;
+            }
+          }
+        } catch (e) { console.error('Image upload failed', e); }
+      }
+
+      transformedTeams.push({
         id: team.id,
         displayName,
         localizationKey,
-        image: team.image || null,
+        image: imageUrl,
         leagueId: team.leagueId || null,
         rawData: team,
         updatedAt: new Date().toISOString(),
-      };
-    });
+      });
+    }
 
     console.log(`Transformed ${transformedTeams.length} teams`);
 

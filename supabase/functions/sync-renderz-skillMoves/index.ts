@@ -47,8 +47,9 @@ Deno.serve(async (req) => {
     const syncApiSecret = Deno.env.get('SYNC_API_SECRET');
     const providedSecret = req.headers.get('x-sync-secret');
     const isInternalCall = req.headers.get('x-internal-call') === 'true';
-    
-    if (syncApiSecret && !isInternalCall && providedSecret !== syncApiSecret) {
+    const hasAuthHeader = req.headers.get('authorization')?.startsWith('Bearer ');
+
+    if (syncApiSecret && !isInternalCall && !hasAuthHeader && providedSecret !== syncApiSecret) {
       console.error('Unauthorized sync-renderz-skillMoves attempt');
       return new Response(
         JSON.stringify({ success: false, error: 'Unauthorized' }),
@@ -76,7 +77,7 @@ Deno.serve(async (req) => {
     }
 
     const renderzData = await renderzResponse.json();
-    
+
     if (renderzData.error) {
       throw new Error(`Renderz API returned error: ${renderzData.error}`);
     }
@@ -112,10 +113,14 @@ Deno.serve(async (req) => {
     });
 
     // Transform and enrich skillMoves with explicit mapping
-    const transformedSkillMoves: TransformedSkillMove[] = renderzData.map((skillMove: SkillMoveData) => {
+    const { data: existingRecords } = await supabase.from('skillmoves').select('id, mediaUrl');
+    const existingImagesMap = new Map((existingRecords || []).map((r: any) => [r.id, r.mediaUrl]));
+
+    const transformedSkillMoves: TransformedSkillMove[] = [];
+    for (const skillMove of renderzData) {
       const keyName = skillMove.name;
       const keyDesc = skillMove.description || null;
-      
+
       const displayName = translationMap.get(keyName) || keyName || 'Unknown Skill';
       const displayDescription = keyDesc ? (translationMap.get(keyDesc) || keyDesc) : null;
 
@@ -123,11 +128,30 @@ Deno.serve(async (req) => {
       const starsRaw = skillMove.stars ?? skillMove.starRating ?? skillMove.level;
       const starsInt = starsRaw !== null && starsRaw !== undefined ? parseInt(String(starsRaw), 10) : NaN;
       const stars = !isNaN(starsInt) ? starsInt : null;
-      
-      // Defensive architecture for mediaUrl
-      const mediaUrl = skillMove.mediaUrl || skillMove.image || skillMove.video || null;
 
-      return {
+      let mediaUrl = skillMove.mediaUrl || skillMove.image || skillMove.video || null;
+      const existingImage = existingImagesMap.get(skillMove.id);
+
+      if (existingImage && !existingImage.includes('renderz.app')) {
+        mediaUrl = existingImage;
+      } else if (mediaUrl && mediaUrl.includes('renderz.app')) {
+        try {
+          const imgResp = await fetch(mediaUrl, { headers: RENDERZ_HEADERS });
+          if (imgResp.ok) {
+            const imgBuffer = await imgResp.arrayBuffer();
+            const isVideo = mediaUrl.endsWith('.mp4');
+            const ext = isVideo ? 'mp4' : 'png';
+            const contentType = isVideo ? 'video/mp4' : 'image/png';
+            const { error: uploadError } = await supabase.storage.from('player-media').upload(`skillMoves/${skillMove.id}.${ext}`, imgBuffer, { contentType, upsert: true });
+            if (!uploadError) {
+              const { data: publicUrlData } = supabase.storage.from('player-media').getPublicUrl(`skillMoves/${skillMove.id}.${ext}`);
+              mediaUrl = publicUrlData.publicUrl;
+            }
+          }
+        } catch (e) { console.error('Image upload failed', e); }
+      }
+
+      transformedSkillMoves.push({
         id: skillMove.id,
         displayName,
         displayDescription,
@@ -137,8 +161,8 @@ Deno.serve(async (req) => {
         mediaUrl,
         rawData: skillMove,
         updatedAt: new Date().toISOString()
-      };
-    });
+      });
+    }
 
     console.log(`✓ Transformed ${transformedSkillMoves.length} skillMoves with explicit mapping`);
 
@@ -168,7 +192,7 @@ Deno.serve(async (req) => {
 
     return new Response(
       JSON.stringify(result),
-      { 
+      {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
@@ -185,7 +209,7 @@ Deno.serve(async (req) => {
         message: 'Internal Server Error during skillMoves sync',
         error: error instanceof Error ? error.message : String(error)
       }),
-      { 
+      {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }

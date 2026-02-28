@@ -31,12 +31,12 @@ function extractDataFromNodes(json: any): any {
       }
     }
   }
-  
+
   // Alternative: check if data is directly in root
   if (json.stats || json.player || json.prices) {
     return json;
   }
-  
+
   return null;
 }
 
@@ -47,12 +47,13 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Security check
+    // Security check - allow authenticated Supabase calls or valid sync secret
     const syncApiSecret = Deno.env.get('SYNC_API_SECRET');
     const providedSecret = req.headers.get('x-sync-secret');
     const isInternalCall = req.headers.get('x-internal-call') === 'true';
-    
-    if (syncApiSecret && !isInternalCall && providedSecret !== syncApiSecret) {
+    const hasAuthHeader = req.headers.get('authorization')?.startsWith('Bearer ');
+
+    if (syncApiSecret && !isInternalCall && !hasAuthHeader && providedSecret !== syncApiSecret) {
       console.error('Unauthorized sync-player-details attempt');
       return new Response(
         JSON.stringify({ success: false, error: 'Unauthorized' }),
@@ -119,6 +120,35 @@ Deno.serve(async (req) => {
 
         // 3. Extract clean data from SvelteKit structure
         const cleanData = extractDataFromNodes(rawJson);
+
+        // --- NEW: Download and upload player image to Supabase Storage ---
+        try {
+          const playerData = cleanData?.player || cleanData;
+          const imageUrl = playerData?.images?.playerCardImage;
+          if (imageUrl && !imageUrl.includes('image not found')) {
+            console.log(`Downloading image for ${assetId}...`);
+            const imgResp = await fetch(imageUrl, { headers: RENDERZ_HEADERS });
+            if (imgResp.ok) {
+              const imgBuffer = await imgResp.arrayBuffer();
+              const { error: uploadError } = await supabase.storage
+                .from('player-media')
+                .upload(`players/${assetId}.png`, imgBuffer, {
+                  contentType: 'image/png',
+                  upsert: true
+                });
+              if (uploadError) {
+                console.error(`Image upload failed for ${assetId}:`, uploadError);
+              } else {
+                console.log(`Image saved to player-media/players/${assetId}.png`);
+              }
+            } else {
+              console.error(`Image fetch failed for ${assetId}: HTTP ${imgResp.status}`);
+            }
+          }
+        } catch (imgErr) {
+          console.error(`Error processing image for ${assetId}:`, imgErr);
+        }
+        // -----------------------------------------------------------------
 
         // Prepare database record
         const dbRecord = {

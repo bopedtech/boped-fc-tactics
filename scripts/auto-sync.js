@@ -27,13 +27,13 @@ async function invokeFunction(functionName, body = {}) {
     return response.json();
 }
 
-async function syncPrograms() {
-    console.log('\n=== Starting Programs Sync ===');
+async function syncMetadata(functionName, displayName) {
+    console.log(`\n=== Starting ${displayName} Sync ===`);
     try {
-        const data = await invokeFunction('sync-renderz-programs');
-        console.log('Programs Sync Result:', data);
+        const data = await invokeFunction(functionName);
+        console.log(`${displayName} Sync Result:`, data);
     } catch (error) {
-        console.error('Error syncing programs:', error.message);
+        console.error(`Error syncing ${displayName}:`, error.message);
     }
 }
 
@@ -118,9 +118,19 @@ async function syncPlayerDetails() {
 
 async function runSyncJob() {
     console.log(`\n[${new Date().toISOString()}] Starting Sync Job...`);
-    await syncPrograms();
+
+    // Sync Metadata
+    await syncMetadata('sync-renderz-programs', 'Programs');
+    await syncMetadata('sync-renderz-nations', 'Nations');
+    await syncMetadata('sync-renderz-teams', 'Teams');
+    await syncMetadata('sync-leagues', 'Leagues');
+    await syncMetadata('sync-renderz-skillMoves', 'Skill Moves');
+    await syncMetadata('sync-renderz-celebrations', 'Celebrations');
+
+    // Sync Players
     await syncPlayers();
-    await syncPlayerDetails(); // NEW: Sync player details after players
+    await syncPlayerDetails();
+
     console.log(`[${new Date().toISOString()}] Sync Job Finished.`);
 }
 

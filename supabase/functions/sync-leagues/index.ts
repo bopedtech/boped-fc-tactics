@@ -26,12 +26,13 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Validate sync API key for security
+    // Validate sync API key for security - allow authenticated Supabase calls
     const syncApiSecret = Deno.env.get('SYNC_API_SECRET');
     const providedSecret = req.headers.get('x-sync-secret');
     const isInternalCall = req.headers.get('x-internal-call') === 'true';
-    
-    if (syncApiSecret && !isInternalCall && providedSecret !== syncApiSecret) {
+    const hasAuthHeader = req.headers.get('authorization')?.startsWith('Bearer ');
+
+    if (syncApiSecret && !isInternalCall && !hasAuthHeader && providedSecret !== syncApiSecret) {
       console.error('Unauthorized sync attempt');
       return new Response(
         JSON.stringify({ success: false, error: 'Unauthorized' }),
@@ -43,7 +44,7 @@ Deno.serve(async (req) => {
 
     // Use Season 24 as reference to fetch universal leagues data
     const REFERENCE_SEASON_ID = 24;
-    
+
     // Khởi tạo Supabase client với service role
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -51,9 +52,9 @@ Deno.serve(async (req) => {
     );
 
     console.log('Fetching universal leagues data using Season 24 as reference...');
-      
+
     const RENDERZ_ENDPOINT = `https://renderz.app/api/filter/filter-data/leagues?seasonId=${REFERENCE_SEASON_ID}`;
-      
+
     const headers = new Headers({
       'Accept': 'application/json, text/plain, */*',
       'sec-ch-ua-platform': '"Android"',
@@ -64,7 +65,7 @@ Deno.serve(async (req) => {
     });
 
     console.log(`Calling: ${RENDERZ_ENDPOINT}`);
-      
+
     const response = await fetch(RENDERZ_ENDPOINT, {
       method: 'GET',
       headers: headers
@@ -93,7 +94,7 @@ Deno.serve(async (req) => {
           message: 'No leagues to sync',
           totalLeagues: 0
         }),
-        { 
+        {
           status: 200,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
@@ -102,52 +103,75 @@ Deno.serve(async (req) => {
 
     // Step 2: Query internal localization dictionary
     console.log('Querying internal localization dictionary...');
-    
+
     const localizationKeys = [...new Set(data.map((league: LeagueData) => league.name))];
     console.log(`Found ${localizationKeys.length} unique localization keys to translate`);
-    
+
     const { data: dictionaryData, error: dictError } = await supabase
       .from('localization_dictionary')
       .select('key, value_en')
       .in('key', localizationKeys);
-    
+
     if (dictError) {
       console.error('Error querying localization dictionary:', dictError);
       throw new Error(`Failed to query dictionary: ${dictError.message}`);
     }
-    
+
     // Create a Map for O(1) lookup
     const localizationMap = new Map(
       (dictionaryData || []).map((entry: any) => [entry.key, entry.value_en])
     );
-    
+
     console.log(`Successfully loaded ${localizationMap.size} translations from DB`);
 
     // Step 3: Transform data with internal lookup (Explicit Mapping)
-    const transformedLeagues = data.map((league: LeagueData) => {
+    const { data: existingRecords } = await supabase.from('leagues').select('id, image');
+    const existingImagesMap = new Map((existingRecords || []).map((r: any) => [r.id, r.image]));
+
+    const transformedLeagues = [];
+    for (const league of data) {
       const localizationKey = league.name;
       const displayName = localizationMap.get(localizationKey);
-      
+
       // Fallback mechanism with warning
       if (!displayName) {
         console.warn(`Warning: Translation missing for key: ${localizationKey}`);
       }
-      
-      return {
+
+      let imageUrl = league.image || null;
+      const existingImage = existingImagesMap.get(league.id);
+
+      if (existingImage && !existingImage.includes('renderz.app')) {
+        imageUrl = existingImage;
+      } else if (imageUrl && imageUrl.includes('renderz.app')) {
+        try {
+          const imgResp = await fetch(imageUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+          if (imgResp.ok) {
+            const imgBuffer = await imgResp.arrayBuffer();
+            const { error: uploadError } = await supabase.storage.from('player-media').upload(`leagues/${league.id}.png`, imgBuffer, { contentType: 'image/png', upsert: true });
+            if (!uploadError) {
+              const { data: publicUrlData } = supabase.storage.from('player-media').getPublicUrl(`leagues/${league.id}.png`);
+              imageUrl = publicUrlData.publicUrl;
+            }
+          }
+        } catch (e) { console.error('Image upload failed', e); }
+      }
+
+      transformedLeagues.push({
         id: league.id,
         localizationKey: localizationKey,
         displayName: displayName || localizationKey, // Fallback to key if translation missing
-        image: league.image || null,
+        image: imageUrl,
         rawData: league,
         updatedAt: new Date().toISOString()
-      };
-    });
+      });
+    }
 
     console.log(`\n=== Total leagues to upsert: ${transformedLeagues.length} ===`);
 
     // Perform UPSERT với single primary key
     console.log('Starting UPSERT operation...');
-    
+
     const { error: upsertError } = await supabase
       .from('leagues')
       .upsert(transformedLeagues, {
@@ -177,7 +201,7 @@ Deno.serve(async (req) => {
 
     return new Response(
       JSON.stringify(result),
-      { 
+      {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
@@ -194,7 +218,7 @@ Deno.serve(async (req) => {
         message: 'Internal Server Error during leagues sync',
         error: error instanceof Error ? error.message : String(error)
       }),
-      { 
+      {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }

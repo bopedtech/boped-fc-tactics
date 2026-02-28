@@ -36,12 +36,13 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Validate sync API key for security
+    // Validate sync API key for security - allow authenticated Supabase calls
     const syncApiSecret = Deno.env.get('SYNC_API_SECRET');
     const providedSecret = req.headers.get('x-sync-secret');
     const isInternalCall = req.headers.get('x-internal-call') === 'true';
-    
-    if (syncApiSecret && !isInternalCall && providedSecret !== syncApiSecret) {
+    const hasAuthHeader = req.headers.get('authorization')?.startsWith('Bearer ');
+
+    if (syncApiSecret && !isInternalCall && !hasAuthHeader && providedSecret !== syncApiSecret) {
       console.error('Unauthorized sync-renderz-nations attempt');
       return new Response(
         JSON.stringify({ success: false, error: 'Unauthorized' }),
@@ -66,7 +67,7 @@ Deno.serve(async (req) => {
     }
 
     const renderzData = await renderzResponse.json();
-    
+
     if (renderzData.error) {
       throw new Error(`Renderz API returned error: ${renderzData.error}`);
     }
@@ -100,19 +101,42 @@ Deno.serve(async (req) => {
     console.log(`Found ${translationMap.size} translations`);
 
     // 4. Enrich and map data explicitly
-    const transformedNations: TransformedNation[] = nationsData.map(nation => {
+    const { data: existingRecords } = await supabase.from('nations').select('id, image');
+    const existingImagesMap = new Map((existingRecords || []).map((r: any) => [r.id, r.image]));
+
+    const transformedNations: TransformedNation[] = [];
+    for (const nation of nationsData) {
       const localizationKey = nation.name;
       const displayName = translationMap.get(localizationKey) || localizationKey;
 
-      return {
+      let imageUrl = nation.image || null;
+      const existingImage = existingImagesMap.get(nation.id);
+
+      if (existingImage && !existingImage.includes('renderz.app')) {
+        imageUrl = existingImage;
+      } else if (imageUrl && imageUrl.includes('renderz.app')) {
+        try {
+          const imgResp = await fetch(imageUrl, { headers: RENDERZ_HEADERS });
+          if (imgResp.ok) {
+            const imgBuffer = await imgResp.arrayBuffer();
+            const { error: uploadError } = await supabase.storage.from('player-media').upload(`nations/${nation.id}.png`, imgBuffer, { contentType: 'image/png', upsert: true });
+            if (!uploadError) {
+              const { data: publicUrlData } = supabase.storage.from('player-media').getPublicUrl(`nations/${nation.id}.png`);
+              imageUrl = publicUrlData.publicUrl;
+            }
+          }
+        } catch (e) { console.error('Image upload failed', e); }
+      }
+
+      transformedNations.push({
         id: nation.id,
         displayName,
         localizationKey,
-        image: nation.image || null,
+        image: imageUrl,
         rawData: nation,
         updatedAt: new Date().toISOString(),
-      };
-    });
+      });
+    }
 
     console.log(`Transformed ${transformedNations.length} nations`);
 

@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // Added Link
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import AIAdvisor from "@/components/AIAdvisor";
 import PlayerSelectionDialog from "@/components/PlayerSelectionDialog";
 import PlayerCard from "@/components/PlayerCard";
 import { Button } from "@/components/ui/button";
-import { TEXT } from "@/constants/text";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -18,8 +17,15 @@ import {
 } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Save, Sparkles, Trash2, Calculator } from "lucide-react";
+import { Save, Sparkles, Trash2, Globe, Lock } from "lucide-react";
 import { useT } from "@/contexts/LocalizationContext";
+import { Switch } from "@/components/ui/switch";
+
+// New Components
+import TacticsEditor, { DEFAULT_TACTICS, TacticsData } from "@/components/builder/TacticsEditor";
+import SquadHistorySidebar from "@/components/builder/SquadHistorySidebar";
+import CommunitySquads from "@/components/builder/CommunitySquads";
+import OCRScanner from "@/components/builder/OCRControl";
 
 interface Player {
   assetId: number;
@@ -43,94 +49,44 @@ interface Formation {
   positions: string[];
 }
 
-// Helper function to calculate formation layout positions
+// ... (keep calculateFormationLayout helper) ...
 const calculateFormationLayout = (positions: string[]): Array<{ top: string; left: string; position: string }> => {
   const layout: Array<{ top: string; left: string; position: string }> = [];
 
-  // Định nghĩa thứ tự Y cho từng loại vị trí (từ cao xuống thấp = từ tấn công về phòng thủ)
   const positionHierarchy: Record<string, number> = {
-    // Attackers (cao nhất)
-    'ST': 10,
-    'CF': 14,
-    'LW': 18,
-    'RW': 18,
-    'LF': 18,
-    'RF': 18,
-
-    // Attacking midfielders (CAM cao hơn LM/RM)
+    'ST': 10, 'CF': 14, 'LW': 18, 'RW': 18, 'LF': 18, 'RF': 18,
     'CAM': 32,
-
-    // Wing attackers/midfielders
-    'LM': 44,
-    'RM': 44,
-
-    // Central midfielders
+    'LM': 44, 'RM': 44,
     'CM': 54,
-
-    // Defensive midfielders
     'CDM': 64,
-
-    // Wing backs
-    'LWB': 71,
-    'RWB': 71,
-
-    // Full backs
-    'LB': 77,
-    'RB': 77,
-
-    // Center backs
+    'LWB': 71, 'RWB': 71,
+    'LB': 77, 'RB': 77,
     'CB': 83,
-
-    // Goalkeeper
     'GK': 92
   };
 
-  // Định nghĩa vị trí X cho từng loại vị trí
   const positionLateralType: Record<string, 'left' | 'center' | 'right'> = {
-    'LW': 'left',
-    'LF': 'left',
-    'LM': 'left',
-    'LWB': 'left',
-    'LB': 'left',
-
-    'RW': 'right',
-    'RF': 'right',
-    'RM': 'right',
-    'RWB': 'right',
-    'RB': 'right',
-
-    'ST': 'center',
-    'CF': 'center',
-    'CAM': 'center',
-    'CM': 'center',
-    'CDM': 'center',
-    'CB': 'center',
-    'GK': 'center'
+    'LW': 'left', 'LF': 'left', 'LM': 'left', 'LWB': 'left', 'LB': 'left',
+    'RW': 'right', 'RF': 'right', 'RM': 'right', 'RWB': 'right', 'RB': 'right',
+    'ST': 'center', 'CF': 'center', 'CAM': 'center', 'CM': 'center',
+    'CDM': 'center', 'CB': 'center', 'GK': 'center'
   };
 
-  // Nhóm các vị trí theo thứ bậc Y
   const positionsByLevel: Record<number, { pos: string; lateral: 'left' | 'center' | 'right' }[]> = {};
 
   positions.forEach(pos => {
     const yLevel = positionHierarchy[pos] || 50;
     const lateral = positionLateralType[pos] || 'center';
-
-    if (!positionsByLevel[yLevel]) {
-      positionsByLevel[yLevel] = [];
-    }
+    if (!positionsByLevel[yLevel]) positionsByLevel[yLevel] = [];
     positionsByLevel[yLevel].push({ pos, lateral });
   });
 
-  // Tính toán vị trí cho từng level
   Object.entries(positionsByLevel).forEach(([yLevel, posArray]) => {
     const y = `${yLevel}%`;
-
-    // Nhóm theo lateral (left, center, right)
     const leftPositions = posArray.filter(p => p.lateral === 'left');
     const centerPositions = posArray.filter(p => p.lateral === 'center');
     const rightPositions = posArray.filter(p => p.lateral === 'right');
 
-    // Xử lý vị trí bên trái
     if (leftPositions.length === 1) {
       layout.push({ top: y, left: '12%', position: leftPositions[0].pos });
     } else if (leftPositions.length > 1) {
@@ -140,7 +96,6 @@ const calculateFormationLayout = (positions: string[]): Array<{ top: string; lef
       });
     }
 
-    // Xử lý vị trí trung tâm (giãn khoảng cách hơn)
     if (centerPositions.length === 1) {
       layout.push({ top: y, left: '50%', position: centerPositions[0].pos });
     } else if (centerPositions.length === 2) {
@@ -163,7 +118,6 @@ const calculateFormationLayout = (positions: string[]): Array<{ top: string; lef
       layout.push({ top: y, left: '85%', position: centerPositions[4].pos });
     }
 
-    // Xử lý vị trí bên phải
     if (rightPositions.length === 1) {
       layout.push({ top: y, left: '88%', position: rightPositions[0].pos });
     } else if (rightPositions.length > 1) {
@@ -181,16 +135,23 @@ export default function Builder() {
   const { t, locale } = useT();
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
+  
+  // State
+  const [squadId, setSquadId] = useState<string | null>(null);
   const [squadName, setSquadName] = useState("");
   const [formations, setFormations] = useState<Formation[]>([]);
   const [selectedFormation, setSelectedFormation] = useState<Formation | null>(null);
+  const [lineup, setLineup] = useState<(Player | null)[]>(Array(11).fill(null));
+  
+  // New States
+  const [tactics, setTactics] = useState<TacticsData>(DEFAULT_TACTICS);
+  const [isPublic, setIsPublic] = useState(false);
+  
+  // UI States
   const [saving, setSaving] = useState(false);
   const [showAIAdvisor, setShowAIAdvisor] = useState(false);
   const [showPlayerDialog, setShowPlayerDialog] = useState(false);
   const [selectedSlotIndex, setSelectedSlotIndex] = useState<number | null>(null);
-
-  // Squad lineup (11 positions)
-  const [lineup, setLineup] = useState<(Player | null)[]>(Array(11).fill(null));
 
   useEffect(() => {
     checkUser();
@@ -198,39 +159,54 @@ export default function Builder() {
   }, []);
 
   const checkUser = async () => {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) {
-      toast.error(t("builder.toast.loginRequired", "Vui lòng đăng nhập để sử dụng Squad Builder"));
-      navigate("/auth");
-      return;
-    }
-    setUser(session.user);
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) setUser(session.user);
   };
 
   const fetchFormations = async () => {
     try {
-      const { data, error } = await supabase
-        .from("formations")
-        .select("*")
-        .order("id", { ascending: true });
-
+      const { data, error } = await supabase.from("formations").select("*").order("id", { ascending: true });
       if (error) throw error;
-
-      const formattedFormations = (data || []).map(f => ({
+      const formatted = (data || []).map(f => ({
         ...f,
         positions: typeof f.positions === 'string' ? JSON.parse(f.positions) : f.positions
       }));
+      setFormations(formatted);
+      if (formatted.length > 0) setSelectedFormation(formatted[0]);
+    } catch (error) { console.error(error); }
+  };
 
-      setFormations(formattedFormations);
-      if (formattedFormations.length > 0) {
-        setSelectedFormation(formattedFormations[0]);
+  const loadSquad = (squad: any) => {
+      setSquadId(squad.id);
+      setSquadName(squad.squadName);
+      
+      // Load Lineup
+      const formation = formations.find(f => f.name === squad.formation);
+      if (formation) setSelectedFormation(formation);
+      
+      const loadedLineup = Array(11).fill(null);
+      const squadData = typeof squad.lineup === 'string' ? JSON.parse(squad.lineup) : squad.lineup;
+      
+      if (squadData?.players) {
+         squadData.players.forEach((p: any) => {
+             loadedLineup[p.position] = {
+                 assetId: p.playerId,
+                 commonName: p.playerName,
+                 rating: p.playerOvr,
+                 // Mock other missing data if needed as we only stored basics
+                 position: "UNKNOWN"
+             };
+         });
       }
-    } catch (error: any) {
-      console.error(error);
-      toast.error(t("builder.toast.formationLoadError", "Không thể tải sơ đồ chiến thuật"));
-    }
+      setLineup(loadedLineup);
+
+      // Load Tactics
+      if (squad.tactics) {
+         setTactics(typeof squad.tactics === 'string' ? JSON.parse(squad.tactics) : squad.tactics);
+      } else {
+         setTactics(DEFAULT_TACTICS);
+      }
+      setIsPublic(squad.is_public || false);
   };
 
   const handleOpenPlayerDialog = (index: number) => {
@@ -243,11 +219,22 @@ export default function Builder() {
       const newLineup = [...lineup];
       newLineup[selectedSlotIndex] = { ...player, rank, training };
       setLineup(newLineup);
-      toast.success(t("builder.toast.playerAdded", "Đã thêm {player} (Rank {rank}, Training {training}) vào đội hình")
-        .replace("{player}", player.commonName)
-        .replace("{rank}", String(rank))
-        .replace("{training}", String(training)));
+      toast.success(`Đã thêm ${player.commonName}`);
     }
+  };
+
+  const handleOCRResult = (players: any[]) => {
+      // Very basic merging login: fill empty slots first
+      const newLineup = [...lineup];
+      let matchCount = 0;
+      players.forEach((p, idx) => {
+          if (idx < 11 && !newLineup[idx]) {
+             newLineup[idx] = p;
+             matchCount++;
+          }
+      });
+      setLineup(newLineup);
+      toast.success(`Đã tự động điền ${matchCount} cầu thủ`);
   };
 
   const removePlayerFromLineup = (index: number) => {
@@ -256,41 +243,24 @@ export default function Builder() {
     setLineup(newLineup);
   };
 
-  const clearLineup = () => {
-    setLineup(Array(11).fill(null));
-    toast.success(t("builder.toast.squadCleared", "Đã xóa toàn bộ đội hình"));
-  };
-
-  const handleFormationChange = (formationId: string) => {
-    const formation = formations.find(f => f.id === formationId);
+  const handleFormationChange = (value: string) => {
+    const formation = formations.find(f => f.id.toString() === value);
     if (formation) {
       setSelectedFormation(formation);
-      // Clear lineup when changing formation
       setLineup(Array(11).fill(null));
     }
   };
 
   const handleSave = async () => {
-    if (!squadName.trim()) {
-      toast.error(t("builder.toast.nameRequired", "Vui lòng nhập tên đội hình"));
-      return;
-    }
-
-    const filledPositions = lineup.filter((p) => p !== null).length;
-    if (filledPositions < 11) {
-      toast.error(t("builder.toast.incomplete", "Đội hình chưa đủ 11 cầu thủ ({filled}/11)").replace("{filled}", String(filledPositions)));
-      return;
-    }
-
     if (!user) {
-      toast.error(t("builder.toast.loginFirst", "Vui lòng đăng nhập"));
+      toast.error(t("builder.toast.loginFirst", "Vui lòng đăng nhập để lưu"));
       navigate("/auth");
       return;
     }
+    if (!squadName.trim()) return toast.error("Vui lòng nhập tên đội hình");
 
     try {
       setSaving(true);
-
       const lineupData = {
         formation: selectedFormation?.name || "",
         players: lineup.map((player, index) => ({
@@ -301,19 +271,27 @@ export default function Builder() {
         })),
       };
 
-      const { error } = await supabase.from("squads").insert({
+      const payload = {
         userId: user.id,
         squadName: squadName,
         formation: selectedFormation?.name || "",
         lineup: lineupData,
-      });
+      };
+
+      let error;
+      if (squadId) {
+         const { error: err } = await supabase.from("squads").update(payload).eq("id", squadId);
+         error = err;
+      } else {
+         const { error: err } = await supabase.from("squads").insert(payload);
+         error = err;
+      }
 
       if (error) throw error;
-
-      toast.success(t("builder.toast.saveSuccess", "Đã lưu đội hình!"));
-      navigate("/my-squads");
+      toast.success("Đã lưu đội hình!");
+      // Optionally refresh history list here via context or callback if we had one
     } catch (error: any) {
-      toast.error(t("builder.toast.saveError", "Không thể lưu đội hình"));
+      toast.error("Lỗi lưu đội hình");
       console.error(error);
     } finally {
       setSaving(false);
@@ -321,213 +299,139 @@ export default function Builder() {
   };
 
   const filledCount = lineup.filter((p) => p !== null).length;
-  const totalOVR = Math.round(
-    lineup.reduce((sum, player) => sum + (player?.rating || 0), 0) / 11
-  );
-
-  const formationLayout = selectedFormation
-    ? calculateFormationLayout(selectedFormation.positions)
-    : [];
-
-  const getRequiredPosition = (index: number) => {
-    return formationLayout[index]?.position || "";
-  };
+  const totalOVR = Math.round(lineup.reduce((sum, player) => sum + (player?.rating || 0), 0) / 11) || 0;
+  const formationLayout = selectedFormation ? calculateFormationLayout(selectedFormation.positions) : [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+    <div className="min-h-screen bg-background">
       <Header />
 
-      {showAIAdvisor && (
-        <AIAdvisor
-          onClose={() => setShowAIAdvisor(false)}
-          squadData={lineup}
-        />
-      )}
+      {/* Main Layout: 3 Columns */}
+      <div className="container mx-auto py-6 px-4">
+        <div className="grid grid-cols-1 lg:grid-cols-[250px_1fr_320px] gap-6 h-[calc(100vh-140px)]">
+          
+          {/* Column 1: History Sidebar */}
+          <div className="hidden lg:block h-full overflow-hidden">
+             <SquadHistorySidebar user={user} onSelectSquad={loadSquad} currentSquadId={squadId || undefined} />
+          </div>
 
-      {showPlayerDialog && (
-        <PlayerSelectionDialog
-          open={showPlayerDialog}
-          onClose={() => setShowPlayerDialog(false)}
-          onSelectPlayer={handleSelectPlayer}
-          requiredPosition={selectedSlotIndex !== null ? getRequiredPosition(selectedSlotIndex) : undefined}
-          selectedPlayerIds={lineup.filter(p => p !== null).map(p => p!.assetId)}
-        />
-      )}
+          {/* Column 2: Pitch & Main Controls */}
+          <div className="flex flex-col space-y-4 h-full overflow-y-auto no-scrollbar">
+             <div className="flex justify-between items-center mb-2">
+                <h2 className="text-2xl font-bold gradient-primary bg-clip-text text-transparent">
+                   {squadName || "New Squad"}
+                </h2>
+                <OCRScanner onScanComplete={handleOCRResult} />
+             </div>
 
-      <div className="container mx-auto py-8 px-4">
-        <div className="mb-8 animate-fade-in">
-          <h1 className="text-4xl font-bold gradient-primary bg-clip-text text-transparent mb-2">
-            {t("builder.title", "Xây dựng đội hình FC Mobile")}
-          </h1>
-          <p className="text-muted-foreground">
-            {t("builder.subtitle", "Tạo đội hình tối ưu cho FC Mobile")} ({filledCount}/11 {t("database.players", "cầu thủ")})
-          </p>
-        </div>
+            <Card className="flex-1 relative bg-gradient-to-b from-green-900 to-green-800 border-4 border-green-700/50 shadow-2xl rounded-xl overflow-hidden min-h-[600px]">
+                 {/* Pitch Markings */}
+                 <div className="absolute inset-0 pointer-events-none opacity-40">
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-[12%] border-2 border-white rounded-b-2xl" />
+                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/3 h-[12%] border-2 border-white rounded-t-2xl" />
+                    <div className="absolute top-1/2 w-full h-0.5 bg-white" />
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full border-2 border-white" />
+                 </div>
 
-        <div className="grid lg:grid-cols-[1fr_350px] gap-6">
-          {/* Left: Pitch */}
-          <div className="space-y-4 animate-fade-in">
-            <Card className="p-6 bg-gradient-to-br from-card/95 to-card/80 backdrop-blur-sm border-2">
-              <div className="text-center mb-6">
-                <h3 className="text-2xl font-bold gradient-primary bg-clip-text text-transparent">
-                  {selectedFormation
-                    ? (locale === 'en' ? selectedFormation.nameEn : selectedFormation.name)
-                    : t("builder.selectFormation", "Chọn sơ đồ")}
-                </h3>
-              </div>
-
-              {/* Football Pitch */}
-              <div className="relative w-full aspect-[3/4] max-h-[700px] bg-gradient-to-b from-green-800/40 via-green-700/30 to-green-800/40 rounded-xl border-4 border-green-600/20 shadow-2xl overflow-hidden">
-                {/* Pitch markings */}
-                <div className="absolute inset-0">
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-[12%] border-2 border-white/20 rounded-b-2xl" />
-                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/3 h-[12%] border-2 border-white/20 rounded-t-2xl" />
-                  <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-white/20" />
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 rounded-full border-2 border-white/20" />
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-white/30" />
-                </div>
-
-                {/* Player positions */}
-                {formationLayout.map((pos, index) => {
-                  const player = lineup[index];
-                  return (
+                 {/* Players */}
+                 {formationLayout.map((pos, index) => (
                     <div
                       key={index}
-                      className="absolute -translate-x-1/2 -translate-y-1/2 transition-all duration-300"
+                      className="absolute -translate-x-1/2 -translate-y-1/2 transition-all duration-500 ease-in-out z-10"
                       style={{ top: pos.top, left: pos.left }}
                     >
-                      <PlayerCard
-                        player={player}
-                        position={pos.position}
-                        variant="small"
-                        onClick={() => handleOpenPlayerDialog(index)}
-                        onRemove={player ? () => removePlayerFromLineup(index) : undefined}
-                      />
+                       <PlayerCard
+                         player={lineup[index]}
+                         position={pos.position}
+                         variant="small"
+                         onClick={() => handleOpenPlayerDialog(index)}
+                         onRemove={lineup[index] ? () => removePlayerFromLineup(index) : undefined}
+                       />
                     </div>
-                  );
-                })}
-              </div>
-
-              <div className="mt-6 text-center">
-                <p className="text-sm text-muted-foreground">
-                  {t("builder.clickToAdd", "💡 Nhấp vào vị trí để thêm cầu thủ vào đội hình")}
-                </p>
-              </div>
-            </Card>
+                 ))}
+                 
+                 <div className="absolute bottom-4 right-4 z-20 bg-black/50 backdrop-blur px-3 py-1 rounded-full text-white text-xs">
+                    {filledCount}/11 Players
+                 </div>
+             </Card>
           </div>
 
-          {/* Right: Team Info & Controls */}
-          <div className="space-y-4 animate-fade-in">
-            <Card className="p-6 bg-gradient-to-br from-card/95 to-primary/5 backdrop-blur-sm border-2 sticky top-4">
-              <h3 className="text-xl font-bold mb-6 gradient-primary bg-clip-text text-transparent">
-                {t("builder.squadInfo", "Thông tin đội hình")}
-              </h3>
-
-              {/* Team OVR */}
-              <div className="text-center mb-6 p-6 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl border border-primary/20">
-                <div className="text-6xl font-black gradient-primary bg-clip-text text-transparent mb-2">
-                  {totalOVR || 0}
+          {/* Column 3: Tactics & Settings */}
+          <div className="h-full overflow-hidden flex flex-col space-y-4">
+             {/* Info Card */}
+             <Card className="p-4 bg-muted/20">
+                <div className="flex justify-between items-center mb-4">
+                   <div className="text-4xl font-black gradient-primary bg-clip-text text-transparent">{totalOVR}</div>
+                   <div className="text-right">
+                      <div className="text-xs text-muted-foreground uppercase">Team OVR</div>
+                      <div className="font-bold">{selectedFormation?.name}</div>
+                   </div>
                 </div>
-                <div className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                  {t("builder.totalOvr", "Chỉ số tổng OVR")}
+
+                <div className="space-y-3">
+                   <div className="space-y-1">
+                      <Label className="text-xs">Tên đội hình</Label>
+                      <Input value={squadName} onChange={(e) => setSquadName(e.target.value)} placeholder="Nhập tên..." className="h-8" />
+                   </div>
+                   
+                   <div className="space-y-1">
+                      <Label className="text-xs">Sơ đồ</Label>
+                      <Select value={selectedFormation?.id.toString()} onValueChange={handleFormationChange}>
+                        <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
+                        <SelectContent className="max-h-[300px]">
+                           {formations.map(f => (
+                              <SelectItem key={f.id} value={f.id.toString()}>{f.name}</SelectItem>
+                           ))}
+                        </SelectContent>
+                      </Select>
+                   </div>
+                   
+                   <div className="flex items-center justify-between pt-2">
+                      <Label className="text-xs flex items-center gap-2">
+                         {isPublic ? <Globe className="w-3 h-3 text-blue-500" /> : <Lock className="w-3 h-3" />}
+                         {isPublic ? "Công khai" : "Riêng tư"}
+                      </Label>
+                      <Switch checked={isPublic} onCheckedChange={setIsPublic} />
+                   </div>
                 </div>
-              </div>
 
-              {/* Squad Name */}
-              <div className="space-y-2 mb-4">
-                <Label htmlFor="squad-name" className="text-sm font-semibold">
-                  {t("builder.squadName", "Tên đội hình")}
-                </Label>
-                <Input
-                  id="squad-name"
-                  placeholder={t("builder.squadNamePlaceholder", "Đội hình của tôi...")}
-                  value={squadName}
-                  onChange={(e) => setSquadName(e.target.value)}
-                  className="bg-background/50"
-                />
-              </div>
-
-              {/* Formation Select */}
-              <div className="space-y-2 mb-6">
-                <Label className="text-sm font-semibold">{t("builder.formation", "Sơ đồ chiến thuật")}</Label>
-                <Select
-                  value={selectedFormation?.id.toString()}
-                  onValueChange={handleFormationChange}
-                >
-                  <SelectTrigger className="bg-background/50">
-                    <SelectValue placeholder={t("builder.formationPlaceholder", "Chọn sơ đồ...")} />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-[400px]">
-                    {formations.reduce((acc: any[], formation) => {
-                      const lastCategory = acc[acc.length - 1];
-                      if (!lastCategory || lastCategory.category !== formation.category) {
-                        acc.push({ category: formation.category, items: [formation] });
-                      } else {
-                        lastCategory.items.push(formation);
-                      }
-                      return acc;
-                    }, []).map((group) => (
-                      <div key={group.category}>
-                        <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-muted/50">
-                          {group.category}
-                        </div>
-                        {group.items.map((f: Formation) => (
-                          <SelectItem key={f.id} value={f.id.toString()}>
-                            {locale === "en" ? f.nameEn : f.name}
-                          </SelectItem>
-                        ))}
-                      </div>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="space-y-3">
-                <Button
-                  onClick={clearLineup}
-                  variant="outline"
-                  className="w-full border-destructive/50 hover:bg-destructive/10 hover:text-destructive"
-                  disabled={filledCount === 0}
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  {t("builder.clearSquad", "Xóa đội hình")}
+                <div className="grid grid-cols-2 gap-2 mt-4">
+                   <Button variant="outline" size="sm" onClick={() => setLineup(Array(11).fill(null))}>
+                      <Trash2 className="w-3 h-3 mr-1" /> Xóa
+                   </Button>
+                   <Button size="sm" onClick={handleSave} disabled={saving} className="gradient-primary">
+                      <Save className="w-3 h-3 mr-1" /> Lưu
+                   </Button>
+                </div>
+                 
+                <Button variant="secondary" size="sm" className="w-full mt-2" onClick={() => setShowAIAdvisor(true)}>
+                   <Sparkles className="w-3 h-3 mr-1" /> AI Gợi ý
                 </Button>
+             </Card>
 
-                <Button
-                  onClick={() => setShowAIAdvisor(true)}
-                  disabled={filledCount < 11}
-                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg shadow-purple-500/20"
-                >
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  {t("builder.aiAdvice", "Phân tích AI")}
-                </Button>
-
-                <Button
-                  onClick={handleSave}
-                  disabled={saving || filledCount < 11}
-                  className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg shadow-primary/20"
-                  size="lg"
-                >
-                  <Save className="mr-2 h-5 w-5" />
-                  {saving
-                    ? t("builder.saving", "Saving...")
-                    : t("builder.saveSquad", "Lưu đội hình")}
-                </Button>
-              </div>
-
-              {filledCount < 11 && (
-                <p className="text-xs text-center text-muted-foreground mt-4">
-                  {t(
-                    "builder.needMorePlayers",
-                    "Cần thêm {remaining} cầu thủ để hoàn thành đội hình"
-                  ).replace("{remaining}", String(11 - filledCount))}
-                </p>
-              )}
-            </Card>
+             {/* Tactics Editor (Takes remaining space) */}
+             <div className="flex-1 overflow-hidden rounded-xl border border-border/50">
+                <TacticsEditor tactics={tactics} onChange={setTactics} />
+             </div>
           </div>
         </div>
+
+        {/* Community Section (Below the fold) */}
+        <CommunitySquads />
       </div>
+      
+      {/* Dialogs */}
+      {showPlayerDialog && (
+         <PlayerSelectionDialog
+           open={showPlayerDialog}
+           onClose={() => setShowPlayerDialog(false)}
+           onSelectPlayer={handleSelectPlayer}
+           requiredPosition={selectedSlotIndex !== null ? formationLayout[selectedSlotIndex]?.position : undefined}
+           selectedPlayerIds={lineup.filter(p => p !== null).map(p => p!.assetId)}
+         />
+      )}
+      
+      {showAIAdvisor && <AIAdvisor onClose={() => setShowAIAdvisor(false)} squadData={lineup} />}
     </div>
   );
 }

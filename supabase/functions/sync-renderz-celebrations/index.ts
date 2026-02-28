@@ -43,8 +43,9 @@ Deno.serve(async (req) => {
     const syncApiSecret = Deno.env.get('SYNC_API_SECRET');
     const providedSecret = req.headers.get('x-sync-secret');
     const isInternalCall = req.headers.get('x-internal-call') === 'true';
-    
-    if (syncApiSecret && !isInternalCall && providedSecret !== syncApiSecret) {
+    const hasAuthHeader = req.headers.get('authorization')?.startsWith('Bearer ');
+
+    if (syncApiSecret && !isInternalCall && !hasAuthHeader && providedSecret !== syncApiSecret) {
       console.error('Unauthorized sync-renderz-celebrations attempt');
       return new Response(
         JSON.stringify({ success: false, error: 'Unauthorized' }),
@@ -72,7 +73,7 @@ Deno.serve(async (req) => {
     }
 
     const renderzData = await renderzResponse.json();
-    
+
     if (renderzData.error) {
       throw new Error(`Renderz API returned error: ${renderzData.error}`);
     }
@@ -108,17 +109,40 @@ Deno.serve(async (req) => {
     });
 
     // Transform and enrich celebrations with explicit mapping
-    const transformedCelebrations: TransformedCelebration[] = renderzData.map((celebration: CelebrationData) => {
+    const { data: existingRecords } = await supabase.from('celebrations').select('id, mediaUrl');
+    const existingImagesMap = new Map((existingRecords || []).map((r: any) => [r.id, r.mediaUrl]));
+
+    const transformedCelebrations: TransformedCelebration[] = [];
+    for (const celebration of renderzData) {
       const keyName = celebration.name;
       const keyDesc = celebration.description || null;
-      
+
       const displayName = translationMap.get(keyName) || keyName;
       const displayDescription = keyDesc ? (translationMap.get(keyDesc) || keyDesc) : null;
 
-      // Defensive architecture for mediaUrl
-      const mediaUrl = celebration.mediaUrl || celebration.image || celebration.video || null;
+      let mediaUrl = celebration.mediaUrl || celebration.image || celebration.video || null;
+      const existingImage = existingImagesMap.get(celebration.id);
 
-      return {
+      if (existingImage && !existingImage.includes('renderz.app')) {
+        mediaUrl = existingImage;
+      } else if (mediaUrl && mediaUrl.includes('renderz.app')) {
+        try {
+          const imgResp = await fetch(mediaUrl, { headers: RENDERZ_HEADERS });
+          if (imgResp.ok) {
+            const imgBuffer = await imgResp.arrayBuffer();
+            const isVideo = mediaUrl.endsWith('.mp4');
+            const ext = isVideo ? 'mp4' : 'png';
+            const contentType = isVideo ? 'video/mp4' : 'image/png';
+            const { error: uploadError } = await supabase.storage.from('player-media').upload(`celebrations/${celebration.id}.${ext}`, imgBuffer, { contentType, upsert: true });
+            if (!uploadError) {
+              const { data: publicUrlData } = supabase.storage.from('player-media').getPublicUrl(`celebrations/${celebration.id}.${ext}`);
+              mediaUrl = publicUrlData.publicUrl;
+            }
+          }
+        } catch (e) { console.error('Image upload failed', e); }
+      }
+
+      transformedCelebrations.push({
         id: celebration.id,
         displayName,
         displayDescription,
@@ -127,8 +151,8 @@ Deno.serve(async (req) => {
         mediaUrl,
         rawData: celebration,
         updatedAt: new Date().toISOString()
-      };
-    });
+      });
+    }
 
     console.log(`✓ Transformed ${transformedCelebrations.length} celebrations with explicit mapping`);
 
@@ -158,7 +182,7 @@ Deno.serve(async (req) => {
 
     return new Response(
       JSON.stringify(result),
-      { 
+      {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
@@ -175,7 +199,7 @@ Deno.serve(async (req) => {
         message: 'Internal Server Error during celebrations sync',
         error: error instanceof Error ? error.message : String(error)
       }),
-      { 
+      {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }

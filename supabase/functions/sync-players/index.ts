@@ -218,9 +218,10 @@ Deno.serve(async (req) => {
     const syncApiSecret = Deno.env.get('SYNC_API_SECRET');
     const providedSecret = req.headers.get('x-sync-secret');
     
-    // Allow if: no secret configured (dev mode), or secret matches, or called from another edge function
+    // Allow if: no secret configured (dev mode), secret matches, called from another edge function, or authenticated via Supabase
     const isInternalCall = req.headers.get('x-internal-call') === 'true';
-    if (syncApiSecret && !isInternalCall && providedSecret !== syncApiSecret) {
+    const hasAuthHeader = req.headers.get('authorization')?.startsWith('Bearer ');
+    if (syncApiSecret && !isInternalCall && !hasAuthHeader && providedSecret !== syncApiSecret) {
       console.error('Unauthorized sync attempt - invalid or missing x-sync-secret');
       return new Response(
         JSON.stringify({ success: false, error: 'Unauthorized' }),

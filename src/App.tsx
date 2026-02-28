@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ScrollToTop from "@/components/ScrollToTop";
+import GoogleOneTap from "@/components/GoogleOneTap";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Database from "./pages/Database";
@@ -29,13 +30,13 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <Toaster />
     <Sonner />
-    <ScrollToTop />
     <BrowserRouter>
+      <GoogleOneTap />
+      <ScrollToTop />
       <Routes>
-        <Route path="/" element={<Index />} />
+        <Route path="/" element={<Builder />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/database" element={<Database />} />
-        <Route path="/builder" element={<Builder />} />
         <Route path="/my-squads" element={<MySquads />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/news" element={<News />} />

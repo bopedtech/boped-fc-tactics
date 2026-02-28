@@ -107,49 +107,10 @@ export default function Header() {
     return location.pathname === path;
   };
 
-  const navItems = [
-    { path: "/", label: t("header.nav.home", "Trang chủ") },
-    { path: "/database", label: t("header.nav.database", "Danh sách cầu thủ") },
-    { path: "/builder", label: t("header.nav.builder", "Xây dựng đội hình") },
-    { path: "/news", label: t("header.nav.news", "Bảng tin") },
-    { path: "/pricing", label: t("header.nav.pricing", "Gói cước") },
-  ];
-
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-white shadow-sm">
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-4">
-          {isMobile && (
-            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="md:hidden hover:text-primary">
-                  <Menu className="h-5 w-5 text-black" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-64 bg-white z-50">
-                <div className="flex flex-col gap-4 mt-4">
-                  <nav className="flex flex-col gap-2">
-                    {navItems.map((item) => (
-                      <Link
-                        key={item.path}
-                        to={item.path}
-                        onClick={() => setMobileMenuOpen(false)}
-                        className={cn(
-                          "text-base transition-colors hover:text-primary px-2 py-2 rounded-md",
-                          isActive(item.path)
-                            ? "text-primary font-semibold bg-muted"
-                            : "text-gray-700"
-                        )}
-                      >
-                        {item.label}
-                      </Link>
-                    ))}
-                  </nav>
-                </div>
-              </SheetContent>
-            </Sheet>
-          )}
-
           <Link to="/" className="flex items-center space-x-2">
             <img
               src={logoImage}
@@ -157,21 +118,6 @@ export default function Header() {
               className="h-12 w-auto"
             />
           </Link>
-
-          <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
-            {navItems.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={cn(
-                  "transition-colors hover:text-primary",
-                  isActive(item.path) ? "text-primary font-semibold" : "text-gray-700"
-                )}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
         </div>
 
         <div className="flex items-center gap-2 md:gap-4">

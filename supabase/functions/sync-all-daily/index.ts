@@ -15,8 +15,10 @@ Deno.serve(async (req) => {
     // Validate sync API key for security
     const syncApiSecret = Deno.env.get('SYNC_API_SECRET');
     const providedSecret = req.headers.get('x-sync-secret');
+    const isInternalCall = req.headers.get('x-internal-call') === 'true';
+    const hasAuthHeader = req.headers.get('authorization')?.startsWith('Bearer ');
     
-    if (syncApiSecret && providedSecret !== syncApiSecret) {
+    if (syncApiSecret && !isInternalCall && !hasAuthHeader && providedSecret !== syncApiSecret) {
       console.error('Unauthorized sync-all-daily attempt');
       return new Response(
         JSON.stringify({ success: false, error: 'Unauthorized' }),

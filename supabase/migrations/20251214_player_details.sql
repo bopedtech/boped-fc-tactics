@@ -1,8 +1,13 @@
 -- Migration: Create playerDetails sidecar table and RPC function
 -- Purpose: Store detailed player data from Renderz (stats, price history, evolution, talents)
+-- NOTE: players.assetId is BIGINT in production DB, so we use BIGINT here too
 
--- 1. Create the sidecar table for detailed player data
-CREATE TABLE IF NOT EXISTS public."playerDetails" (
+-- 1. Drop existing objects if they exist (for re-run safety)
+DROP FUNCTION IF EXISTS get_missing_player_details(INT);
+DROP TABLE IF EXISTS public."playerDetails";
+
+-- 2. Create the sidecar table for detailed player data
+CREATE TABLE public."playerDetails" (
     "assetId" BIGINT PRIMARY KEY,
     
     -- Cleaned data for fast querying
@@ -25,10 +30,10 @@ CREATE TABLE IF NOT EXISTS public."playerDetails" (
         ON DELETE CASCADE
 );
 
--- 2. Create index for faster lookups
+-- 3. Create index for faster lookups
 CREATE INDEX IF NOT EXISTS "idx_playerDetails_fetchedAt" ON public."playerDetails" ("fetchedAt");
 
--- 3. Create RPC function to get players missing details (queue mechanism)
+-- 4. Create RPC function to get players missing details (queue mechanism)
 CREATE OR REPLACE FUNCTION get_missing_player_details(batch_size INT DEFAULT 15)
 RETURNS TABLE ("assetId" BIGINT) 
 LANGUAGE plpgsql
@@ -45,16 +50,16 @@ BEGIN
 END;
 $$;
 
--- 4. Grant permissions
+-- 5. Grant permissions
 GRANT SELECT, INSERT, UPDATE, DELETE ON public."playerDetails" TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public."playerDetails" TO service_role;
 GRANT EXECUTE ON FUNCTION get_missing_player_details TO authenticated;
 GRANT EXECUTE ON FUNCTION get_missing_player_details TO service_role;
 
--- 5. Enable RLS
+-- 6. Enable RLS
 ALTER TABLE public."playerDetails" ENABLE ROW LEVEL SECURITY;
 
--- 6. Create RLS policies (read-only for authenticated users, full access for service role)
+-- 7. Create RLS policies (read-only for authenticated users, full access for service role)
 CREATE POLICY "Allow public read access" ON public."playerDetails"
     FOR SELECT USING (true);
 
